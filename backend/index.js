@@ -75,6 +75,78 @@ const profileData = {
   initials: 'SM'
 };
 
+const familyData = {
+  nextOfKin: {
+    id: 1,
+    name: 'Ann Miller',
+    relationship: 'Son',
+    phone: '+13462127336',
+    email: 'annna.miller@gmail.com',
+    accesses: [
+      { id: 'FU8434434', type: 'viewer', label: 'ID: FU8434434' },
+      { type: 'viewer', label: 'My Wishes' }
+    ],
+    isStarred: false,
+    initials: 'AM'
+  },
+  starredMembers: [
+    {
+      id: 2,
+      name: 'Ann Miller',
+      relationship: 'Mother',
+      phone: '+13462127336',
+      email: 'annna.miller@gmail.com',
+      accesses: [
+        { id: 'FU8434434', type: 'viewer', label: 'ID: FU8434434' },
+        { type: 'viewer', label: 'My Wishes' }
+      ],
+      isStarred: true,
+      initials: 'AM'
+    },
+    {
+      id: 3,
+      name: 'Ann Miller',
+      relationship: 'Mother',
+      phone: '+13462127336',
+      email: 'annna.miller@gmail.com',
+      accesses: [
+        { id: 'FU8434434', type: 'viewer', label: 'ID: FU8434434' },
+        { type: 'viewer', label: 'My Wishes' }
+      ],
+      isStarred: true,
+      initials: 'AM'
+    }
+  ],
+  allMembers: [
+    {
+      id: 4,
+      name: 'Ann Miller',
+      relationship: 'Mother',
+      phone: '+13462127336',
+      email: 'annna.miller@gmail.com',
+      accesses: [
+        { id: 'FU8434434', type: 'viewer', label: 'ID: FU8434434' },
+        { type: 'viewer', label: 'My Wishes' }
+      ],
+      isStarred: false,
+      initials: 'AM'
+    },
+    {
+      id: 5,
+      name: 'Ann Miller',
+      relationship: 'Mother',
+      phone: '+13462127336',
+      email: 'annna.miller@gmail.com',
+      accesses: [
+        { id: 'FU8434434', type: 'viewer', label: 'ID: FU8434434' },
+        { type: 'viewer', label: 'My Wishes' }
+      ],
+      isStarred: false,
+      initials: 'AM'
+    }
+  ]
+};
+
 // Routes
 app.get('/', (req, res) => {
   res.json({
@@ -86,7 +158,8 @@ app.get('/', (req, res) => {
       analytics: '/api/analytics',
       activity: '/api/activity',
       sales: '/api/sales',
-      profile: '/api/profile'
+      profile: '/api/profile',
+      family: '/api/family'
     }
   });
 });
@@ -143,6 +216,11 @@ app.put('/api/profile', (req, res) => {
   // Update profile data with request body
   Object.assign(profileData, req.body);
   res.json({ success: true, data: profileData, message: 'Profile updated successfully' });
+});
+
+// Family endpoint
+app.get('/api/family', (req, res) => {
+  res.json({ success: true, data: familyData });
 });
 
 // Start server

@@ -23,6 +23,14 @@ export const api = {
     return response.json();
   },
 
+  getFamily: async () => {
+    const response = await fetch(`${API_BASE_URL}/api/family`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch family');
+    }
+    return response.json();
+  },
+
   getUsers: async () => {
     const response = await fetch(`${API_BASE_URL}/api/users`);
     if (!response.ok) {
