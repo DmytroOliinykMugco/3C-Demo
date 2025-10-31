@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Copy } from 'lucide-react';
@@ -8,9 +8,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/components/ui/toast';
+import { Dialog, DialogHeader, DialogTitle, DialogContent, DialogFooter } from '@/components/ui/dialog';
 
 const Profile = () => {
   const queryClient = useQueryClient();
+  const { addToast } = useToast();
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const { data: profileResponse, isLoading, error } = useQuery({
     queryKey: ['profile'],
     queryFn: api.getProfile,
@@ -78,6 +82,8 @@ const Profile = () => {
     },
     onSuccess: (response) => {
       queryClient.invalidateQueries(['profile']);
+      setShowConfirmDialog(false);
+      addToast('Profile updated successfully', 'success');
       // Reset form with new data to clear isDirty
       if (response?.data) {
         const updatedProfile = response.data;
@@ -104,6 +110,11 @@ const Profile = () => {
   // Handle form submission
   const onSubmit = (data) => {
     updateMutation.mutate(data);
+  };
+
+  // Handle confirm button click - show dialog
+  const handleConfirmClick = () => {
+    setShowConfirmDialog(true);
   };
 
   // Handle cancel - reset form to original values
@@ -150,6 +161,7 @@ const Profile = () => {
 
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
+    addToast('Link successfully copied', 'success');
   };
 
   return (
@@ -342,11 +354,31 @@ const Profile = () => {
           <Button variant="outline" onClick={handleCancel} type="button">
             Cancel
           </Button>
-          <Button onClick={handleSubmit(onSubmit)} disabled={updateMutation.isPending} type="button">
+          <Button onClick={handleConfirmClick} disabled={updateMutation.isPending} type="button">
             {updateMutation.isPending ? 'Saving...' : 'Confirm'}
           </Button>
         </div>
       )}
+
+      {/* Confirmation Dialog */}
+      <Dialog isOpen={showConfirmDialog} onClose={() => setShowConfirmDialog(false)}>
+        <DialogHeader onClose={() => setShowConfirmDialog(false)}>
+          <DialogTitle>Confirm changes</DialogTitle>
+        </DialogHeader>
+        <DialogContent>
+          <p className="text-sm text-gray-600">
+            Please confirm the updates to the general information, as these will affect the contract details.
+          </p>
+        </DialogContent>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setShowConfirmDialog(false)}>
+            Cancel
+          </Button>
+          <Button onClick={handleSubmit(onSubmit)} disabled={updateMutation.isPending}>
+            {updateMutation.isPending ? 'Saving...' : 'Confirm and notify counselor'}
+          </Button>
+        </DialogFooter>
+      </Dialog>
     </div>
   );
 };
