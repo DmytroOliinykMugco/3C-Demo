@@ -2,11 +2,16 @@ import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from './button';
 
-export const Dialog = ({ isOpen, onClose, children }) => {
+export const Dialog = ({ isOpen, onClose, children, variant = 'center' }) => {
   if (!isOpen) return null;
 
+  const isRightSide = variant === 'right';
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className={cn(
+      "fixed inset-0 z-50",
+      isRightSide ? "flex justify-end" : "flex items-center justify-center"
+    )}>
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/50"
@@ -14,7 +19,12 @@ export const Dialog = ({ isOpen, onClose, children }) => {
       />
 
       {/* Dialog */}
-      <div className="relative bg-white rounded-lg shadow-lg max-w-md w-full mx-4 animate-in fade-in zoom-in-95">
+      <div className={cn(
+        "relative bg-white shadow-lg",
+        isRightSide
+          ? "h-full w-full max-w-lg animate-in slide-in-from-right overflow-y-auto"
+          : "rounded-lg max-w-md w-full mx-4 animate-in fade-in zoom-in-95"
+      )}>
         {children}
       </div>
     </div>

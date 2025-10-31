@@ -80,6 +80,15 @@
     }
   }
 
+  @keyframes slide-in-from-right {
+    from {
+      transform: translateX(100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+
   @keyframes fade-in {
     from {
       opacity: 0;
@@ -107,6 +116,10 @@
 
   .slide-in-from-top {
     animation-name: slide-in-from-top;
+  }
+
+  .slide-in-from-right {
+    animation-name: slide-in-from-right;
   }
 
   .fade-in {

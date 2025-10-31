@@ -30,6 +30,18 @@ const profileData = {
   photoUrl: null // Will store base64 encoded image
 };
 
+// Mocked contracts data
+const contractsData = [
+  { id: 1, contractNumber: 'FU8434434' },
+  { id: 2, contractNumber: 'FU8434435' },
+  { id: 3, contractNumber: 'FU8434436' },
+  { id: 4, contractNumber: 'FU8434437' },
+  { id: 5, contractNumber: 'FU8434438' },
+];
+
+// Counter for generating new family member IDs
+let familyMemberIdCounter = 6;
+
 const familyData = {
   nextOfKin: {
     id: 1,
@@ -170,6 +182,43 @@ app.patch('/api/family/:id/star', (req, res) => {
   }
 
   res.json({ success: true, data: member, message: 'Star status updated' });
+});
+
+// Add family member
+app.post('/api/family', (req, res) => {
+  const { status, firstName, lastName, familyStatus, email, phone, contractId } = req.body;
+
+  // Create initials
+  const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+
+  // Find contract
+  const contract = contractsData.find(c => c.id === parseInt(contractId));
+  const contractNumber = contract ? contract.contractNumber : '';
+
+  // Create new member
+  const newMember = {
+    id: familyMemberIdCounter++,
+    name: `${firstName} ${lastName}`,
+    relationship: familyStatus,
+    phone: phone || '',
+    email: email,
+    accesses: [
+      { id: contractNumber, type: 'viewer', label: `ID: ${contractNumber}` },
+      { type: 'viewer', label: 'My Wishes' }
+    ],
+    isStarred: false,
+    initials: initials
+  };
+
+  // Add to all members
+  familyData.allMembers.push(newMember);
+
+  res.json({ success: true, data: newMember, message: 'Family member added successfully' });
+});
+
+// Get contracts
+app.get('/api/contracts', (req, res) => {
+  res.json({ success: true, data: contractsData });
 });
 
 // Start server

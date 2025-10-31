@@ -1,12 +1,15 @@
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import FamilyMemberCard from '@/components/FamilyMemberCard';
+import AddUserModal from '@/components/AddUserModal';
 import { useToast } from '@/components/ui/toast';
 
 const Family = () => {
   const { addToast } = useToast();
   const queryClient = useQueryClient();
+  const [showAddUserModal, setShowAddUserModal] = useState(false);
 
   const { data: familyResponse, isLoading, error } = useQuery({
     queryKey: ['family'],
@@ -70,7 +73,7 @@ const Family = () => {
             >
               Share contract access
             </Button>
-            <Button onClick={() => handleComingSoon('Add user manually')}>
+            <Button onClick={() => setShowAddUserModal(true)}>
               Add user manually
             </Button>
           </div>
@@ -137,6 +140,12 @@ const Family = () => {
           </div>
         </div>
       )}
+
+      {/* Add User Modal */}
+      <AddUserModal
+        isOpen={showAddUserModal}
+        onClose={() => setShowAddUserModal(false)}
+      />
     </div>
   );
 };

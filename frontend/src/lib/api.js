@@ -53,5 +53,27 @@ export const api = {
       throw new Error('Failed to toggle star status');
     }
     return response.json();
+  },
+
+  addFamilyMember: async (data) => {
+    const response = await fetch(`${API_BASE_URL}/api/family`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to add family member');
+    }
+    return response.json();
+  },
+
+  getContracts: async () => {
+    const response = await fetch(`${API_BASE_URL}/api/contracts`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch contracts');
+    }
+    return response.json();
   }
 };
