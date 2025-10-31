@@ -55,6 +55,26 @@ const salesData = [
   { month: 'Oct', sales: 79000, orders: 560 }
 ];
 
+const profileData = {
+  userId: '3298-981239',
+  status: 'Mister',
+  firstName: 'Scott',
+  lastName: 'Miller',
+  middleName: 'Sasha',
+  prefix: '',
+  suffix: '',
+  phoneNumber: '+00 000 0000 00 00',
+  email: 'Scott.miller@gmail.com',
+  secondNumber: '+00 000 0000 00 00',
+  country: 'USA',
+  addressLine1: '20 W 34th St., New York, NY 10001, United States',
+  addressLine2: '',
+  state: 'CA',
+  city: 'Menlo park',
+  zipCode: '01000',
+  initials: 'SM'
+};
+
 // Routes
 app.get('/', (req, res) => {
   res.json({
@@ -65,7 +85,8 @@ app.get('/', (req, res) => {
       products: '/api/products',
       analytics: '/api/analytics',
       activity: '/api/activity',
-      sales: '/api/sales'
+      sales: '/api/sales',
+      profile: '/api/profile'
     }
   });
 });
@@ -111,6 +132,17 @@ app.get('/api/activity', (req, res) => {
 // Sales data endpoint
 app.get('/api/sales', (req, res) => {
   res.json({ success: true, data: salesData });
+});
+
+// Profile endpoints
+app.get('/api/profile', (req, res) => {
+  res.json({ success: true, data: profileData });
+});
+
+app.put('/api/profile', (req, res) => {
+  // Update profile data with request body
+  Object.assign(profileData, req.body);
+  res.json({ success: true, data: profileData, message: 'Profile updated successfully' });
 });
 
 // Start server
