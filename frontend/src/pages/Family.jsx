@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import FamilyMemberCard from '@/components/FamilyMemberCard';
@@ -6,12 +6,27 @@ import { useToast } from '@/components/ui/toast';
 
 const Family = () => {
   const { addToast } = useToast();
+  const queryClient = useQueryClient();
+
   const { data: familyResponse, isLoading, error } = useQuery({
     queryKey: ['family'],
     queryFn: api.getFamily,
   });
 
   const familyData = familyResponse?.data;
+
+  // Toggle star mutation
+  const toggleStarMutation = useMutation({
+    mutationFn: (memberId) => api.toggleFamilyMemberStar(memberId),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['family']);
+      addToast('Star status updated successfully', 'success');
+    },
+  });
+
+  const handleStarToggle = (memberId) => {
+    toggleStarMutation.mutate(memberId);
+  };
 
   const handleComingSoon = (feature) => {
     addToast(`${feature} will be developed soon`, 'success');
@@ -74,7 +89,7 @@ const Family = () => {
           <div className="max-w-md">
             <FamilyMemberCard
               member={familyData.nextOfKin}
-              onStar={() => handleComingSoon('Star member')}
+              onStar={() => handleStarToggle(familyData.nextOfKin.id)}
               onEditAccesses={() => handleComingSoon('Edit accesses')}
               onDelete={() => handleComingSoon('Delete member')}
             />
@@ -96,7 +111,7 @@ const Family = () => {
               <FamilyMemberCard
                 key={member.id}
                 member={member}
-                onStar={() => handleComingSoon('Unstar member')}
+                onStar={() => handleStarToggle(member.id)}
                 onEditAccesses={() => handleComingSoon('Edit accesses')}
                 onDelete={() => handleComingSoon('Delete member')}
               />
@@ -114,7 +129,7 @@ const Family = () => {
               <FamilyMemberCard
                 key={member.id}
                 member={member}
-                onStar={() => handleComingSoon('Star member')}
+                onStar={() => handleStarToggle(member.id)}
                 onEditAccesses={() => handleComingSoon('Edit accesses')}
                 onDelete={() => handleComingSoon('Delete member')}
               />

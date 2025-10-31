@@ -43,5 +43,15 @@ export const api = {
       throw new Error('Failed to fetch family');
     }
     return response.json();
+  },
+
+  toggleFamilyMemberStar: async (memberId) => {
+    const response = await fetch(`${API_BASE_URL}/api/family/${memberId}/star`, {
+      method: 'PATCH',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to toggle star status');
+    }
+    return response.json();
   }
 };

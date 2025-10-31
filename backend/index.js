@@ -137,6 +137,41 @@ app.get('/api/family', (req, res) => {
   res.json({ success: true, data: familyData });
 });
 
+// Toggle star status for family member
+app.patch('/api/family/:id/star', (req, res) => {
+  const memberId = parseInt(req.params.id);
+
+  // Find member in starred members
+  let memberIndex = familyData.starredMembers.findIndex(m => m.id === memberId);
+  let member;
+
+  if (memberIndex !== -1) {
+    // Member is starred, move to all members
+    member = familyData.starredMembers.splice(memberIndex, 1)[0];
+    member.isStarred = false;
+    familyData.allMembers.push(member);
+  } else {
+    // Find in all members
+    memberIndex = familyData.allMembers.findIndex(m => m.id === memberId);
+    if (memberIndex !== -1) {
+      // Member is not starred, move to starred members
+      member = familyData.allMembers.splice(memberIndex, 1)[0];
+      member.isStarred = true;
+      familyData.starredMembers.push(member);
+    } else {
+      // Check if it's the next of kin
+      if (familyData.nextOfKin.id === memberId) {
+        familyData.nextOfKin.isStarred = !familyData.nextOfKin.isStarred;
+        member = familyData.nextOfKin;
+      } else {
+        return res.status(404).json({ success: false, message: 'Member not found' });
+      }
+    }
+  }
+
+  res.json({ success: true, data: member, message: 'Star status updated' });
+});
+
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 Backend server running on http://localhost:${PORT}`);
