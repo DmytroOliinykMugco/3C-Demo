@@ -23,42 +23,24 @@ export const api = {
     return response.json();
   },
 
+  uploadPhoto: async (photoUrl) => {
+    const response = await fetch(`${API_BASE_URL}/api/profile/photo`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ photoUrl }),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to upload photo');
+    }
+    return response.json();
+  },
+
   getFamily: async () => {
     const response = await fetch(`${API_BASE_URL}/api/family`);
     if (!response.ok) {
       throw new Error('Failed to fetch family');
-    }
-    return response.json();
-  },
-
-  getUsers: async () => {
-    const response = await fetch(`${API_BASE_URL}/api/users`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch users');
-    }
-    return response.json();
-  },
-
-  getAnalytics: async () => {
-    const response = await fetch(`${API_BASE_URL}/api/analytics`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch analytics');
-    }
-    return response.json();
-  },
-
-  getActivity: async () => {
-    const response = await fetch(`${API_BASE_URL}/api/activity`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch activity');
-    }
-    return response.json();
-  },
-
-  getSales: async () => {
-    const response = await fetch(`${API_BASE_URL}/api/sales`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch sales');
     }
     return response.json();
   }

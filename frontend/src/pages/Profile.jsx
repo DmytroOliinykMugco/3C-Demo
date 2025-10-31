@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Copy } from 'lucide-react';
@@ -15,6 +15,8 @@ const Profile = () => {
   const queryClient = useQueryClient();
   const { addToast } = useToast();
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const fileInputRef = useRef(null);
+
   const { data: profileResponse, isLoading, error } = useQuery({
     queryKey: ['profile'],
     queryFn: api.getProfile,
@@ -107,6 +109,15 @@ const Profile = () => {
     },
   });
 
+  // Upload photo mutation
+  const uploadPhotoMutation = useMutation({
+    mutationFn: (photoUrl) => api.uploadPhoto(photoUrl),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['profile']);
+      addToast('Photo uploaded successfully', 'success');
+    },
+  });
+
   // Handle form submission
   const onSubmit = (data) => {
     updateMutation.mutate(data);
@@ -137,6 +148,37 @@ const Profile = () => {
         zipCode: profile.zipCode || '',
       });
     }
+  };
+
+  // Handle photo upload
+  const handlePhotoUpload = (event) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Check file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        addToast('Photo size must be less than 5MB', 'error');
+        return;
+      }
+
+      // Check file type
+      if (!file.type.startsWith('image/')) {
+        addToast('Please upload an image file', 'error');
+        return;
+      }
+
+      // Convert to base64
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result;
+        uploadPhotoMutation.mutate(base64String);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Trigger file input click
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
   };
 
   if (isLoading) {
@@ -193,12 +235,33 @@ const Profile = () => {
           <div className="grid grid-cols-12 gap-6">
             {/* Avatar Section */}
             <div className="col-span-3 flex flex-col items-center">
-              <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center mb-4">
-                <span className="text-4xl font-semibold text-gray-700">
-                  {profile?.initials}
-                </span>
+              <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center mb-4 overflow-hidden">
+                {profile?.photoUrl ? (
+                  <img
+                    src={profile.photoUrl}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="text-4xl font-semibold text-gray-700">
+                    {profile?.initials}
+                  </span>
+                )}
               </div>
-              <Button variant="default">Upload photo</Button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handlePhotoUpload}
+                className="hidden"
+              />
+              <Button
+                variant="default"
+                onClick={handleUploadClick}
+                disabled={uploadPhotoMutation.isPending}
+              >
+                {uploadPhotoMutation.isPending ? 'Uploading...' : 'Upload photo'}
+              </Button>
             </div>
 
             {/* Form Fields */}

@@ -8,141 +8,96 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// Mocked Data
-const users = [
-  { id: 1, name: 'John Doe', email: 'john@example.com', role: 'Admin', status: 'active' },
-  { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'User', status: 'active' },
-  { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: 'User', status: 'inactive' },
-  { id: 4, name: 'Alice Brown', email: 'alice@example.com', role: 'Manager', status: 'active' },
-  { id: 5, name: 'Charlie Wilson', email: 'charlie@example.com', role: 'User', status: 'active' }
-];
-
-const products = [
-  { id: 1, name: 'Laptop Pro', price: 1299.99, category: 'Electronics', stock: 45, rating: 4.5 },
-  { id: 2, name: 'Wireless Mouse', price: 29.99, category: 'Accessories', stock: 150, rating: 4.2 },
-  { id: 3, name: 'USB-C Cable', price: 12.99, category: 'Accessories', stock: 200, rating: 4.0 },
-  { id: 4, name: 'Monitor 27"', price: 399.99, category: 'Electronics', stock: 30, rating: 4.7 },
-  { id: 5, name: 'Keyboard Mechanical', price: 89.99, category: 'Accessories', stock: 75, rating: 4.6 }
-];
-
-const analytics = {
-  totalUsers: 1247,
-  activeUsers: 892,
-  totalRevenue: 125430.50,
-  totalOrders: 3421,
-  conversionRate: 3.2,
-  averageOrderValue: 36.67
-};
-
-const recentActivity = [
-  { id: 1, user: 'John Doe', action: 'Purchased Laptop Pro', timestamp: '2024-10-31T10:30:00Z', amount: 1299.99 },
-  { id: 2, user: 'Jane Smith', action: 'Added Monitor to cart', timestamp: '2024-10-31T10:25:00Z', amount: 0 },
-  { id: 3, user: 'Bob Johnson', action: 'Registered new account', timestamp: '2024-10-31T10:20:00Z', amount: 0 },
-  { id: 4, user: 'Alice Brown', action: 'Purchased Wireless Mouse', timestamp: '2024-10-31T10:15:00Z', amount: 29.99 },
-  { id: 5, user: 'Charlie Wilson', action: 'Left product review', timestamp: '2024-10-31T10:10:00Z', amount: 0 }
-];
-
-const salesData = [
-  { month: 'Jan', sales: 45000, orders: 320 },
-  { month: 'Feb', sales: 52000, orders: 380 },
-  { month: 'Mar', sales: 48000, orders: 350 },
-  { month: 'Apr', sales: 61000, orders: 420 },
-  { month: 'May', sales: 55000, orders: 390 },
-  { month: 'Jun', sales: 67000, orders: 480 },
-  { month: 'Jul', sales: 72000, orders: 510 },
-  { month: 'Aug', sales: 68000, orders: 495 },
-  { month: 'Sep', sales: 74000, orders: 530 },
-  { month: 'Oct', sales: 79000, orders: 560 }
-];
-
+// Mocked Data - Star Wars Theme
 const profileData = {
-  userId: '3298-981239',
+  userId: 'JEDI-2187',
   status: 'Mister',
-  firstName: 'Scott',
-  lastName: 'Miller',
-  middleName: 'Sasha',
-  prefix: '',
-  suffix: '',
-  phoneNumber: '+00 000 0000 00 00',
-  email: 'Scott.miller@gmail.com',
-  secondNumber: '+00 000 0000 00 00',
+  firstName: 'Luke',
+  lastName: 'Skywalker',
+  middleName: 'Force',
+  prefix: 'Jedi Master',
+  suffix: 'Jr.',
+  phoneNumber: '+1 555 JEDI 001',
+  email: 'luke.skywalker@jediorder.org',
+  secondNumber: '+1 555 REBEL 123',
   country: 'USA',
-  addressLine1: '20 W 34th St., New York, NY 10001, United States',
-  addressLine2: '',
-  state: 'CA',
-  city: 'Menlo park',
-  zipCode: '01000',
-  initials: 'SM'
+  addressLine1: '1138 Desert View Lane, Tatooine District, AZ 85001',
+  addressLine2: 'Moisture Farm #42',
+  state: 'AZ',
+  city: 'Mos Eisley',
+  zipCode: '77777',
+  initials: 'LS',
+  photoUrl: null // Will store base64 encoded image
 };
 
 const familyData = {
   nextOfKin: {
     id: 1,
-    name: 'Ann Miller',
-    relationship: 'Son',
-    phone: '+13462127336',
-    email: 'annna.miller@gmail.com',
+    name: 'Obi-Wan Kenobi',
+    relationship: 'Mentor',
+    phone: '+1 555 JEDI 999',
+    email: 'obiwan.kenobi@jediorder.org',
     accesses: [
-      { id: 'FU8434434', type: 'viewer', label: 'ID: FU8434434' },
+      { id: 'JEDI-9999', type: 'viewer', label: 'ID: JEDI-9999' },
       { type: 'viewer', label: 'My Wishes' }
     ],
     isStarred: false,
-    initials: 'AM'
+    initials: 'OK'
   },
   starredMembers: [
     {
       id: 2,
-      name: 'Ann Miller',
-      relationship: 'Mother',
-      phone: '+13462127336',
-      email: 'annna.miller@gmail.com',
+      name: 'Leia Organa',
+      relationship: 'Sister',
+      phone: '+1 555 REBEL 777',
+      email: 'leia.organa@rebellion.org',
       accesses: [
-        { id: 'FU8434434', type: 'viewer', label: 'ID: FU8434434' },
+        { id: 'PRIN-0001', type: 'viewer', label: 'ID: PRIN-0001' },
         { type: 'viewer', label: 'My Wishes' }
       ],
       isStarred: true,
-      initials: 'AM'
+      initials: 'LO'
     },
     {
       id: 3,
-      name: 'Ann Miller',
-      relationship: 'Mother',
-      phone: '+13462127336',
-      email: 'annna.miller@gmail.com',
+      name: 'Han Solo',
+      relationship: 'Brother-in-law',
+      phone: '+1 555 FCON 420',
+      email: 'han.solo@millenniumfalcon.com',
       accesses: [
-        { id: 'FU8434434', type: 'viewer', label: 'ID: FU8434434' },
+        { id: 'SMUG-1977', type: 'viewer', label: 'ID: SMUG-1977' },
         { type: 'viewer', label: 'My Wishes' }
       ],
       isStarred: true,
-      initials: 'AM'
+      initials: 'HS'
     }
   ],
   allMembers: [
     {
       id: 4,
-      name: 'Ann Miller',
-      relationship: 'Mother',
-      phone: '+13462127336',
-      email: 'annna.miller@gmail.com',
+      name: 'Chewbacca',
+      relationship: 'Co-pilot & Friend',
+      phone: '+1 555 WOOKIE 190',
+      email: 'chewie@millenniumfalcon.com',
       accesses: [
-        { id: 'FU8434434', type: 'viewer', label: 'ID: FU8434434' },
+        { id: 'WOOK-0200', type: 'viewer', label: 'ID: WOOK-0200' },
         { type: 'viewer', label: 'My Wishes' }
       ],
       isStarred: false,
-      initials: 'AM'
+      initials: 'CB'
     },
     {
       id: 5,
-      name: 'Ann Miller',
-      relationship: 'Mother',
-      phone: '+13462127336',
-      email: 'annna.miller@gmail.com',
+      name: 'R2-D2',
+      relationship: 'Droid Companion',
+      phone: '+1 555 BEEP BOOP',
+      email: 'r2d2@astromech.droid',
       accesses: [
-        { id: 'FU8434434', type: 'viewer', label: 'ID: FU8434434' },
+        { id: 'DROID-D2', type: 'viewer', label: 'ID: DROID-D2' },
         { type: 'viewer', label: 'My Wishes' }
       ],
       isStarred: false,
-      initials: 'AM'
+      initials: 'R2'
     }
   ]
 };
@@ -150,61 +105,13 @@ const familyData = {
 // Routes
 app.get('/', (req, res) => {
   res.json({
-    message: 'Demo Backend API',
+    message: 'Customer Care Center Demo Backend API',
     version: '1.0.0',
     endpoints: {
-      users: '/api/users',
-      products: '/api/products',
-      analytics: '/api/analytics',
-      activity: '/api/activity',
-      sales: '/api/sales',
       profile: '/api/profile',
       family: '/api/family'
     }
   });
-});
-
-// Users endpoints
-app.get('/api/users', (req, res) => {
-  res.json({ success: true, data: users, count: users.length });
-});
-
-app.get('/api/users/:id', (req, res) => {
-  const user = users.find(u => u.id === parseInt(req.params.id));
-  if (user) {
-    res.json({ success: true, data: user });
-  } else {
-    res.status(404).json({ success: false, message: 'User not found' });
-  }
-});
-
-// Products endpoints
-app.get('/api/products', (req, res) => {
-  res.json({ success: true, data: products, count: products.length });
-});
-
-app.get('/api/products/:id', (req, res) => {
-  const product = products.find(p => p.id === parseInt(req.params.id));
-  if (product) {
-    res.json({ success: true, data: product });
-  } else {
-    res.status(404).json({ success: false, message: 'Product not found' });
-  }
-});
-
-// Analytics endpoint
-app.get('/api/analytics', (req, res) => {
-  res.json({ success: true, data: analytics });
-});
-
-// Recent activity endpoint
-app.get('/api/activity', (req, res) => {
-  res.json({ success: true, data: recentActivity, count: recentActivity.length });
-});
-
-// Sales data endpoint
-app.get('/api/sales', (req, res) => {
-  res.json({ success: true, data: salesData });
 });
 
 // Profile endpoints
@@ -216,6 +123,13 @@ app.put('/api/profile', (req, res) => {
   // Update profile data with request body
   Object.assign(profileData, req.body);
   res.json({ success: true, data: profileData, message: 'Profile updated successfully' });
+});
+
+// Upload photo endpoint
+app.post('/api/profile/photo', (req, res) => {
+  const { photoUrl } = req.body;
+  profileData.photoUrl = photoUrl;
+  res.json({ success: true, data: { photoUrl }, message: 'Photo uploaded successfully' });
 });
 
 // Family endpoint

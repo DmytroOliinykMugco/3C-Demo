@@ -1,6 +1,6 @@
-# Backend API - Demo Application
+# Backend API - Customer Care Center Demo
 
-Express.js backend with mocked data for demo purposes.
+Express.js backend with mocked Star Wars themed data for demo purposes.
 
 ## Getting Started
 
@@ -16,22 +16,12 @@ The server will start on `http://localhost:3000`
 ### Base
 - `GET /` - API information and available endpoints
 
-### Users
-- `GET /api/users` - Get all users
-- `GET /api/users/:id` - Get user by ID
+### Profile
+- `GET /api/profile` - Get user profile data
+- `PUT /api/profile` - Update user profile data
 
-### Products
-- `GET /api/products` - Get all products
-- `GET /api/products/:id` - Get product by ID
-
-### Analytics
-- `GET /api/analytics` - Get dashboard analytics (users, revenue, orders, etc.)
-
-### Activity
-- `GET /api/activity` - Get recent user activity
-
-### Sales
-- `GET /api/sales` - Get sales data by month
+### Family
+- `GET /api/family` - Get family members (nextOfKin, starredMembers, allMembers)
 
 ## Response Format
 
@@ -41,7 +31,7 @@ All responses follow this format:
 {
   "success": true,
   "data": {...},
-  "count": 5
+  "message": "Optional message"
 }
 ```
 
