@@ -1,35 +1,32 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import MainLayout from '@/layouts/MainLayout';
+import Profile from '@/pages/Profile';
+import Family from '@/pages/Family';
+import Security from '@/pages/Security';
+import Information from '@/pages/Information';
+import Balance from '@/pages/Balance';
+import Wallet from '@/pages/Wallet';
+import Cemetery from '@/pages/Cemetery';
+import Funeral from '@/pages/Funeral';
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <Router>
+      <Routes>
+        <Route path="/" element={<MainLayout />}>
+          <Route index element={<Navigate to="/profile" replace />} />
+          <Route path="profile" element={<Profile />} />
+          <Route path="family" element={<Family />} />
+          <Route path="security" element={<Security />} />
+          <Route path="information" element={<Information />} />
+          <Route path="balance" element={<Balance />} />
+          <Route path="wallet" element={<Wallet />} />
+          <Route path="cemetery" element={<Cemetery />} />
+          <Route path="funeral" element={<Funeral />} />
+        </Route>
+      </Routes>
+    </Router>
+  );
 }
 
-export default App
+export default App;
