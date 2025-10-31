@@ -221,6 +221,32 @@ app.get('/api/contracts', (req, res) => {
   res.json({ success: true, data: contractsData });
 });
 
+// Delete family member
+app.delete('/api/family/:id', (req, res) => {
+  const memberId = parseInt(req.params.id);
+
+  // Check if it's the next of kin
+  if (familyData.nextOfKin.id === memberId) {
+    return res.status(400).json({ success: false, message: 'Cannot delete next of kin' });
+  }
+
+  // Find and remove from starred members
+  let memberIndex = familyData.starredMembers.findIndex(m => m.id === memberId);
+  if (memberIndex !== -1) {
+    familyData.starredMembers.splice(memberIndex, 1);
+    return res.json({ success: true, message: 'Family member deleted successfully' });
+  }
+
+  // Find and remove from all members
+  memberIndex = familyData.allMembers.findIndex(m => m.id === memberId);
+  if (memberIndex !== -1) {
+    familyData.allMembers.splice(memberIndex, 1);
+    return res.json({ success: true, message: 'Family member deleted successfully' });
+  }
+
+  return res.status(404).json({ success: false, message: 'Member not found' });
+});
+
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 Backend server running on http://localhost:${PORT}`);

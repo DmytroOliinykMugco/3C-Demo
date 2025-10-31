@@ -4,12 +4,15 @@ import { api } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import FamilyMemberCard from '@/components/FamilyMemberCard';
 import AddUserModal from '@/components/AddUserModal';
+import DeleteUserModal from '@/components/DeleteUserModal';
 import { useToast } from '@/components/ui/toast';
 
 const Family = () => {
   const { addToast } = useToast();
   const queryClient = useQueryClient();
   const [showAddUserModal, setShowAddUserModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [memberToDelete, setMemberToDelete] = useState(null);
 
   const { data: familyResponse, isLoading, error } = useQuery({
     queryKey: ['family'],
@@ -27,8 +30,30 @@ const Family = () => {
     },
   });
 
+  // Delete member mutation
+  const deleteMemberMutation = useMutation({
+    mutationFn: (memberId) => api.deleteFamilyMember(memberId),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['family']);
+      addToast('Family member deleted successfully', 'success');
+      setShowDeleteModal(false);
+      setMemberToDelete(null);
+    },
+  });
+
   const handleStarToggle = (memberId) => {
     toggleStarMutation.mutate(memberId);
+  };
+
+  const handleDeleteClick = (member) => {
+    setMemberToDelete(member);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (memberToDelete) {
+      deleteMemberMutation.mutate(memberToDelete.id);
+    }
   };
 
   const handleComingSoon = (feature) => {
@@ -94,7 +119,7 @@ const Family = () => {
               member={familyData.nextOfKin}
               onStar={() => handleStarToggle(familyData.nextOfKin.id)}
               onEditAccesses={() => handleComingSoon('Edit accesses')}
-              onDelete={() => handleComingSoon('Delete member')}
+              onDelete={() => handleDeleteClick(familyData.nextOfKin)}
             />
           </div>
         </div>
@@ -116,7 +141,7 @@ const Family = () => {
                 member={member}
                 onStar={() => handleStarToggle(member.id)}
                 onEditAccesses={() => handleComingSoon('Edit accesses')}
-                onDelete={() => handleComingSoon('Delete member')}
+                onDelete={() => handleDeleteClick(member)}
               />
             ))}
           </div>
@@ -134,7 +159,7 @@ const Family = () => {
                 member={member}
                 onStar={() => handleStarToggle(member.id)}
                 onEditAccesses={() => handleComingSoon('Edit accesses')}
-                onDelete={() => handleComingSoon('Delete member')}
+                onDelete={() => handleDeleteClick(member)}
               />
             ))}
           </div>
@@ -145,6 +170,18 @@ const Family = () => {
       <AddUserModal
         isOpen={showAddUserModal}
         onClose={() => setShowAddUserModal(false)}
+      />
+
+      {/* Delete User Modal */}
+      <DeleteUserModal
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setMemberToDelete(null);
+        }}
+        member={memberToDelete}
+        onConfirm={handleDeleteConfirm}
+        isDeleting={deleteMemberMutation.isPending}
       />
     </div>
   );

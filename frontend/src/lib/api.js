@@ -75,5 +75,15 @@ export const api = {
       throw new Error('Failed to fetch contracts');
     }
     return response.json();
+  },
+
+  deleteFamilyMember: async (memberId) => {
+    const response = await fetch(`${API_BASE_URL}/api/family/${memberId}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to delete family member');
+    }
+    return response.json();
   }
 };
