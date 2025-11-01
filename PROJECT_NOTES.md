@@ -74,6 +74,26 @@ This is a demo application designed to create a "wow effect" for the customer. I
 
 ## Completed Features
 
+### Information Page (✓ Complete - Readonly)
+- **Emergency Contacts Section**:
+  - Customer support card with avatar and 24/7 badge
+  - Email and phone contact buttons (show "Coming soon" toast)
+- **Welcome Section**:
+  - Introduction text with bullet points
+  - Privacy and security message
+- **What to Expect Section**:
+  - Description of arrangement meeting
+  - Bullet points covering key steps
+  - Mission statement
+- **Documents Section**:
+  - Instructions for document signing process (3 steps)
+  - Tab navigation: "Signed documents" / "Example"
+  - Document cards showing:
+    - File icon, name, and size
+    - Preview and Download buttons (show "Coming soon" toast)
+  - Grid layout (2 columns on medium+ screens)
+- **All buttons are mocked** - show "Coming soon" toast notification
+
 ### Family Page (✓ Complete)
 - **Backend Architecture**:
   - Single `familyMembers` collection with flags: `isStarred`, `isNextOfKin`
