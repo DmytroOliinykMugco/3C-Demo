@@ -7,6 +7,7 @@ import FamilyMemberCard from "@/components/FamilyMemberCard";
 import AddUserModal from "@/components/AddUserModal";
 import DeleteUserModal from "@/components/DeleteUserModal";
 import AddNextOfKinModal from "@/components/AddNextOfKinModal";
+import EditAccessesModal from "@/components/EditAccessesModal";
 import { useToast } from "@/components/ui/toast";
 
 const Family = () => {
@@ -15,7 +16,9 @@ const Family = () => {
   const [showAddUserModal, setShowAddUserModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showAddNextOfKinModal, setShowAddNextOfKinModal] = useState(false);
+  const [showEditAccessesModal, setShowEditAccessesModal] = useState(false);
   const [memberToDelete, setMemberToDelete] = useState(null);
+  const [memberToEdit, setMemberToEdit] = useState(null);
 
   const {
     data: familyResponse,
@@ -76,6 +79,11 @@ const Family = () => {
     if (memberToDelete) {
       deleteMemberMutation.mutate({ memberId: memberToDelete.id, isNextOfKin: false });
     }
+  };
+
+  const handleEditAccesses = (member) => {
+    setMemberToEdit(member);
+    setShowEditAccessesModal(true);
   };
 
   const handleComingSoon = (feature) => {
@@ -146,7 +154,7 @@ const Family = () => {
                 <FamilyMemberCard
                   member={familyData.nextOfKin}
                   onStar={() => handleStarToggle(familyData.nextOfKin.id)}
-                  onEditAccesses={() => handleComingSoon("Edit accesses")}
+                  onEditAccesses={() => handleEditAccesses(familyData.nextOfKin)}
                   onDelete={() => handleDeleteClick(familyData.nextOfKin)}
                 />
               </div>
@@ -186,7 +194,7 @@ const Family = () => {
                       key={member.id}
                       member={member}
                       onStar={() => handleStarToggle(member.id)}
-                      onEditAccesses={() => handleComingSoon("Edit accesses")}
+                      onEditAccesses={() => handleEditAccesses(member)}
                       onDelete={() => handleDeleteClick(member)}
                     />
                   ))}
@@ -208,7 +216,7 @@ const Family = () => {
                     key={member.id}
                     member={member}
                     onStar={() => handleStarToggle(member.id)}
-                    onEditAccesses={() => handleComingSoon("Edit accesses")}
+                    onEditAccesses={() => handleEditAccesses(member)}
                     onDelete={() => handleDeleteClick(member)}
                   />
                 ))}
@@ -240,6 +248,16 @@ const Family = () => {
       <AddNextOfKinModal
         isOpen={showAddNextOfKinModal}
         onClose={() => setShowAddNextOfKinModal(false)}
+      />
+
+      {/* Edit Accesses Modal */}
+      <EditAccessesModal
+        isOpen={showEditAccessesModal}
+        onClose={() => {
+          setShowEditAccessesModal(false);
+          setMemberToEdit(null);
+        }}
+        member={memberToEdit}
       />
     </div>
   );

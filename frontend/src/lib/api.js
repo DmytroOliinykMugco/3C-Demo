@@ -99,5 +99,19 @@ export const api = {
       throw new Error('Failed to assign next of kin');
     }
     return response.json();
+  },
+
+  updateMemberAccesses: async (memberId, contracts) => {
+    const response = await fetch(`${API_BASE_URL}/api/family/${memberId}/accesses`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ contracts }),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to update member accesses');
+    }
+    return response.json();
   }
 };

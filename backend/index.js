@@ -51,7 +51,8 @@ const familyMembers = [
     phone: '+1 555 REBEL 777',
     email: 'leia.organa@rebellion.org',
     accesses: [
-      { id: 'PRIN-0001', type: 'viewer', label: 'ID: PRIN-0001' },
+      { id: 'FU8434434', type: 'viewer', label: 'ID: FU8434434' },
+      { id: 'FU8434435', type: 'viewer', label: 'ID: FU8434435' },
       { type: 'viewer', label: 'My Wishes' }
     ],
     isStarred: true,
@@ -65,7 +66,7 @@ const familyMembers = [
     phone: '+1 555 FCON 420',
     email: 'han.solo@millenniumfalcon.com',
     accesses: [
-      { id: 'SMUG-1977', type: 'viewer', label: 'ID: SMUG-1977' },
+      { id: 'FU8434434', type: 'viewer', label: 'ID: FU8434434' },
       { type: 'viewer', label: 'My Wishes' }
     ],
     isStarred: true,
@@ -79,7 +80,8 @@ const familyMembers = [
     phone: '+1 555 WOOKIE 190',
     email: 'chewie@millenniumfalcon.com',
     accesses: [
-      { id: 'WOOK-0200', type: 'viewer', label: 'ID: WOOK-0200' },
+      { id: 'FU8434436', type: 'viewer', label: 'ID: FU8434436' },
+      { id: 'FU8434437', type: 'viewer', label: 'ID: FU8434437' },
       { type: 'viewer', label: 'My Wishes' }
     ],
     isStarred: false,
@@ -93,7 +95,7 @@ const familyMembers = [
     phone: '+1 555 BEEP BOOP',
     email: 'r2d2@astromech.droid',
     accesses: [
-      { id: 'DROID-D2', type: 'viewer', label: 'ID: DROID-D2' },
+      { id: 'FU8434438', type: 'viewer', label: 'ID: FU8434438' },
       { type: 'viewer', label: 'My Wishes' }
     ],
     isStarred: false,
@@ -227,6 +229,33 @@ app.post('/api/family/next-of-kin', (req, res) => {
   }
 
   return res.status(400).json({ success: false, message: 'Either memberId or email is required' });
+});
+
+// Update member accesses
+app.patch('/api/family/:id/accesses', (req, res) => {
+  const memberId = parseInt(req.params.id);
+  const { contracts } = req.body;
+
+  // Find the member
+  const member = familyMembers.find(m => m.id === memberId);
+
+  if (!member) {
+    return res.status(404).json({ success: false, message: 'Member not found' });
+  }
+
+  // Update accesses based on contracts array
+  const newAccesses = [
+    ...contracts.map(contractNumber => ({
+      id: contractNumber,
+      type: 'viewer',
+      label: `ID: ${contractNumber}`
+    })),
+    { type: 'viewer', label: 'My Wishes' }
+  ];
+
+  member.accesses = newAccesses;
+
+  res.json({ success: true, data: member, message: 'Accesses updated successfully' });
 });
 
 // Delete family member
