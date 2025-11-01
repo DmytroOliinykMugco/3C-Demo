@@ -42,77 +42,65 @@ const contractsData = [
 // Counter for generating new family member IDs
 let familyMemberIdCounter = 6;
 
-const familyData = {
-  nextOfKin: {
-    id: 1,
-    name: 'Obi-Wan Kenobi',
-    relationship: 'Mentor',
-    phone: '+1 555 JEDI 999',
-    email: 'obiwan.kenobi@jediorder.org',
+// All family members in a single collection
+const familyMembers = [
+  {
+    id: 2,
+    name: 'Leia Organa',
+    relationship: 'Sister',
+    phone: '+1 555 REBEL 777',
+    email: 'leia.organa@rebellion.org',
     accesses: [
-      { id: 'JEDI-9999', type: 'viewer', label: 'ID: JEDI-9999' },
+      { id: 'PRIN-0001', type: 'viewer', label: 'ID: PRIN-0001' },
+      { type: 'viewer', label: 'My Wishes' }
+    ],
+    isStarred: true,
+    isNextOfKin: false,
+    initials: 'LO'
+  },
+  {
+    id: 3,
+    name: 'Han Solo',
+    relationship: 'Brother-in-law',
+    phone: '+1 555 FCON 420',
+    email: 'han.solo@millenniumfalcon.com',
+    accesses: [
+      { id: 'SMUG-1977', type: 'viewer', label: 'ID: SMUG-1977' },
+      { type: 'viewer', label: 'My Wishes' }
+    ],
+    isStarred: true,
+    isNextOfKin: false,
+    initials: 'HS'
+  },
+  {
+    id: 4,
+    name: 'Chewbacca',
+    relationship: 'Co-pilot & Friend',
+    phone: '+1 555 WOOKIE 190',
+    email: 'chewie@millenniumfalcon.com',
+    accesses: [
+      { id: 'WOOK-0200', type: 'viewer', label: 'ID: WOOK-0200' },
       { type: 'viewer', label: 'My Wishes' }
     ],
     isStarred: false,
-    initials: 'OK'
+    isNextOfKin: false,
+    initials: 'CB'
   },
-  starredMembers: [
-    {
-      id: 2,
-      name: 'Leia Organa',
-      relationship: 'Sister',
-      phone: '+1 555 REBEL 777',
-      email: 'leia.organa@rebellion.org',
-      accesses: [
-        { id: 'PRIN-0001', type: 'viewer', label: 'ID: PRIN-0001' },
-        { type: 'viewer', label: 'My Wishes' }
-      ],
-      isStarred: true,
-      initials: 'LO'
-    },
-    {
-      id: 3,
-      name: 'Han Solo',
-      relationship: 'Brother-in-law',
-      phone: '+1 555 FCON 420',
-      email: 'han.solo@millenniumfalcon.com',
-      accesses: [
-        { id: 'SMUG-1977', type: 'viewer', label: 'ID: SMUG-1977' },
-        { type: 'viewer', label: 'My Wishes' }
-      ],
-      isStarred: true,
-      initials: 'HS'
-    }
-  ],
-  allMembers: [
-    {
-      id: 4,
-      name: 'Chewbacca',
-      relationship: 'Co-pilot & Friend',
-      phone: '+1 555 WOOKIE 190',
-      email: 'chewie@millenniumfalcon.com',
-      accesses: [
-        { id: 'WOOK-0200', type: 'viewer', label: 'ID: WOOK-0200' },
-        { type: 'viewer', label: 'My Wishes' }
-      ],
-      isStarred: false,
-      initials: 'CB'
-    },
-    {
-      id: 5,
-      name: 'R2-D2',
-      relationship: 'Droid Companion',
-      phone: '+1 555 BEEP BOOP',
-      email: 'r2d2@astromech.droid',
-      accesses: [
-        { id: 'DROID-D2', type: 'viewer', label: 'ID: DROID-D2' },
-        { type: 'viewer', label: 'My Wishes' }
-      ],
-      isStarred: false,
-      initials: 'R2'
-    }
-  ]
-};
+  {
+    id: 5,
+    name: 'R2-D2',
+    relationship: 'Droid Companion',
+    phone: '+1 555 BEEP BOOP',
+    email: 'r2d2@astromech.droid',
+    accesses: [
+      { id: 'DROID-D2', type: 'viewer', label: 'ID: DROID-D2' },
+      { type: 'viewer', label: 'My Wishes' }
+    ],
+    isStarred: false,
+    isNextOfKin: false,
+    initials: 'R2'
+  }
+];
 
 // Routes
 app.get('/', (req, res) => {
@@ -146,6 +134,17 @@ app.post('/api/profile/photo', (req, res) => {
 
 // Family endpoint
 app.get('/api/family', (req, res) => {
+  // Organize members based on their flags
+  const nextOfKin = familyMembers.find(m => m.isNextOfKin) || null;
+  const starredMembers = familyMembers.filter(m => !m.isNextOfKin && m.isStarred);
+  const allMembers = familyMembers.filter(m => !m.isNextOfKin && !m.isStarred);
+
+  const familyData = {
+    nextOfKin,
+    starredMembers,
+    allMembers
+  };
+
   res.json({ success: true, data: familyData });
 });
 
@@ -153,33 +152,15 @@ app.get('/api/family', (req, res) => {
 app.patch('/api/family/:id/star', (req, res) => {
   const memberId = parseInt(req.params.id);
 
-  // Find member in starred members
-  let memberIndex = familyData.starredMembers.findIndex(m => m.id === memberId);
-  let member;
+  // Find member in the collection
+  const member = familyMembers.find(m => m.id === memberId);
 
-  if (memberIndex !== -1) {
-    // Member is starred, move to all members
-    member = familyData.starredMembers.splice(memberIndex, 1)[0];
-    member.isStarred = false;
-    familyData.allMembers.push(member);
-  } else {
-    // Find in all members
-    memberIndex = familyData.allMembers.findIndex(m => m.id === memberId);
-    if (memberIndex !== -1) {
-      // Member is not starred, move to starred members
-      member = familyData.allMembers.splice(memberIndex, 1)[0];
-      member.isStarred = true;
-      familyData.starredMembers.push(member);
-    } else {
-      // Check if it's the next of kin
-      if (familyData.nextOfKin.id === memberId) {
-        familyData.nextOfKin.isStarred = !familyData.nextOfKin.isStarred;
-        member = familyData.nextOfKin;
-      } else {
-        return res.status(404).json({ success: false, message: 'Member not found' });
-      }
-    }
+  if (!member) {
+    return res.status(404).json({ success: false, message: 'Member not found' });
   }
+
+  // Toggle the star status
+  member.isStarred = !member.isStarred;
 
   res.json({ success: true, data: member, message: 'Star status updated' });
 });
@@ -207,11 +188,12 @@ app.post('/api/family', (req, res) => {
       { type: 'viewer', label: 'My Wishes' }
     ],
     isStarred: false,
+    isNextOfKin: false,
     initials: initials
   };
 
-  // Add to all members
-  familyData.allMembers.push(newMember);
+  // Add to members collection
+  familyMembers.push(newMember);
 
   res.json({ success: true, data: newMember, message: 'Family member added successfully' });
 });
@@ -221,30 +203,54 @@ app.get('/api/contracts', (req, res) => {
   res.json({ success: true, data: contractsData });
 });
 
+// Set/Assign Next of Kin
+app.post('/api/family/next-of-kin', (req, res) => {
+  const { memberId, email } = req.body;
+
+  if (memberId) {
+    // First, clear any existing next of kin
+    familyMembers.forEach(m => m.isNextOfKin = false);
+
+    // Find and assign the member as next of kin
+    const member = familyMembers.find(m => m.id === memberId);
+
+    if (member) {
+      member.isNextOfKin = true;
+      return res.json({ success: true, data: member, message: 'Next of kin assigned successfully' });
+    } else {
+      return res.status(404).json({ success: false, message: 'Member not found' });
+    }
+  } else if (email) {
+    // For now, just show that email invite will be sent (not actually implemented)
+    // In a real app, this would send an email invitation
+    return res.json({ success: true, message: 'Invitation sent to ' + email });
+  }
+
+  return res.status(400).json({ success: false, message: 'Either memberId or email is required' });
+});
+
 // Delete family member
 app.delete('/api/family/:id', (req, res) => {
   const memberId = parseInt(req.params.id);
 
-  // Check if it's the next of kin
-  if (familyData.nextOfKin.id === memberId) {
-    return res.status(400).json({ success: false, message: 'Cannot delete next of kin' });
+  // Find the member
+  const member = familyMembers.find(m => m.id === memberId);
+
+  if (!member) {
+    return res.status(404).json({ success: false, message: 'Member not found' });
   }
 
-  // Find and remove from starred members
-  let memberIndex = familyData.starredMembers.findIndex(m => m.id === memberId);
-  if (memberIndex !== -1) {
-    familyData.starredMembers.splice(memberIndex, 1);
-    return res.json({ success: true, message: 'Family member deleted successfully' });
+  // If it's the next of kin, just remove the flag (don't delete the member)
+  if (member.isNextOfKin) {
+    member.isNextOfKin = false;
+    return res.json({ success: true, message: 'Next of kin removed successfully' });
   }
 
-  // Find and remove from all members
-  memberIndex = familyData.allMembers.findIndex(m => m.id === memberId);
-  if (memberIndex !== -1) {
-    familyData.allMembers.splice(memberIndex, 1);
-    return res.json({ success: true, message: 'Family member deleted successfully' });
-  }
+  // Otherwise, actually delete the member from the array
+  const memberIndex = familyMembers.findIndex(m => m.id === memberId);
+  familyMembers.splice(memberIndex, 1);
 
-  return res.status(404).json({ success: false, message: 'Member not found' });
+  return res.json({ success: true, message: 'Family member deleted successfully' });
 });
 
 // Start server

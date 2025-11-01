@@ -85,5 +85,19 @@ export const api = {
       throw new Error('Failed to delete family member');
     }
     return response.json();
+  },
+
+  assignNextOfKin: async (data) => {
+    const response = await fetch(`${API_BASE_URL}/api/family/next-of-kin`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to assign next of kin');
+    }
+    return response.json();
   }
 };
