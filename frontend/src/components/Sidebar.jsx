@@ -26,8 +26,11 @@ const Sidebar = () => {
       items: [
         { name: "Profile", path: "/profile", icon: User },
         { name: "Family", path: "/family", icon: Users },
-        { name: "Security", path: "/security", icon: Shield },
-        { name: "Information and...", path: "/information", icon: Info },
+        {
+          name: "Information at time of need",
+          path: "/information",
+          icon: Info,
+        },
       ],
     },
     {

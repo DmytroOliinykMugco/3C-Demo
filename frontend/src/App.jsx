@@ -1,13 +1,17 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import MainLayout from '@/layouts/MainLayout';
-import Profile from '@/pages/Profile';
-import Family from '@/pages/Family';
-import Security from '@/pages/Security';
-import Information from '@/pages/Information';
-import Balance from '@/pages/Balance';
-import Wallet from '@/pages/Wallet';
-import Cemetery from '@/pages/Cemetery';
-import Funeral from '@/pages/Funeral';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import MainLayout from "@/layouts/MainLayout";
+import Profile from "@/pages/Profile";
+import Family from "@/pages/Family";
+import Information from "@/pages/Information";
+import Balance from "@/pages/Balance";
+import Wallet from "@/pages/Wallet";
+import Cemetery from "@/pages/Cemetery";
+import Funeral from "@/pages/Funeral";
 
 function App() {
   return (
@@ -17,7 +21,6 @@ function App() {
           <Route index element={<Navigate to="/profile" replace />} />
           <Route path="profile" element={<Profile />} />
           <Route path="family" element={<Family />} />
-          <Route path="security" element={<Security />} />
           <Route path="information" element={<Information />} />
           <Route path="balance" element={<Balance />} />
           <Route path="wallet" element={<Wallet />} />
