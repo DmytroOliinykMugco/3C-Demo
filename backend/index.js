@@ -42,6 +42,179 @@ const contractsData = [
 // Counter for generating new family member IDs
 let familyMemberIdCounter = 6;
 
+// Balance page mocked data
+const balanceData = {
+  contacts: [
+    {
+      id: 1,
+      name: 'Joanna Lu',
+      role: 'Counsellor',
+      descriptionPrefix: 'Contact Counsellor in case you have any',
+      descriptionBold: 'contract related questions.',
+      email: 'joanna.lu@example.com',
+      initials: 'JL'
+    },
+    {
+      id: 2,
+      name: 'Leo Dou',
+      role: 'Account Services',
+      descriptionPrefix: 'Contact Account Services for account',
+      descriptionBold: 'payment related questions.',
+      email: 'leo.dou@example.com',
+      phone: '+1 (650) 550-8808',
+      initials: 'LD'
+    }
+  ],
+  contractBalances: [
+    {
+      id: 1,
+      type: 'Cemetery contract',
+      contractId: 'CE8434434',
+      owner: { name: 'Marie Parker', badge: 'PN', initials: 'MP' },
+      totalAmount: 25000.00,
+      payOffAmount: 5000.00,
+      balanceDue: 5000.00,
+      nextPayment: {
+        amount: 10000.00,
+        dueDate: 'Nov 23 2025',
+        label: 'Instalment payment due'
+      },
+      remainingMonths: 12,
+      overduePayments: []
+    },
+    {
+      id: 2,
+      type: 'Funeral trust contract',
+      contractId: 'CE8434434',
+      owner: { name: 'Marie Parker', badge: 'PN', initials: 'MP' },
+      totalAmount: 25000.00,
+      statementBalanceDue: 5000.00,
+      nextPayment: {
+        amount: 10000.00,
+        dueDate: 'Nov 23 2025',
+        label: 'Monthly payment due'
+      },
+      remainingMonths: 12,
+      overduePayments: [
+        { amount: 10000.00, dueDate: 'Feb 01 2025' },
+        { amount: 10000.00, dueDate: 'Dec 01 2025' }
+      ]
+    }
+  ],
+  accountStatements: {
+    funeral: [
+      { id: 'FU8434434', name: 'FinalStatment.pdf', date: 'Oct 23 2025', size: '4.4mb' },
+      { id: 'FU8434434', name: 'SepStatment.pdf', date: 'Sep 23 2025', size: '2.4mb' },
+      { id: 'FU8434434', name: 'AugStatment.pdf', date: 'Aug 23 2025', size: '2.4mb' }
+    ],
+    cemetery: [
+      { id: 'CE8434434', name: 'FinalStatment.pdf', date: 'Oct 23 2025', size: '4.4mb' },
+      { id: 'CE8434434', name: 'SepStatment.pdf', date: 'Sep 23 2025', size: '2.4mb' },
+      { id: 'CE8434434', name: 'AugStatment.pdf', date: 'Aug 23 2025', size: '2.4mb' }
+    ]
+  },
+  paymentHistory: [
+    {
+      id: 1,
+      contractId: 'FU8434434',
+      beneficiary: { name: 'Marie Parker', badge: 'AN', initials: 'MP' },
+      dateTime: '11/03/2025 3:24 PM',
+      paymentMethod: 'Cash in store',
+      amount: 25000.00,
+      balance: 0.00
+    },
+    {
+      id: 2,
+      contractId: 'FU8434434',
+      beneficiary: { name: 'Marie Parker', badge: 'PN', initials: 'MP' },
+      dateTime: '10/22/2025 3:24 PM',
+      paymentMethod: '** 5758',
+      amount: 5000.00,
+      balance: 25000.00
+    },
+    {
+      id: 3,
+      contractId: 'CE8434434',
+      beneficiary: { name: 'Ken Parker', badge: 'PN', initials: 'KP' },
+      dateTime: '9/21/2025 3:24 PM',
+      paymentMethod: '** 026',
+      amount: 14000.00,
+      balance: 12000.00
+    },
+    {
+      id: 4,
+      contractId: 'FU8434434',
+      beneficiary: { name: 'Marie Parker', badge: 'PN', initials: 'MP' },
+      dateTime: '9/22/2025 3:24 PM',
+      paymentMethod: '** 5758',
+      amount: 5000.00,
+      balance: 30000.00
+    },
+    {
+      id: 5,
+      contractId: 'FU8434434',
+      beneficiary: { name: 'Marie Parker', badge: 'PN', initials: 'MP' },
+      dateTime: '8/22/2025 3:24 PM',
+      paymentMethod: '** 5758',
+      amount: 5000.00,
+      balance: 35000.00
+    }
+  ],
+  contracts: [
+    {
+      id: 1,
+      type: 'Funeral trust contract',
+      contractNumber: 'FU8434434',
+      status: 'Fully payed',
+      role: 'Owner',
+      beneficiary: { name: 'Marie Parker', badge: 'PN', initials: 'MP' },
+      sharedWith: 5,
+      totalAmount: 25000.00,
+      balanceDue: 15000.00
+    },
+    {
+      id: 2,
+      type: 'Funeral insurance contract',
+      contractNumber: 'CE8434434',
+      policyId: 'INS-843434',
+      insuranceCarrier: 'HomesteadersLife Co.',
+      role: 'Owner',
+      beneficiary: { name: 'Marie Parker', badge: 'PN', initials: 'MP' },
+      sharedWith: 5,
+      totalAmount: 25000.00
+    }
+  ],
+  ownedProperty: [
+    {
+      id: 1,
+      contractId: 'CE8434434',
+      type: 'Family burial',
+      owner: { name: 'Luna Miller', badge: 'AN', initials: 'LM' },
+      location: 'Location',
+      status: 'Paid',
+      image: 'https://images.unsplash.com/photo-1566305977571-5666677c6e98?w=400'
+    },
+    {
+      id: 2,
+      contractId: 'CE8434434',
+      type: 'Family burial',
+      owner: { name: 'Luna Miller', badge: 'AN', initials: 'LM' },
+      location: 'Location',
+      status: 'Paid',
+      image: 'https://images.unsplash.com/photo-1566305977571-5666677c6e98?w=400'
+    },
+    {
+      id: 3,
+      contractId: 'CE8434434',
+      type: 'Columbarium',
+      owner: { name: 'Luna Miller', badge: 'AN', initials: 'LM' },
+      location: 'Location',
+      status: 'Paid',
+      image: 'https://images.unsplash.com/photo-1566305977571-5666677c6e98?w=400'
+    }
+  ]
+};
+
 // All family members in a single collection
 const familyMembers = [
   {
@@ -203,6 +376,11 @@ app.post('/api/family', (req, res) => {
 // Get contracts
 app.get('/api/contracts', (req, res) => {
   res.json({ success: true, data: contractsData });
+});
+
+// Get balance data
+app.get('/api/balance', (req, res) => {
+  res.json({ success: true, data: balanceData });
 });
 
 // Set/Assign Next of Kin

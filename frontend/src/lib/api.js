@@ -113,5 +113,13 @@ export const api = {
       throw new Error('Failed to update member accesses');
     }
     return response.json();
+  },
+
+  getBalance: async () => {
+    const response = await fetch(`${API_BASE_URL}/api/balance`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch balance');
+    }
+    return response.json();
   }
 };
