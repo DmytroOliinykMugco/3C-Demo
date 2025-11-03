@@ -1,3 +1,4 @@
+import { useState, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight, Filter, Layout, Search } from "lucide-react";
 import { api } from "@/lib/api";
@@ -11,9 +12,24 @@ import ContractBalanceCard from "@/components/ContractBalanceCard";
 import StatementCard from "@/components/StatementCard";
 import ContractCard from "@/components/ContractCard";
 import PropertyCard from "@/components/PropertyCard";
+import InvoiceCard from "@/components/InvoiceCard";
 
 const Balance = () => {
   const { addToast } = useToast();
+  const [activeTab, setActiveTab] = useState("all");
+  const [funeralShowAll, setFuneralShowAll] = useState(false);
+  const [cemeteryShowAll, setCemeteryShowAll] = useState(false);
+  const funeralScrollRef = useRef(null);
+  const cemeteryScrollRef = useRef(null);
+
+  // Payment history table state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [selectedRows, setSelectedRows] = useState([]);
+
+  // Owned property carousel state
+  const [propertyShowAll, setPropertyShowAll] = useState(false);
+  const propertyScrollRef = useRef(null);
 
   const {
     data: balanceResponse,
@@ -57,6 +73,81 @@ const Balance = () => {
     }).format(amount);
   };
 
+  const handleFuneralPrev = () => {
+    if (funeralScrollRef.current) {
+      funeralScrollRef.current.scrollBy({ left: -400, behavior: 'smooth' });
+    }
+  };
+
+  const handleFuneralNext = () => {
+    if (funeralScrollRef.current) {
+      funeralScrollRef.current.scrollBy({ left: 400, behavior: 'smooth' });
+    }
+  };
+
+  const handleCemeteryPrev = () => {
+    if (cemeteryScrollRef.current) {
+      cemeteryScrollRef.current.scrollBy({ left: -400, behavior: 'smooth' });
+    }
+  };
+
+  const handleCemeteryNext = () => {
+    if (cemeteryScrollRef.current) {
+      cemeteryScrollRef.current.scrollBy({ left: 400, behavior: 'smooth' });
+    }
+  };
+
+  const handlePropertyPrev = () => {
+    if (propertyScrollRef.current) {
+      propertyScrollRef.current.scrollBy({ left: -400, behavior: 'smooth' });
+    }
+  };
+
+  const handlePropertyNext = () => {
+    if (propertyScrollRef.current) {
+      propertyScrollRef.current.scrollBy({ left: 400, behavior: 'smooth' });
+    }
+  };
+
+  // Payment history pagination and selection handlers
+  const totalPayments = balanceData?.paymentHistory.length || 0;
+  const totalPages = Math.ceil(totalPayments / rowsPerPage);
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const endIndex = startIndex + rowsPerPage;
+  const currentPayments = balanceData?.paymentHistory.slice(startIndex, endIndex) || [];
+
+  const handleSelectAll = (checked) => {
+    if (checked) {
+      setSelectedRows(currentPayments.map(p => p.id));
+    } else {
+      setSelectedRows([]);
+    }
+  };
+
+  const handleSelectRow = (id, checked) => {
+    if (checked) {
+      setSelectedRows([...selectedRows, id]);
+    } else {
+      setSelectedRows(selectedRows.filter(rowId => rowId !== id));
+    }
+  };
+
+  const handleRowsPerPageChange = (value) => {
+    setRowsPerPage(Number(value));
+    setCurrentPage(1); // Reset to first page
+  };
+
+  const handlePreviousPage = () => {
+    setCurrentPage(prev => Math.max(1, prev - 1));
+  };
+
+  const handleNextPage = () => {
+    setCurrentPage(prev => Math.min(totalPages, prev + 1));
+  };
+
+  const allCurrentPageSelected = currentPayments.length > 0 &&
+    currentPayments.every(payment => selectedRows.includes(payment.id));
+
   return (
     <div className="p-8 bg-gray-50 min-h-screen">
       {/* Header */}
@@ -69,7 +160,7 @@ const Balance = () => {
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue="all" className="mb-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
         <TabsList className="w-full grid grid-cols-4">
           <TabsTrigger value="all">All</TabsTrigger>
           <TabsTrigger value="balance">Balance and invoices</TabsTrigger>
@@ -79,70 +170,121 @@ const Balance = () => {
       </Tabs>
 
       <div className="space-y-8">
-        {/* Contact Section */}
-        <section>
-          <h2 className="text-2xl font-semibold text-gray-900 mb-2">Contact</h2>
-          <p className="text-gray-600 mb-4">
-            Please contact our support team for assistance.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {balanceData?.contacts.map((contact) => (
-              <ContactCard
-                key={contact.id}
-                contact={contact}
-                onEmailClick={() => handleComingSoon("Email contact")}
-                onPhoneClick={() => handleComingSoon("Phone contact")}
-              />
-            ))}
-          </div>
-        </section>
+        {/* Contact Section - Only show in "all" tab */}
+        {activeTab === "all" && (
+          <section>
+            <h2 className="text-2xl font-semibold text-gray-900 mb-2">Contact</h2>
+            <p className="text-gray-600 mb-4">
+              Please contact our support team for assistance.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {balanceData?.contacts.map((contact) => (
+                <ContactCard
+                  key={contact.id}
+                  contact={contact}
+                  onEmailClick={() => handleComingSoon("Email contact")}
+                  onPhoneClick={() => handleComingSoon("Phone contact")}
+                />
+              ))}
+            </div>
+          </section>
+        )}
 
-        {/* Contract Balances Section */}
-        <section>
-          <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-            Contract balances
-          </h2>
-          <div className="space-y-4">
-            {balanceData?.contractBalances.map((contract) => (
-              <ContractBalanceCard
-                key={contract.id}
-                contract={contract}
-                onPay={() => handleComingSoon("Payment")}
-                onPayOverdue={() => handleComingSoon("Overdue payment")}
-              />
-            ))}
-          </div>
-        </section>
+        {/* Contract Balances Section - Show in "all" and "balance" tabs */}
+        {(activeTab === "all" || activeTab === "balance") && (
+          <section>
+            <h2 className="text-2xl font-semibold text-gray-900 mb-4">
+              Contract balances
+            </h2>
+            <div className="space-y-4">
+              {balanceData?.contractBalances.map((contract) => (
+                <ContractBalanceCard
+                  key={contract.id}
+                  contract={contract}
+                  onPay={() => handleComingSoon("Payment")}
+                  onPayOverdue={() => handleComingSoon("Overdue payment")}
+                />
+              ))}
+            </div>
+          </section>
+        )}
 
-        {/* Account Statements Section */}
-        <section>
-          <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-            Account Statements
-          </h2>
+        {/* Additional Invoices Section - Show only in "balance" tab */}
+        {activeTab === "balance" && (
+          <section>
+            <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+              Additional Invoices
+            </h2>
+            <p className="text-gray-600 mb-4">
+              Invoices associated with completed contract or no contract
+            </p>
 
-          {/* Funeral contract */}
-          <div className="mb-6">
+            {/* Filters */}
+            <div className="flex gap-3 mb-6">
+              <Button variant="outline" size="sm">
+                <Filter className="w-4 h-4 mr-2" />
+                Filters
+              </Button>
+              <Button variant="outline" size="sm">
+                <Layout className="w-4 h-4 mr-2" />
+                View
+              </Button>
+            </div>
+
+            {/* Invoice cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {balanceData?.additionalInvoices.map((invoice) => (
+                <InvoiceCard
+                  key={invoice.id}
+                  invoice={invoice}
+                  onPay={() => handleComingSoon("Payment")}
+                  onPreview={() => handleComingSoon("Preview invoice")}
+                  onDownload={() => handleComingSoon("Download invoice")}
+                />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Account Statements Section - Show in "all" and "statements" tabs */}
+        {(activeTab === "all" || activeTab === "statements") && (
+          <section>
+            <h2 className="text-2xl font-semibold text-gray-900 mb-4">
+              Account Statements
+            </h2>
+
+            {/* Funeral contract */}
+            <div className="mb-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-3">
               Funeral contract
             </h3>
             <div className="flex items-center gap-2 mb-4">
-              <button className="p-2 hover:bg-gray-100 rounded-lg">
-                <ChevronLeft className="w-5 h-5 text-gray-600" />
-              </button>
-              <button className="p-2 hover:bg-gray-100 rounded-lg">
-                <ChevronRight className="w-5 h-5 text-gray-600" />
-              </button>
+              {!funeralShowAll && (
+                <>
+                  <button
+                    onClick={handleFuneralPrev}
+                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
+                    <ChevronLeft className="w-5 h-5 text-gray-600" />
+                  </button>
+                  <button
+                    onClick={handleFuneralNext}
+                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
+                    <ChevronRight className="w-5 h-5 text-gray-600" />
+                  </button>
+                </>
+              )}
               <button
-                onClick={() => handleComingSoon("See all statements")}
+                onClick={() => setFuneralShowAll(!funeralShowAll)}
                 className="text-sm font-medium text-gray-900 hover:text-gray-700 transition-colors"
               >
-                See all (12)
+                {funeralShowAll ? 'Show less' : `See all (${balanceData?.accountStatements.funeral.length || 0})`}
               </button>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {balanceData?.accountStatements.funeral
-                .slice(0, 3)
-                .map((statement, index) => (
+            {funeralShowAll ? (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {balanceData?.accountStatements.funeral.map((statement, index) => (
                   <StatementCard
                     key={index}
                     statement={statement}
@@ -150,7 +292,24 @@ const Balance = () => {
                     onDownload={() => handleComingSoon("Download statement")}
                   />
                 ))}
-            </div>
+              </div>
+            ) : (
+              <div
+                ref={funeralScrollRef}
+                className="flex gap-4 overflow-x-auto scrollbar-hide"
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+              >
+                {balanceData?.accountStatements.funeral.map((statement, index) => (
+                  <div key={index} className="flex-shrink-0 w-[calc(33.333%-0.67rem)]">
+                    <StatementCard
+                      statement={statement}
+                      onPreview={() => handleComingSoon("Preview statement")}
+                      onDownload={() => handleComingSoon("Download statement")}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Cemetery contract */}
@@ -159,23 +318,32 @@ const Balance = () => {
               Cemetery contract
             </h3>
             <div className="flex items-center gap-2 mb-4">
-              <button className="p-2 hover:bg-gray-100 rounded-lg">
-                <ChevronLeft className="w-5 h-5 text-gray-600" />
-              </button>
-              <button className="p-2 hover:bg-gray-100 rounded-lg">
-                <ChevronRight className="w-5 h-5 text-gray-600" />
-              </button>
+              {!cemeteryShowAll && (
+                <>
+                  <button
+                    onClick={handleCemeteryPrev}
+                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
+                    <ChevronLeft className="w-5 h-5 text-gray-600" />
+                  </button>
+                  <button
+                    onClick={handleCemeteryNext}
+                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
+                    <ChevronRight className="w-5 h-5 text-gray-600" />
+                  </button>
+                </>
+              )}
               <button
-                onClick={() => handleComingSoon("See all statements")}
+                onClick={() => setCemeteryShowAll(!cemeteryShowAll)}
                 className="text-sm font-medium text-gray-900 hover:text-gray-700 transition-colors"
               >
-                See all (12)
+                {cemeteryShowAll ? 'Show less' : `See all (${balanceData?.accountStatements.cemetery.length || 0})`}
               </button>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {balanceData?.accountStatements.cemetery
-                .slice(0, 3)
-                .map((statement, index) => (
+            {cemeteryShowAll ? (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {balanceData?.accountStatements.cemetery.map((statement, index) => (
                   <StatementCard
                     key={index}
                     statement={statement}
@@ -183,12 +351,31 @@ const Balance = () => {
                     onDownload={() => handleComingSoon("Download statement")}
                   />
                 ))}
-            </div>
+              </div>
+            ) : (
+              <div
+                ref={cemeteryScrollRef}
+                className="flex gap-4 overflow-x-auto scrollbar-hide"
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+              >
+                {balanceData?.accountStatements.cemetery.map((statement, index) => (
+                  <div key={index} className="flex-shrink-0 w-[calc(33.333%-0.67rem)]">
+                    <StatementCard
+                      statement={statement}
+                      onPreview={() => handleComingSoon("Preview statement")}
+                      onDownload={() => handleComingSoon("Download statement")}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-        </section>
+          </section>
+        )}
 
-        {/* Payment History Section */}
-        <section>
+        {/* Payment History Section - Show in "all" and "statements" tabs */}
+        {(activeTab === "all" || activeTab === "statements") && (
+          <section>
           <h2 className="text-2xl font-semibold text-gray-900 mb-2">
             Payment history
           </h2>
@@ -200,11 +387,19 @@ const Balance = () => {
             <CardContent className="p-6">
               {/* Filters */}
               <div className="flex gap-3 mb-4">
-                <Button variant="outline" size="sm">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleComingSoon("Filters")}
+                >
                   <Filter className="w-4 h-4 mr-2" />
                   Filters
                 </Button>
-                <Button variant="outline" size="sm">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleComingSoon("View options")}
+                >
                   <Layout className="w-4 h-4 mr-2" />
                   View
                 </Button>
@@ -216,7 +411,12 @@ const Balance = () => {
                   <thead>
                     <tr className="border-b">
                       <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">
-                        <input type="checkbox" className="rounded" />
+                        <input
+                          type="checkbox"
+                          className="rounded"
+                          checked={allCurrentPageSelected}
+                          onChange={(e) => handleSelectAll(e.target.checked)}
+                        />
                       </th>
                       <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">
                         Contract
@@ -240,10 +440,15 @@ const Balance = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {balanceData?.paymentHistory.map((payment) => (
+                    {currentPayments.map((payment) => (
                       <tr key={payment.id} className="border-b hover:bg-gray-50">
                         <td className="py-3 px-4">
-                          <input type="checkbox" className="rounded" />
+                          <input
+                            type="checkbox"
+                            className="rounded"
+                            checked={selectedRows.includes(payment.id)}
+                            onChange={(e) => handleSelectRow(payment.id, e.target.checked)}
+                          />
                         </td>
                         <td className="py-3 px-4 text-sm text-gray-900">
                           ID: {payment.contractId}
@@ -276,7 +481,10 @@ const Balance = () => {
                           {formatCurrency(payment.balance)}
                         </td>
                         <td className="py-3 px-4 text-center">
-                          <button className="text-gray-600 hover:bg-gray-100 p-1 rounded">
+                          <button
+                            onClick={() => handleComingSoon("Payment actions")}
+                            className="text-gray-600 hover:bg-gray-100 p-1 rounded"
+                          >
                             •••
                           </button>
                         </td>
@@ -288,22 +496,35 @@ const Balance = () => {
 
               {/* Pagination */}
               <div className="flex items-center justify-between mt-4 text-sm text-gray-600">
-                <p>0 of 5 row(s) selected.</p>
+                <p>{selectedRows.length} of {totalPayments} row(s) selected.</p>
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-2">
                     <span>Rows per page</span>
-                    <select className="border rounded px-2 py-1">
-                      <option>5</option>
-                      <option>10</option>
-                      <option>20</option>
+                    <select
+                      className="border rounded px-2 py-1"
+                      value={rowsPerPage}
+                      onChange={(e) => handleRowsPerPageChange(e.target.value)}
+                    >
+                      <option value={5}>5</option>
+                      <option value={10}>10</option>
+                      <option value={20}>20</option>
+                      <option value={50}>50</option>
                     </select>
                   </div>
-                  <span>Page 1 of 10</span>
+                  <span>Page {currentPage} of {totalPages}</span>
                   <div className="flex items-center gap-1">
-                    <button className="p-1 hover:bg-gray-100 rounded">
+                    <button
+                      onClick={handlePreviousPage}
+                      disabled={currentPage === 1}
+                      className="p-1 hover:bg-gray-100 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
                       <ChevronLeft className="w-4 h-4" />
                     </button>
-                    <button className="p-1 hover:bg-gray-100 rounded">
+                    <button
+                      onClick={handleNextPage}
+                      disabled={currentPage === totalPages}
+                      className="p-1 hover:bg-gray-100 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
                       <ChevronRight className="w-4 h-4" />
                     </button>
                   </div>
@@ -311,10 +532,12 @@ const Balance = () => {
               </div>
             </CardContent>
           </Card>
-        </section>
+          </section>
+        )}
 
-        {/* Contracts Section */}
-        <section>
+        {/* Contracts Section - Show in "all" and "contracts" tabs */}
+        {(activeTab === "all" || activeTab === "contracts") && (
+          <section>
           <h2 className="text-2xl font-semibold text-gray-900 mb-2">
             Contracts
           </h2>
@@ -344,10 +567,12 @@ const Balance = () => {
               />
             ))}
           </div>
-        </section>
+          </section>
+        )}
 
-        {/* Owned Property Section */}
-        <section>
+        {/* Owned Property Section - Show in "all" and "contracts" tabs */}
+        {(activeTab === "all" || activeTab === "contracts") && (
+          <section>
           <h2 className="text-2xl font-semibold text-gray-900 mb-2">
             Owned property
           </h2>
@@ -356,30 +581,58 @@ const Balance = () => {
           </p>
 
           <div className="flex items-center gap-2 mb-4">
-            <button className="p-2 hover:bg-gray-100 rounded-lg">
-              <ChevronLeft className="w-5 h-5 text-gray-600" />
-            </button>
-            <button className="p-2 hover:bg-gray-100 rounded-lg">
-              <ChevronRight className="w-5 h-5 text-gray-600" />
-            </button>
+            {!propertyShowAll && (
+              <>
+                <button
+                  onClick={handlePropertyPrev}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <ChevronLeft className="w-5 h-5 text-gray-600" />
+                </button>
+                <button
+                  onClick={handlePropertyNext}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <ChevronRight className="w-5 h-5 text-gray-600" />
+                </button>
+              </>
+            )}
             <button
-              onClick={() => handleComingSoon("See all properties")}
+              onClick={() => setPropertyShowAll(!propertyShowAll)}
               className="text-sm font-medium text-gray-900 hover:text-gray-700 transition-colors"
             >
-              See all (12)
+              {propertyShowAll ? 'Show less' : `See all (${balanceData?.ownedProperty.length || 0})`}
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {balanceData?.ownedProperty.map((property) => (
-              <PropertyCard
-                key={property.id}
-                property={property}
-                onMenuClick={() => handleComingSoon("Property menu")}
-              />
-            ))}
-          </div>
-        </section>
+          {propertyShowAll ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {balanceData?.ownedProperty.map((property) => (
+                <PropertyCard
+                  key={property.id}
+                  property={property}
+                  onMenuClick={() => handleComingSoon("Property menu")}
+                />
+              ))}
+            </div>
+          ) : (
+            <div
+              ref={propertyScrollRef}
+              className="flex gap-4 overflow-x-auto scrollbar-hide"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+              {balanceData?.ownedProperty.map((property) => (
+                <div key={property.id} className="flex-shrink-0 w-[calc(33.333%-0.67rem)]">
+                  <PropertyCard
+                    property={property}
+                    onMenuClick={() => handleComingSoon("Property menu")}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+          </section>
+        )}
       </div>
     </div>
   );

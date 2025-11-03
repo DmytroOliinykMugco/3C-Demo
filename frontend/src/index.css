@@ -129,4 +129,13 @@
   .zoom-in-95 {
     animation-name: zoom-in-95;
   }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }

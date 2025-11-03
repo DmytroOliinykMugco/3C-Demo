@@ -102,64 +102,188 @@ const balanceData = {
     }
   ],
   accountStatements: {
-    funeral: [
-      { id: 'FU8434434', name: 'FinalStatment.pdf', date: 'Oct 23 2025', size: '4.4mb' },
-      { id: 'FU8434434', name: 'SepStatment.pdf', date: 'Sep 23 2025', size: '2.4mb' },
-      { id: 'FU8434434', name: 'AugStatment.pdf', date: 'Aug 23 2025', size: '2.4mb' }
-    ],
-    cemetery: [
-      { id: 'CE8434434', name: 'FinalStatment.pdf', date: 'Oct 23 2025', size: '4.4mb' },
-      { id: 'CE8434434', name: 'SepStatment.pdf', date: 'Sep 23 2025', size: '2.4mb' },
-      { id: 'CE8434434', name: 'AugStatment.pdf', date: 'Aug 23 2025', size: '2.4mb' }
-    ]
+    funeral: (() => {
+      const statements = [];
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const statementTypes = ['Monthly', 'Quarterly', 'Annual', 'Final', 'Interim', 'Summary', 'Detailed'];
+      const years = [2022, 2023, 2024, 2025];
+
+      // Generate statements for the past 3 years
+      let counter = 1;
+      for (const year of years) {
+        // Generate monthly statements
+        for (let monthIdx = 0; monthIdx < 12; monthIdx++) {
+          const month = months[monthIdx];
+          const day = Math.floor(Math.random() * 28) + 1;
+          const statementType = monthIdx % 3 === 0 && monthIdx > 0
+            ? statementTypes[Math.floor(Math.random() * statementTypes.length)]
+            : 'Monthly';
+          const fileSize = (Math.random() * 4 + 1).toFixed(1);
+
+          statements.push({
+            id: 'FU8434434',
+            name: `${statementType}Statement_${month}${year}.pdf`,
+            date: `${month} ${String(day).padStart(2, '0')} ${year}`,
+            size: `${fileSize}mb`
+          });
+          counter++;
+        }
+
+        // Add annual summary for each year
+        const annualSize = (Math.random() * 6 + 3).toFixed(1);
+        statements.push({
+          id: 'FU8434434',
+          name: `AnnualSummary_${year}.pdf`,
+          date: `Dec 31 ${year}`,
+          size: `${annualSize}mb`
+        });
+      }
+
+      return statements.reverse(); // Most recent first
+    })(),
+    cemetery: (() => {
+      const statements = [];
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const statementTypes = ['Monthly', 'Quarterly', 'Maintenance', 'Service', 'Annual', 'Summary'];
+      const years = [2022, 2023, 2024, 2025];
+
+      // Generate statements for the past 3 years
+      let counter = 1;
+      for (const year of years) {
+        // Generate monthly statements
+        for (let monthIdx = 0; monthIdx < 12; monthIdx++) {
+          const month = months[monthIdx];
+          const day = Math.floor(Math.random() * 28) + 1;
+          const statementType = monthIdx % 3 === 0 && monthIdx > 0
+            ? statementTypes[Math.floor(Math.random() * statementTypes.length)]
+            : 'Monthly';
+          const fileSize = (Math.random() * 3.5 + 0.8).toFixed(1);
+
+          statements.push({
+            id: 'CE8434434',
+            name: `${statementType}Report_${month}${year}.pdf`,
+            date: `${month} ${String(day).padStart(2, '0')} ${year}`,
+            size: `${fileSize}mb`
+          });
+          counter++;
+        }
+
+        // Add annual maintenance report for each year
+        const annualSize = (Math.random() * 5 + 2.5).toFixed(1);
+        statements.push({
+          id: 'CE8434434',
+          name: `AnnualMaintenanceReport_${year}.pdf`,
+          date: `Dec 31 ${year}`,
+          size: `${annualSize}mb`
+        });
+      }
+
+      return statements.reverse(); // Most recent first
+    })()
   },
-  paymentHistory: [
-    {
-      id: 1,
-      contractId: 'FU8434434',
-      beneficiary: { name: 'Marie Parker', badge: 'AN', initials: 'MP' },
-      dateTime: '11/03/2025 3:24 PM',
-      paymentMethod: 'Cash in store',
-      amount: 25000.00,
-      balance: 0.00
-    },
-    {
-      id: 2,
-      contractId: 'FU8434434',
-      beneficiary: { name: 'Marie Parker', badge: 'PN', initials: 'MP' },
-      dateTime: '10/22/2025 3:24 PM',
-      paymentMethod: '** 5758',
-      amount: 5000.00,
-      balance: 25000.00
-    },
-    {
-      id: 3,
-      contractId: 'CE8434434',
-      beneficiary: { name: 'Ken Parker', badge: 'PN', initials: 'KP' },
-      dateTime: '9/21/2025 3:24 PM',
-      paymentMethod: '** 026',
-      amount: 14000.00,
-      balance: 12000.00
-    },
-    {
-      id: 4,
-      contractId: 'FU8434434',
-      beneficiary: { name: 'Marie Parker', badge: 'PN', initials: 'MP' },
-      dateTime: '9/22/2025 3:24 PM',
-      paymentMethod: '** 5758',
-      amount: 5000.00,
-      balance: 30000.00
-    },
-    {
-      id: 5,
-      contractId: 'FU8434434',
-      beneficiary: { name: 'Marie Parker', badge: 'PN', initials: 'MP' },
-      dateTime: '8/22/2025 3:24 PM',
-      paymentMethod: '** 5758',
-      amount: 5000.00,
-      balance: 35000.00
+  paymentHistory: (() => {
+    const payments = [];
+    const beneficiaries = [
+      { name: 'Marie Parker', initials: 'MP' },
+      { name: 'Ken Parker', initials: 'KP' },
+      { name: 'John Smith', initials: 'JS' },
+      { name: 'Sarah Johnson', initials: 'SJ' },
+      { name: 'Michael Brown', initials: 'MB' },
+      { name: 'Emily Davis', initials: 'ED' },
+      { name: 'David Wilson', initials: 'DW' },
+      { name: 'Jessica Martinez', initials: 'JM' },
+      { name: 'Robert Anderson', initials: 'RA' },
+      { name: 'Lisa Thompson', initials: 'LT' },
+      { name: 'James White', initials: 'JW' },
+      { name: 'Mary Garcia', initials: 'MG' },
+      { name: 'William Rodriguez', initials: 'WR' },
+      { name: 'Patricia Lee', initials: 'PL' },
+      { name: 'Christopher Walker', initials: 'CW' }
+    ];
+
+    const contractIds = [
+      'FU8434434', 'FU8434435', 'FU8434436', 'FU8434437', 'FU8434438',
+      'CE8434434', 'CE8434435', 'CE8434436', 'CE8434437', 'CE8434438'
+    ];
+
+    const paymentMethods = [
+      'Cash in store',
+      '** 5758',
+      '** 4242',
+      '** 1234',
+      '** 5678',
+      '** 9012',
+      '** 3456',
+      '** 7890',
+      'Bank transfer',
+      'Check',
+      'ACH',
+      'Wire transfer'
+    ];
+
+    const badges = ['AN', 'PN', 'BN', 'OK'];
+
+    const amounts = [500, 750, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 7500, 10000, 12500, 15000, 20000, 25000];
+
+    // Start from recent date and go backwards
+    let currentDate = new Date('2025-11-03');
+    let runningBalances = {}; // Track balance per contract
+
+    // Initialize balances for each contract
+    contractIds.forEach(contractId => {
+      runningBalances[contractId] = 0;
+    });
+
+    for (let i = 1; i <= 200; i++) {
+      // Random contract
+      const contractId = contractIds[Math.floor(Math.random() * contractIds.length)];
+
+      // Random beneficiary
+      const beneficiary = beneficiaries[Math.floor(Math.random() * beneficiaries.length)];
+
+      // Random badge
+      const badge = badges[Math.floor(Math.random() * badges.length)];
+
+      // Random payment method
+      const paymentMethod = paymentMethods[Math.floor(Math.random() * paymentMethods.length)];
+
+      // Random amount
+      const amount = amounts[Math.floor(Math.random() * amounts.length)];
+
+      // Calculate balance (add payment to current balance)
+      const balance = runningBalances[contractId];
+      runningBalances[contractId] += amount;
+
+      // Generate date (go backwards in time)
+      const daysBack = Math.floor(Math.random() * 15) + 1; // 1-15 days back
+      currentDate.setDate(currentDate.getDate() - daysBack);
+
+      const month = currentDate.getMonth() + 1;
+      const day = currentDate.getDate();
+      const year = currentDate.getFullYear();
+      const hours = Math.floor(Math.random() * 12) + 1;
+      const minutes = Math.floor(Math.random() * 60);
+      const period = Math.random() > 0.5 ? 'PM' : 'AM';
+
+      const dateTime = `${month}/${String(day).padStart(2, '0')}/${year} ${hours}:${String(minutes).padStart(2, '0')} ${period}`;
+
+      payments.unshift({
+        id: i,
+        contractId,
+        beneficiary: {
+          name: beneficiary.name,
+          badge,
+          initials: beneficiary.initials
+        },
+        dateTime,
+        paymentMethod,
+        amount,
+        balance
+      });
     }
-  ],
+
+    return payments;
+  })(),
   contracts: [
     {
       id: 1,
@@ -184,35 +308,141 @@ const balanceData = {
       totalAmount: 25000.00
     }
   ],
-  ownedProperty: [
-    {
-      id: 1,
-      contractId: 'CE8434434',
-      type: 'Family burial',
-      owner: { name: 'Luna Miller', badge: 'AN', initials: 'LM' },
-      location: 'Location',
-      status: 'Paid',
-      image: 'https://images.unsplash.com/photo-1566305977571-5666677c6e98?w=400'
-    },
-    {
-      id: 2,
-      contractId: 'CE8434434',
-      type: 'Family burial',
-      owner: { name: 'Luna Miller', badge: 'AN', initials: 'LM' },
-      location: 'Location',
-      status: 'Paid',
-      image: 'https://images.unsplash.com/photo-1566305977571-5666677c6e98?w=400'
-    },
-    {
-      id: 3,
-      contractId: 'CE8434434',
-      type: 'Columbarium',
-      owner: { name: 'Luna Miller', badge: 'AN', initials: 'LM' },
-      location: 'Location',
-      status: 'Paid',
-      image: 'https://images.unsplash.com/photo-1566305977571-5666677c6e98?w=400'
+  ownedProperty: (() => {
+    const properties = [];
+
+    const propertyTypes = [
+      'Family burial',
+      'Single burial',
+      'Columbarium',
+      'Cremation niche',
+      'Mausoleum',
+      'Garden plot',
+      'Memorial bench',
+      'Estate plot'
+    ];
+
+    const owners = [
+      { name: 'Luna Miller', initials: 'LM' },
+      { name: 'Ken Parker', initials: 'KP' },
+      { name: 'Marie Parker', initials: 'MP' },
+      { name: 'John Smith', initials: 'JS' },
+      { name: 'Sarah Johnson', initials: 'SJ' },
+      { name: 'Michael Brown', initials: 'MB' },
+      { name: 'Emily Davis', initials: 'ED' },
+      { name: 'David Wilson', initials: 'DW' },
+      { name: 'Jessica Martinez', initials: 'JM' },
+      { name: 'Robert Anderson', initials: 'RA' },
+      { name: 'Lisa Thompson', initials: 'LT' },
+      { name: 'James White', initials: 'JW' }
+    ];
+
+    const locations = [
+      'Section A, Row 12',
+      'Section B, Row 5',
+      'Section C, Row 8',
+      'East Garden, Block 3',
+      'West Garden, Block 7',
+      'North Hill, Plot 15',
+      'South Valley, Plot 22',
+      'Memorial Grove, Area 4',
+      'Peaceful Meadow, Lot 18',
+      'Serenity Garden, Plot 9',
+      'Eternal Rest, Section D',
+      'Tranquil Hills, Row 14',
+      'Garden of Remembrance',
+      'Veterans Memorial',
+      'Sunset View, Block 6'
+    ];
+
+    const contractIds = [
+      'CE8434434', 'CE8434435', 'CE8434436', 'CE8434437', 'CE8434438',
+      'CE8434439', 'CE8434440', 'CE8434441', 'CE8434442', 'CE8434443'
+    ];
+
+    const statuses = ['Paid', 'Active', 'Reserved'];
+    const badges = ['AN', 'PN', 'BN', 'OK'];
+
+    const images = [
+      'https://images.unsplash.com/photo-1566305977571-5666677c6e98?w=400',
+      'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400',
+      'https://images.unsplash.com/photo-1615461066841-6116e61058f4?w=400',
+      'https://images.unsplash.com/photo-1605116959016-b4e8afbbb7c5?w=400',
+      'https://images.unsplash.com/photo-1571380401583-72ca84994796?w=400'
+    ];
+
+    // Generate properties - spanning several years
+    const years = [2020, 2021, 2022, 2023, 2024, 2025];
+
+    for (const year of years) {
+      // Generate 8-12 properties per year
+      const propertiesPerYear = Math.floor(Math.random() * 5) + 8;
+
+      for (let i = 0; i < propertiesPerYear; i++) {
+        const propertyType = propertyTypes[Math.floor(Math.random() * propertyTypes.length)];
+        const owner = owners[Math.floor(Math.random() * owners.length)];
+        const location = locations[Math.floor(Math.random() * locations.length)];
+        const contractId = contractIds[Math.floor(Math.random() * contractIds.length)];
+        const status = statuses[Math.floor(Math.random() * statuses.length)];
+        const badge = badges[Math.floor(Math.random() * badges.length)];
+        const image = images[Math.floor(Math.random() * images.length)];
+
+        properties.push({
+          id: properties.length + 1,
+          contractId,
+          type: propertyType,
+          owner: {
+            name: owner.name,
+            badge,
+            initials: owner.initials
+          },
+          location,
+          status,
+          image,
+          purchaseYear: year
+        });
+      }
     }
-  ]
+
+    return properties.reverse(); // Most recent first
+  })(),
+  additionalInvoices: (() => {
+    const services = [
+      'Cleaning', 'Maintenance', 'FlowerArrangement', 'MemorialService',
+      'Transportation', 'Catering', 'Photography', 'VideoRecording',
+      'MusicServices', 'PrintedMaterials', 'Cremation', 'Embalming',
+      'CasketRental', 'UrnsAndKeepsakes', 'GraveMaintenance', 'HeadstoneEngraving',
+      'ObituaryNotices', 'DeathCertificates', 'MemorialCards', 'ThankYouCards'
+    ];
+
+    const statuses = ['Payed', 'Ongoing', 'Pending', 'Cancelled'];
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+    const invoices = [];
+
+    for (let i = 1; i <= 100; i++) {
+      const service = services[Math.floor(Math.random() * services.length)];
+      const status = statuses[Math.floor(Math.random() * statuses.length)];
+      const month = months[Math.floor(Math.random() * months.length)];
+      const day = Math.floor(Math.random() * 28) + 1;
+      const year = Math.random() > 0.3 ? 2025 : 2024;
+      const amount = (Math.floor(Math.random() * 5000) + 100);
+      const fileSize = (Math.random() * 5 + 0.5).toFixed(1);
+      const invoiceIdNum = 8400000 + i;
+
+      invoices.push({
+        id: i,
+        fileName: `InvoiceFor${service}.pdf`,
+        fileSize: `${fileSize}mb`,
+        invoiceId: invoiceIdNum.toString(),
+        paymentDue: `${month} ${String(day).padStart(2, '0')} ${year}`,
+        status: status,
+        amount: amount
+      });
+    }
+
+    return invoices;
+  })()
 };
 
 // All family members in a single collection
