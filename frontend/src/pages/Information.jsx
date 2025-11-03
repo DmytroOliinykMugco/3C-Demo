@@ -1,12 +1,39 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Mail, Phone, FileText, Download } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
+import { api } from "@/lib/api";
+import DocumentViewer from "@/components/DocumentViewer";
 
 const Information = () => {
   const { addToast } = useToast();
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("signed");
+  const fileInputRef = useRef(null);
+  const [viewerDocument, setViewerDocument] = useState(null);
+
+  // Fetch documents
+  const { data: documentsResponse } = useQuery({
+    queryKey: ["documents"],
+    queryFn: api.getDocuments,
+  });
+
+  // Upload mutation
+  const uploadMutation = useMutation({
+    mutationFn: api.uploadDocument,
+    onSuccess: () => {
+      queryClient.invalidateQueries(["documents"]);
+      addToast("Document uploaded successfully", "success");
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    },
+    onError: () => {
+      addToast("Failed to upload document", "error");
+    }
+  });
 
   const handleComingSoon = () => {
     addToast("Coming soon", "success");
@@ -20,7 +47,38 @@ const Information = () => {
     window.location.href = "tel:+16505508808";
   };
 
-  const signedDocuments = [];
+  const handleFileSelect = (event) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (file.type !== "application/pdf") {
+        addToast("Please upload only PDF files", "error");
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+        return;
+      }
+      uploadMutation.mutate(file);
+    }
+  };
+
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handlePreview = (doc) => {
+    setViewerDocument(doc);
+  };
+
+  const handleDownload = (documentId) => {
+    window.open(api.getDocumentDownloadUrl(documentId), "_blank");
+  };
+
+  const handleCloseViewer = () => {
+    setViewerDocument(null);
+  };
+
+  const signedDocuments = documentsResponse?.data || [];
 
   const exampleDocuments = [
     { name: "Example Document 1", size: "1.2mb" },
@@ -221,15 +279,32 @@ const Information = () => {
                   </a>{" "}
                   to sign the documents.
                 </p>
-                <Button onClick={handleComingSoon}>
-                  Upload signed documents
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileSelect}
+                  className="hidden"
+                  accept=".pdf,application/pdf"
+                />
+                <Button
+                  onClick={handleUploadClick}
+                  disabled={uploadMutation.isPending}
+                >
+                  {uploadMutation.isPending ? "Uploading..." : "Upload signed documents"}
                 </Button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-4">
                 {documents.map((doc, index) => (
-                  <Card key={index}>
-                    <CardContent className="p-4">
+                  <Card key={doc.id || index}>
+                    <CardContent className="p-6">
+                      {activeTab === "signed" && doc.status && (
+                        <div className="flex gap-2 mb-3">
+                          <span className="px-2 py-0.5 text-xs font-medium rounded bg-yellow-100 text-yellow-800">
+                            {doc.status}
+                          </span>
+                        </div>
+                      )}
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <FileText className="w-5 h-5 text-gray-400" />
@@ -244,14 +319,22 @@ const Information = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={handleComingSoon}
+                            onClick={() =>
+                              activeTab === "signed"
+                                ? handlePreview(doc)
+                                : handleComingSoon()
+                            }
                           >
                             Preview
                           </Button>
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={handleComingSoon}
+                            onClick={() =>
+                              activeTab === "signed"
+                                ? handleDownload(doc.id)
+                                : handleComingSoon()
+                            }
                           >
                             <Download className="w-4 h-4" />
                           </Button>
@@ -265,6 +348,16 @@ const Information = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Document Viewer Modal */}
+      {viewerDocument && (
+        <DocumentViewer
+          documentUrl={api.getDocumentUrl(viewerDocument.id)}
+          documentName={viewerDocument.name}
+          onClose={handleCloseViewer}
+          onDownload={() => handleDownload(viewerDocument.id)}
+        />
+      )}
     </div>
   );
 };

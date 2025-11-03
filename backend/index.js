@@ -1,8 +1,24 @@
 import express from "express";
 import cors from "cors";
+import multer from "multer";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Multer configuration for file uploads (in-memory storage)
+const storage = multer.memoryStorage();
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+  fileFilter: (req, file, cb) => {
+    // Only accept PDF files
+    if (file.mimetype === "application/pdf") {
+      cb(null, true);
+    } else {
+      cb(new Error("Only PDF files are allowed"), false);
+    }
+  }
+});
 
 // Middleware
 app.use(cors());
@@ -38,6 +54,10 @@ const contractsData = [
   { id: 4, contractNumber: "FU8434437" },
   { id: 5, contractNumber: "FU8434438" },
 ];
+
+// Uploaded documents storage (in-memory)
+let uploadedDocuments = [];
+let documentIdCounter = 1;
 
 // Counter for generating new family member IDs
 let familyMemberIdCounter = 6;
@@ -1399,6 +1419,99 @@ app.delete("/api/family/:id", (req, res) => {
     success: true,
     message: "Family member deleted successfully",
   });
+});
+
+// Upload document
+app.post("/api/documents/upload", (req, res) => {
+  upload.single("document")(req, res, (err) => {
+    if (err) {
+      if (err instanceof multer.MulterError) {
+        if (err.code === "LIMIT_FILE_SIZE") {
+          return res.status(400).json({
+            success: false,
+            message: "File size too large. Maximum size is 10MB"
+          });
+        }
+      }
+      return res.status(400).json({
+        success: false,
+        message: err.message || "Failed to upload document"
+      });
+    }
+
+    try {
+      if (!req.file) {
+        return res.status(400).json({ success: false, message: "No file uploaded" });
+      }
+
+      const document = {
+        id: documentIdCounter++,
+        name: req.file.originalname,
+        size: `${(req.file.size / (1024 * 1024)).toFixed(1)}mb`,
+        mimeType: req.file.mimetype,
+        buffer: req.file.buffer,
+        uploadedAt: new Date().toISOString(),
+        status: "Pending"
+      };
+
+      uploadedDocuments.push(document);
+
+      res.json({
+        success: true,
+        message: "Document uploaded successfully",
+        data: {
+          id: document.id,
+          name: document.name,
+          size: document.size,
+          uploadedAt: document.uploadedAt,
+          status: document.status
+        }
+      });
+    } catch (error) {
+      res.status(500).json({ success: false, message: "Failed to upload document" });
+    }
+  });
+});
+
+// Get all uploaded documents
+app.get("/api/documents", (req, res) => {
+  const documents = uploadedDocuments.map(doc => ({
+    id: doc.id,
+    name: doc.name,
+    size: doc.size,
+    uploadedAt: doc.uploadedAt,
+    status: doc.status
+  }));
+
+  res.json({ success: true, data: documents });
+});
+
+// Download/view document
+app.get("/api/documents/:id", (req, res) => {
+  const documentId = parseInt(req.params.id);
+  const document = uploadedDocuments.find(doc => doc.id === documentId);
+
+  if (!document) {
+    return res.status(404).json({ success: false, message: "Document not found" });
+  }
+
+  res.setHeader("Content-Type", document.mimeType);
+  res.setHeader("Content-Disposition", `inline; filename="${document.name}"`);
+  res.send(document.buffer);
+});
+
+// Download document (force download)
+app.get("/api/documents/:id/download", (req, res) => {
+  const documentId = parseInt(req.params.id);
+  const document = uploadedDocuments.find(doc => doc.id === documentId);
+
+  if (!document) {
+    return res.status(404).json({ success: false, message: "Document not found" });
+  }
+
+  res.setHeader("Content-Type", document.mimeType);
+  res.setHeader("Content-Disposition", `attachment; filename="${document.name}"`);
+  res.send(document.buffer);
 });
 
 // Start server

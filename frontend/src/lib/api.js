@@ -145,5 +145,35 @@ export const api = {
       throw new Error('Failed to fetch funeral');
     }
     return response.json();
+  },
+
+  uploadDocument: async (file) => {
+    const formData = new FormData();
+    formData.append('document', file);
+
+    const response = await fetch(`${API_BASE_URL}/api/documents/upload`, {
+      method: 'POST',
+      body: formData,
+    });
+    if (!response.ok) {
+      throw new Error('Failed to upload document');
+    }
+    return response.json();
+  },
+
+  getDocuments: async () => {
+    const response = await fetch(`${API_BASE_URL}/api/documents`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch documents');
+    }
+    return response.json();
+  },
+
+  getDocumentUrl: (documentId) => {
+    return `${API_BASE_URL}/api/documents/${documentId}`;
+  },
+
+  getDocumentDownloadUrl: (documentId) => {
+    return `${API_BASE_URL}/api/documents/${documentId}/download`;
   }
 };
