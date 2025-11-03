@@ -12,6 +12,14 @@ const Information = () => {
     addToast("Coming soon", "success");
   };
 
+  const handleEmailClick = () => {
+    window.location.href = "mailto:support@3c.com?subject=Customer Support Request";
+  };
+
+  const handlePhoneClick = () => {
+    window.location.href = "tel:+16505508808";
+  };
+
   const signedDocuments = [];
 
   const exampleDocuments = [
@@ -73,7 +81,7 @@ const Information = () => {
                 <div className="flex gap-4">
                   <Button
                     variant="outline"
-                    onClick={handleComingSoon}
+                    onClick={handleEmailClick}
                     className="flex-1"
                   >
                     <Mail className="w-4 h-4 mr-2" />
@@ -81,7 +89,7 @@ const Information = () => {
                   </Button>
                   <Button
                     variant="outline"
-                    onClick={handleComingSoon}
+                    onClick={handlePhoneClick}
                     className="flex-1"
                   >
                     <Phone className="w-4 h-4 mr-2" />
