@@ -610,6 +610,231 @@ const familyMembers = [
   },
 ];
 
+// Cemetery page mocked data
+const cemeteryData = {
+  properties: (() => {
+    const names = ["Marie Parker", "John Smith", "Sarah Johnson", "Michael Davis", "Emily Wilson", "David Brown", "Jessica Taylor", "Robert Anderson", "Jennifer Martinez", "William Garcia"];
+    const badges = ["PN", "FN", "CN"];
+    const statuses = ["In Trust", "Not Purchased", "Used"];
+    const sections = ["Section A", "Section B", "Section C", "Section D", "East Garden", "West Garden", "North Wing", "South Wing"];
+    const propertyTypes = ["ES-B Lot", "Columbarium", "Memorial", "Garden Plot", "Mausoleum", "Crypt"];
+    const images = [
+      "https://images.unsplash.com/photo-1566305977571-5666677c6e98?w=400",
+      "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400",
+      "https://images.unsplash.com/photo-1615461066841-6116e61058f4?w=400",
+      "https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=400",
+      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400",
+    ];
+
+    const properties = [];
+    for (let i = 1; i <= 100; i++) {
+      const beneficiaryName = names[Math.floor(Math.random() * names.length)];
+      const initials = beneficiaryName.split(' ').map(n => n[0]).join('');
+      const contractNum = 8434434 + i;
+      const serviceNum = 8434434 + Math.floor(Math.random() * 50);
+
+      const month = Math.floor(Math.random() * 12) + 1;
+      const day = Math.floor(Math.random() * 28) + 1;
+      const year = Math.random() > 0.5 ? 2025 : 2024;
+      const hour = Math.floor(Math.random() * 12) + 1;
+      const minute = Math.floor(Math.random() * 60);
+      const ampm = Math.random() > 0.5 ? 'AM' : 'PM';
+
+      properties.push({
+        id: i,
+        contractId: `CE${contractNum}`,
+        name: `${propertyTypes[Math.floor(Math.random() * propertyTypes.length)]} ${100 + i}`,
+        beneficiary: {
+          name: beneficiaryName,
+          badge: badges[Math.floor(Math.random() * badges.length)],
+          initials: initials,
+        },
+        dateTime: `${month}/${day}/${year} ${hour}:${minute.toString().padStart(2, '0')} ${ampm}`,
+        status: statuses[Math.floor(Math.random() * statuses.length)],
+        serviceId: `FU${serviceNum}`,
+        location: `${sections[Math.floor(Math.random() * sections.length)]}, Row ${Math.floor(Math.random() * 20) + 1}`,
+        image: images[Math.floor(Math.random() * images.length)],
+      });
+    }
+    return properties;
+  })(),
+  services: (() => {
+    const names = ["Marie Parker", "John Smith", "Sarah Johnson", "Michael Davis", "Emily Wilson", "David Brown", "Jessica Taylor", "Robert Anderson", "Jennifer Martinez", "William Garcia", "Luna Miller", "John Doe", "Alice Smith", "Robert Johnson", "Emily Davis", "Ken Parker"];
+    const badges = ["PN", "FN", "CN", "AN"];
+    const statuses = ["Paid", "Pending", "In Trust"];
+    const serviceTypes = [
+      "Installation of gravestone",
+      "Cremation services",
+      "Memorial plaque",
+      "Special handling full service",
+      "Headstone engraving",
+      "Flower arrangement",
+      "Memorial service",
+      "Burial service",
+      "Grave opening/closing",
+      "Monument installation"
+    ];
+    const locations = ["Location", "Crematory A", "Garden Area", "Chapel B", "North Section", "South Wing", "Memorial Hall", "East Garden"];
+    const images = [
+      "https://images.unsplash.com/photo-1566305977571-5666677c6e98?w=400",
+      "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400",
+      "https://images.unsplash.com/photo-1615461066841-6116e61058f4?w=400",
+      "https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=400",
+      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400",
+      "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400",
+    ];
+
+    const services = [];
+    for (let i = 1; i <= 100; i++) {
+      const beneficiaryName = names[Math.floor(Math.random() * names.length)];
+      const initials = beneficiaryName.split(' ').map(n => n[0]).join('');
+      const contractNum = 8434434 + i;
+      const serviceNum = 8434434 + Math.floor(Math.random() * 50);
+
+      const month = Math.floor(Math.random() * 12) + 1;
+      const day = Math.floor(Math.random() * 28) + 1;
+      const year = Math.random() > 0.5 ? 2025 : 2024;
+      const hour = Math.floor(Math.random() * 12) + 1;
+      const minute = Math.floor(Math.random() * 60);
+      const ampm = Math.random() > 0.5 ? 'AM' : 'PM';
+
+      services.push({
+        id: i,
+        contractId: `CE${contractNum}`,
+        name: serviceTypes[Math.floor(Math.random() * serviceTypes.length)],
+        beneficiary: {
+          name: beneficiaryName,
+          badge: badges[Math.floor(Math.random() * badges.length)],
+          initials: initials,
+        },
+        dateTime: `${month}/${day}/${year} ${hour}:${minute.toString().padStart(2, '0')} ${ampm}`,
+        status: statuses[Math.floor(Math.random() * statuses.length)],
+        serviceId: `FU${serviceNum}`,
+        location: locations[Math.floor(Math.random() * locations.length)],
+        image: images[Math.floor(Math.random() * images.length)],
+      });
+    }
+    return services;
+  })(),
+  merchandise: (() => {
+    const names = ["Marie Parker", "John Smith", "Sarah Johnson", "Michael Davis", "Emily Wilson", "David Brown", "Jessica Taylor", "Robert Anderson", "Jennifer Martinez", "William Garcia", "Luna Miller", "John Doe", "Alice Smith", "Robert Johnson", "Emily Davis", "Ken Parker"];
+    const badges = ["PN", "FN", "CN", "AN"];
+    const statuses = ["Paid", "Not Purchased", "Used"];
+    const merchandiseTypes = [
+      "Gravestone",
+      "Monument",
+      "Memorial plaque",
+      "Paving slabs",
+      "Headstone",
+      "Urn",
+      "Memorial bench",
+      "Bronze marker",
+      "Granite marker",
+      "Memorial vase"
+    ];
+    const locations = ["San Francisco, CA", "Los Angeles, CA", "New York, NY", "Chicago, IL", "Houston, TX", "Phoenix, AZ", "Philadelphia, PA", "San Antonio, TX"];
+    const images = [
+      "https://images.unsplash.com/photo-1566305977571-5666677c6e98?w=400",
+      "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400",
+      "https://images.unsplash.com/photo-1615461066841-6116e61058f4?w=400",
+      "https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=400",
+      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400",
+      "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400",
+    ];
+
+    const merchandise = [];
+    for (let i = 1; i <= 100; i++) {
+      const beneficiaryName = names[Math.floor(Math.random() * names.length)];
+      const initials = beneficiaryName.split(' ').map(n => n[0]).join('');
+      const contractNum = 8434434 + i;
+      const serviceNum = 8434434 + Math.floor(Math.random() * 50);
+
+      const month = Math.floor(Math.random() * 12) + 1;
+      const day = Math.floor(Math.random() * 28) + 1;
+      const year = Math.random() > 0.5 ? 2025 : 2024;
+      const hour = Math.floor(Math.random() * 12) + 1;
+      const minute = Math.floor(Math.random() * 60);
+      const ampm = Math.random() > 0.5 ? 'AM' : 'PM';
+
+      merchandise.push({
+        id: i,
+        contractId: `CE${contractNum}`,
+        name: merchandiseTypes[Math.floor(Math.random() * merchandiseTypes.length)],
+        beneficiary: {
+          name: beneficiaryName,
+          badge: badges[Math.floor(Math.random() * badges.length)],
+          initials: initials,
+        },
+        dateTime: `${month}/${day}/${year} ${hour}:${minute.toString().padStart(2, '0')} ${ampm}`,
+        status: statuses[Math.floor(Math.random() * statuses.length)],
+        serviceId: `FU${serviceNum}`,
+        location: Math.random() > 0.5 ? locations[Math.floor(Math.random() * locations.length)] : null,
+        image: images[Math.floor(Math.random() * images.length)],
+      });
+    }
+    return merchandise;
+  })(),
+  certificates: [
+    {
+      id: 1,
+      name: "Certificate of Sepulcher",
+      fileName: "CertificateOfSepulcher_8434434.pdf",
+      size: "2.4mb",
+      propertyId: "8434434",
+    },
+    {
+      id: 2,
+      name: "Certificate of Sepulcher",
+      fileName: "CertificateOfSepulcher_8434434_2.pdf",
+      size: "2.4mb",
+      propertyId: "8434434",
+    },
+  ],
+  designationRights: [
+    {
+      id: 1,
+      location: "WS-location lotspace",
+      status: "Available",
+      assignee: { name: "Marie Parker", initials: "MP" },
+    },
+    {
+      id: 2,
+      location: "WS-location lotspace",
+      status: "Available",
+      assignee: { name: "Marie Parker", initials: "MP" },
+    },
+    {
+      id: 3,
+      location: "WS-location lotspace",
+      status: "Used",
+      assignee: { name: "Marie Parker", initials: "MP" },
+    },
+  ],
+  documents: [
+    {
+      id: 1,
+      name: "Designation of Interment Rights",
+      fileName: "DesignationOfIntermentRights.pdf",
+      size: "2.4mb",
+      propertyId: null,
+    },
+    {
+      id: 2,
+      name: "Certificate of Sepulcher",
+      fileName: "CertificateOfSepulcher_8434434.pdf",
+      size: "2.4mb",
+      propertyId: "8434434",
+    },
+    {
+      id: 3,
+      name: "Certificate of Sepulcher",
+      fileName: "CertificateOfSepulcher_8434434_2.pdf",
+      size: "2.4mb",
+      propertyId: "8434434",
+    },
+  ],
+};
+
 // Wallet page mocked data
 const walletData = {
   contractPaymentMethods: [
@@ -826,6 +1051,11 @@ app.get("/api/balance", (req, res) => {
 // Get wallet data
 app.get("/api/wallet", (req, res) => {
   res.json({ success: true, data: walletData });
+});
+
+// Get cemetery data
+app.get("/api/cemetery", (req, res) => {
+  res.json({ success: true, data: cemeteryData });
 });
 
 // Set/Assign Next of Kin
