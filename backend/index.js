@@ -1058,6 +1058,117 @@ app.get("/api/cemetery", (req, res) => {
   res.json({ success: true, data: cemeteryData });
 });
 
+// Funeral data
+const funeralData = {
+  funeralServices: (() => {
+    const names = ["Marie Parker", "John Smith", "Sarah Johnson", "Robert Williams", "Emily Davis"];
+    const badges = ["AN", "PN", "CN"];
+    const statuses = ["In Trust", "Not Purchased", "Used", "Paid"];
+    const serviceTypes = [
+      "Transportation of the deceased",
+      "Conduct of the funeral service",
+      "Organization of cremation",
+      "Preparation of documents",
+      "Conduct of the funeral",
+      "Memorial service coordination",
+      "Graveside service",
+      "Cremation service"
+    ];
+    const images = [
+      "https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=400",
+      "https://images.unsplash.com/photo-1590650046871-92c887180603?w=400",
+      "https://images.unsplash.com/photo-1556911220-bff31c812dba?w=400",
+      "https://images.unsplash.com/photo-1590650213165-f9bb42984f9f?w=400",
+      "https://images.unsplash.com/photo-1528459801416-a9e53bbf4e17?w=400",
+    ];
+    const locations = ["San Francisco, CA", "Crematory A", "Garden Area", "Chapel B", "Memorial Hall"];
+
+    const services = [];
+    for (let i = 1; i <= 100; i++) {
+      const beneficiaryName = names[Math.floor(Math.random() * names.length)];
+      const initials = beneficiaryName.split(' ').map(n => n[0]).join('');
+      const contractNum = 8434434 + i;
+      const serviceNum = 8434434 + Math.floor(Math.random() * 50);
+
+      const month = Math.floor(Math.random() * 12) + 1;
+      const day = Math.floor(Math.random() * 28) + 1;
+      const year = 2025;
+      const hour = Math.floor(Math.random() * 12) + 1;
+      const minute = Math.floor(Math.random() * 60);
+      const ampm = Math.random() > 0.5 ? "AM" : "PM";
+
+      services.push({
+        id: i,
+        contractId: `CE${contractNum}`,
+        name: serviceTypes[Math.floor(Math.random() * serviceTypes.length)],
+        beneficiary: { name: beneficiaryName, badge: badges[Math.floor(Math.random() * badges.length)], initials },
+        dateTime: `${month}/${day}/${year} ${hour}:${minute < 10 ? '0' : ''}${minute} ${ampm}`,
+        status: statuses[Math.floor(Math.random() * statuses.length)],
+        serviceId: `FU${serviceNum}`,
+        location: locations[Math.floor(Math.random() * locations.length)],
+        image: images[Math.floor(Math.random() * images.length)],
+      });
+    }
+    return services;
+  })(),
+
+  merchandise: (() => {
+    const names = ["Marie Parker", "John Smith", "Sarah Johnson", "Robert Williams", "Emily Davis"];
+    const badges = ["AN", "PN", "CN"];
+    const statuses = ["In Trust", "Not Purchased", "Used", "Paid"];
+    const merchandiseTypes = [
+      "Coffins",
+      "Urn for ashes",
+      "Funeral clothing",
+      "Flower basket",
+      "Memorial plaque",
+      "Casket",
+      "Prayer cards",
+      "Guest book"
+    ];
+    const images = [
+      "https://images.unsplash.com/photo-1614267157481-ca2b81ac6fcc?w=400",
+      "https://images.unsplash.com/photo-1615529182904-14819c35db37?w=400",
+      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400",
+      "https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=400",
+      "https://images.unsplash.com/photo-1563207153-f403bf289096?w=400",
+    ];
+    const locations = ["San Francisco, CA", "Garden Area", "Chapel B", null, null];
+
+    const merchandise = [];
+    for (let i = 1; i <= 100; i++) {
+      const beneficiaryName = names[Math.floor(Math.random() * names.length)];
+      const initials = beneficiaryName.split(' ').map(n => n[0]).join('');
+      const contractNum = 8434434 + i;
+      const serviceNum = 8434434 + Math.floor(Math.random() * 50);
+
+      const month = Math.floor(Math.random() * 12) + 1;
+      const day = Math.floor(Math.random() * 28) + 1;
+      const year = 2025;
+      const hour = Math.floor(Math.random() * 12) + 1;
+      const minute = Math.floor(Math.random() * 60);
+      const ampm = Math.random() > 0.5 ? "AM" : "PM";
+
+      merchandise.push({
+        id: i,
+        contractId: `CE${contractNum}`,
+        name: merchandiseTypes[Math.floor(Math.random() * merchandiseTypes.length)],
+        beneficiary: { name: beneficiaryName, badge: badges[Math.floor(Math.random() * badges.length)], initials },
+        dateTime: `${month}/${day}/${year} ${hour}:${minute < 10 ? '0' : ''}${minute} ${ampm}`,
+        status: statuses[Math.floor(Math.random() * statuses.length)],
+        serviceId: `FU${serviceNum}`,
+        location: locations[Math.floor(Math.random() * locations.length)],
+        image: images[Math.floor(Math.random() * images.length)],
+      });
+    }
+    return merchandise;
+  })(),
+};
+
+app.get("/api/funeral", (req, res) => {
+  res.json({ success: true, data: funeralData });
+});
+
 // Set/Assign Next of Kin
 app.post("/api/family/next-of-kin", (req, res) => {
   const { memberId, email } = req.body;

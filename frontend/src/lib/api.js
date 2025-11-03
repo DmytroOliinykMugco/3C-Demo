@@ -137,5 +137,13 @@ export const api = {
       throw new Error('Failed to fetch cemetery');
     }
     return response.json();
+  },
+
+  getFuneral: async () => {
+    const response = await fetch(`${API_BASE_URL}/api/funeral`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch funeral');
+    }
+    return response.json();
   }
 };
