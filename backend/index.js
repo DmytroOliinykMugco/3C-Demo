@@ -613,11 +613,38 @@ const familyMembers = [
 // Cemetery page mocked data
 const cemeteryData = {
   properties: (() => {
-    const names = ["Marie Parker", "John Smith", "Sarah Johnson", "Michael Davis", "Emily Wilson", "David Brown", "Jessica Taylor", "Robert Anderson", "Jennifer Martinez", "William Garcia"];
+    const names = [
+      "Marie Parker",
+      "John Smith",
+      "Sarah Johnson",
+      "Michael Davis",
+      "Emily Wilson",
+      "David Brown",
+      "Jessica Taylor",
+      "Robert Anderson",
+      "Jennifer Martinez",
+      "William Garcia",
+    ];
     const badges = ["PN", "FN", "CN"];
     const statuses = ["In Trust", "Not Purchased", "Used"];
-    const sections = ["Section A", "Section B", "Section C", "Section D", "East Garden", "West Garden", "North Wing", "South Wing"];
-    const propertyTypes = ["ES-B Lot", "Columbarium", "Memorial", "Garden Plot", "Mausoleum", "Crypt"];
+    const sections = [
+      "Section A",
+      "Section B",
+      "Section C",
+      "Section D",
+      "East Garden",
+      "West Garden",
+      "North Wing",
+      "South Wing",
+    ];
+    const propertyTypes = [
+      "ES-B Lot",
+      "Columbarium",
+      "Memorial",
+      "Garden Plot",
+      "Mausoleum",
+      "Crypt",
+    ];
     const images = [
       "https://images.unsplash.com/photo-1566305977571-5666677c6e98?w=400",
       "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400",
@@ -629,7 +656,10 @@ const cemeteryData = {
     const properties = [];
     for (let i = 1; i <= 100; i++) {
       const beneficiaryName = names[Math.floor(Math.random() * names.length)];
-      const initials = beneficiaryName.split(' ').map(n => n[0]).join('');
+      const initials = beneficiaryName
+        .split(" ")
+        .map((n) => n[0])
+        .join("");
       const contractNum = 8434434 + i;
       const serviceNum = 8434434 + Math.floor(Math.random() * 50);
 
@@ -638,28 +668,51 @@ const cemeteryData = {
       const year = Math.random() > 0.5 ? 2025 : 2024;
       const hour = Math.floor(Math.random() * 12) + 1;
       const minute = Math.floor(Math.random() * 60);
-      const ampm = Math.random() > 0.5 ? 'AM' : 'PM';
+      const ampm = Math.random() > 0.5 ? "AM" : "PM";
 
       properties.push({
         id: i,
         contractId: `CE${contractNum}`,
-        name: `${propertyTypes[Math.floor(Math.random() * propertyTypes.length)]} ${100 + i}`,
+        name: `${
+          propertyTypes[Math.floor(Math.random() * propertyTypes.length)]
+        } ${100 + i}`,
         beneficiary: {
           name: beneficiaryName,
           badge: badges[Math.floor(Math.random() * badges.length)],
           initials: initials,
         },
-        dateTime: `${month}/${day}/${year} ${hour}:${minute.toString().padStart(2, '0')} ${ampm}`,
+        dateTime: `${month}/${day}/${year} ${hour}:${minute
+          .toString()
+          .padStart(2, "0")} ${ampm}`,
         status: statuses[Math.floor(Math.random() * statuses.length)],
         serviceId: `FU${serviceNum}`,
-        location: `${sections[Math.floor(Math.random() * sections.length)]}, Row ${Math.floor(Math.random() * 20) + 1}`,
+        location: `${
+          sections[Math.floor(Math.random() * sections.length)]
+        }, Row ${Math.floor(Math.random() * 20) + 1}`,
         image: images[Math.floor(Math.random() * images.length)],
       });
     }
     return properties;
   })(),
   services: (() => {
-    const names = ["Marie Parker", "John Smith", "Sarah Johnson", "Michael Davis", "Emily Wilson", "David Brown", "Jessica Taylor", "Robert Anderson", "Jennifer Martinez", "William Garcia", "Luna Miller", "John Doe", "Alice Smith", "Robert Johnson", "Emily Davis", "Ken Parker"];
+    const names = [
+      "Marie Parker",
+      "John Smith",
+      "Sarah Johnson",
+      "Michael Davis",
+      "Emily Wilson",
+      "David Brown",
+      "Jessica Taylor",
+      "Robert Anderson",
+      "Jennifer Martinez",
+      "William Garcia",
+      "Luna Miller",
+      "John Doe",
+      "Alice Smith",
+      "Robert Johnson",
+      "Emily Davis",
+      "Ken Parker",
+    ];
     const badges = ["PN", "FN", "CN", "AN"];
     const statuses = ["Paid", "Pending", "In Trust"];
     const serviceTypes = [
@@ -672,9 +725,18 @@ const cemeteryData = {
       "Memorial service",
       "Burial service",
       "Grave opening/closing",
-      "Monument installation"
+      "Monument installation",
     ];
-    const locations = ["Location", "Crematory A", "Garden Area", "Chapel B", "North Section", "South Wing", "Memorial Hall", "East Garden"];
+    const locations = [
+      "Location",
+      "Crematory A",
+      "Garden Area",
+      "Chapel B",
+      "North Section",
+      "South Wing",
+      "Memorial Hall",
+      "East Garden",
+    ];
     const images = [
       "https://images.unsplash.com/photo-1566305977571-5666677c6e98?w=400",
       "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400",
@@ -687,7 +749,10 @@ const cemeteryData = {
     const services = [];
     for (let i = 1; i <= 100; i++) {
       const beneficiaryName = names[Math.floor(Math.random() * names.length)];
-      const initials = beneficiaryName.split(' ').map(n => n[0]).join('');
+      const initials = beneficiaryName
+        .split(" ")
+        .map((n) => n[0])
+        .join("");
       const contractNum = 8434434 + i;
       const serviceNum = 8434434 + Math.floor(Math.random() * 50);
 
@@ -696,7 +761,7 @@ const cemeteryData = {
       const year = Math.random() > 0.5 ? 2025 : 2024;
       const hour = Math.floor(Math.random() * 12) + 1;
       const minute = Math.floor(Math.random() * 60);
-      const ampm = Math.random() > 0.5 ? 'AM' : 'PM';
+      const ampm = Math.random() > 0.5 ? "AM" : "PM";
 
       services.push({
         id: i,
@@ -707,7 +772,9 @@ const cemeteryData = {
           badge: badges[Math.floor(Math.random() * badges.length)],
           initials: initials,
         },
-        dateTime: `${month}/${day}/${year} ${hour}:${minute.toString().padStart(2, '0')} ${ampm}`,
+        dateTime: `${month}/${day}/${year} ${hour}:${minute
+          .toString()
+          .padStart(2, "0")} ${ampm}`,
         status: statuses[Math.floor(Math.random() * statuses.length)],
         serviceId: `FU${serviceNum}`,
         location: locations[Math.floor(Math.random() * locations.length)],
@@ -717,7 +784,24 @@ const cemeteryData = {
     return services;
   })(),
   merchandise: (() => {
-    const names = ["Marie Parker", "John Smith", "Sarah Johnson", "Michael Davis", "Emily Wilson", "David Brown", "Jessica Taylor", "Robert Anderson", "Jennifer Martinez", "William Garcia", "Luna Miller", "John Doe", "Alice Smith", "Robert Johnson", "Emily Davis", "Ken Parker"];
+    const names = [
+      "Marie Parker",
+      "John Smith",
+      "Sarah Johnson",
+      "Michael Davis",
+      "Emily Wilson",
+      "David Brown",
+      "Jessica Taylor",
+      "Robert Anderson",
+      "Jennifer Martinez",
+      "William Garcia",
+      "Luna Miller",
+      "John Doe",
+      "Alice Smith",
+      "Robert Johnson",
+      "Emily Davis",
+      "Ken Parker",
+    ];
     const badges = ["PN", "FN", "CN", "AN"];
     const statuses = ["Paid", "Not Purchased", "Used"];
     const merchandiseTypes = [
@@ -730,9 +814,18 @@ const cemeteryData = {
       "Memorial bench",
       "Bronze marker",
       "Granite marker",
-      "Memorial vase"
+      "Memorial vase",
     ];
-    const locations = ["San Francisco, CA", "Los Angeles, CA", "New York, NY", "Chicago, IL", "Houston, TX", "Phoenix, AZ", "Philadelphia, PA", "San Antonio, TX"];
+    const locations = [
+      "San Francisco, CA",
+      "Los Angeles, CA",
+      "New York, NY",
+      "Chicago, IL",
+      "Houston, TX",
+      "Phoenix, AZ",
+      "Philadelphia, PA",
+      "San Antonio, TX",
+    ];
     const images = [
       "https://images.unsplash.com/photo-1566305977571-5666677c6e98?w=400",
       "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400",
@@ -745,7 +838,10 @@ const cemeteryData = {
     const merchandise = [];
     for (let i = 1; i <= 100; i++) {
       const beneficiaryName = names[Math.floor(Math.random() * names.length)];
-      const initials = beneficiaryName.split(' ').map(n => n[0]).join('');
+      const initials = beneficiaryName
+        .split(" ")
+        .map((n) => n[0])
+        .join("");
       const contractNum = 8434434 + i;
       const serviceNum = 8434434 + Math.floor(Math.random() * 50);
 
@@ -754,21 +850,28 @@ const cemeteryData = {
       const year = Math.random() > 0.5 ? 2025 : 2024;
       const hour = Math.floor(Math.random() * 12) + 1;
       const minute = Math.floor(Math.random() * 60);
-      const ampm = Math.random() > 0.5 ? 'AM' : 'PM';
+      const ampm = Math.random() > 0.5 ? "AM" : "PM";
 
       merchandise.push({
         id: i,
         contractId: `CE${contractNum}`,
-        name: merchandiseTypes[Math.floor(Math.random() * merchandiseTypes.length)],
+        name: merchandiseTypes[
+          Math.floor(Math.random() * merchandiseTypes.length)
+        ],
         beneficiary: {
           name: beneficiaryName,
           badge: badges[Math.floor(Math.random() * badges.length)],
           initials: initials,
         },
-        dateTime: `${month}/${day}/${year} ${hour}:${minute.toString().padStart(2, '0')} ${ampm}`,
+        dateTime: `${month}/${day}/${year} ${hour}:${minute
+          .toString()
+          .padStart(2, "0")} ${ampm}`,
         status: statuses[Math.floor(Math.random() * statuses.length)],
         serviceId: `FU${serviceNum}`,
-        location: Math.random() > 0.5 ? locations[Math.floor(Math.random() * locations.length)] : null,
+        location:
+          Math.random() > 0.5
+            ? locations[Math.floor(Math.random() * locations.length)]
+            : null,
         image: images[Math.floor(Math.random() * images.length)],
       });
     }
@@ -855,20 +958,6 @@ const walletData = {
       nextPayment: {
         date: "December 13, 2025",
         amount: 2384.0,
-      },
-    },
-    {
-      contractId: "FU8434435",
-      hasPaymentMethod: true,
-      paymentMethod: {
-        type: "Credit card",
-        holderName: "Marie Parker",
-        lastDigits: "5758",
-        icon: "card",
-      },
-      nextPayment: {
-        date: "January 15, 2026",
-        amount: 1500.0,
       },
     },
   ],
@@ -1061,7 +1150,13 @@ app.get("/api/cemetery", (req, res) => {
 // Funeral data
 const funeralData = {
   funeralServices: (() => {
-    const names = ["Marie Parker", "John Smith", "Sarah Johnson", "Robert Williams", "Emily Davis"];
+    const names = [
+      "Marie Parker",
+      "John Smith",
+      "Sarah Johnson",
+      "Robert Williams",
+      "Emily Davis",
+    ];
     const badges = ["AN", "PN", "CN"];
     const statuses = ["In Trust", "Not Purchased", "Used", "Paid"];
     const serviceTypes = [
@@ -1072,7 +1167,7 @@ const funeralData = {
       "Conduct of the funeral",
       "Memorial service coordination",
       "Graveside service",
-      "Cremation service"
+      "Cremation service",
     ];
     const images = [
       "https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=400",
@@ -1081,12 +1176,21 @@ const funeralData = {
       "https://images.unsplash.com/photo-1590650213165-f9bb42984f9f?w=400",
       "https://images.unsplash.com/photo-1528459801416-a9e53bbf4e17?w=400",
     ];
-    const locations = ["San Francisco, CA", "Crematory A", "Garden Area", "Chapel B", "Memorial Hall"];
+    const locations = [
+      "San Francisco, CA",
+      "Crematory A",
+      "Garden Area",
+      "Chapel B",
+      "Memorial Hall",
+    ];
 
     const services = [];
     for (let i = 1; i <= 100; i++) {
       const beneficiaryName = names[Math.floor(Math.random() * names.length)];
-      const initials = beneficiaryName.split(' ').map(n => n[0]).join('');
+      const initials = beneficiaryName
+        .split(" ")
+        .map((n) => n[0])
+        .join("");
       const contractNum = 8434434 + i;
       const serviceNum = 8434434 + Math.floor(Math.random() * 50);
 
@@ -1101,8 +1205,14 @@ const funeralData = {
         id: i,
         contractId: `CE${contractNum}`,
         name: serviceTypes[Math.floor(Math.random() * serviceTypes.length)],
-        beneficiary: { name: beneficiaryName, badge: badges[Math.floor(Math.random() * badges.length)], initials },
-        dateTime: `${month}/${day}/${year} ${hour}:${minute < 10 ? '0' : ''}${minute} ${ampm}`,
+        beneficiary: {
+          name: beneficiaryName,
+          badge: badges[Math.floor(Math.random() * badges.length)],
+          initials,
+        },
+        dateTime: `${month}/${day}/${year} ${hour}:${
+          minute < 10 ? "0" : ""
+        }${minute} ${ampm}`,
         status: statuses[Math.floor(Math.random() * statuses.length)],
         serviceId: `FU${serviceNum}`,
         location: locations[Math.floor(Math.random() * locations.length)],
@@ -1113,7 +1223,13 @@ const funeralData = {
   })(),
 
   merchandise: (() => {
-    const names = ["Marie Parker", "John Smith", "Sarah Johnson", "Robert Williams", "Emily Davis"];
+    const names = [
+      "Marie Parker",
+      "John Smith",
+      "Sarah Johnson",
+      "Robert Williams",
+      "Emily Davis",
+    ];
     const badges = ["AN", "PN", "CN"];
     const statuses = ["In Trust", "Not Purchased", "Used", "Paid"];
     const merchandiseTypes = [
@@ -1124,7 +1240,7 @@ const funeralData = {
       "Memorial plaque",
       "Casket",
       "Prayer cards",
-      "Guest book"
+      "Guest book",
     ];
     const images = [
       "https://images.unsplash.com/photo-1614267157481-ca2b81ac6fcc?w=400",
@@ -1133,12 +1249,21 @@ const funeralData = {
       "https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=400",
       "https://images.unsplash.com/photo-1563207153-f403bf289096?w=400",
     ];
-    const locations = ["San Francisco, CA", "Garden Area", "Chapel B", null, null];
+    const locations = [
+      "San Francisco, CA",
+      "Garden Area",
+      "Chapel B",
+      null,
+      null,
+    ];
 
     const merchandise = [];
     for (let i = 1; i <= 100; i++) {
       const beneficiaryName = names[Math.floor(Math.random() * names.length)];
-      const initials = beneficiaryName.split(' ').map(n => n[0]).join('');
+      const initials = beneficiaryName
+        .split(" ")
+        .map((n) => n[0])
+        .join("");
       const contractNum = 8434434 + i;
       const serviceNum = 8434434 + Math.floor(Math.random() * 50);
 
@@ -1152,9 +1277,17 @@ const funeralData = {
       merchandise.push({
         id: i,
         contractId: `CE${contractNum}`,
-        name: merchandiseTypes[Math.floor(Math.random() * merchandiseTypes.length)],
-        beneficiary: { name: beneficiaryName, badge: badges[Math.floor(Math.random() * badges.length)], initials },
-        dateTime: `${month}/${day}/${year} ${hour}:${minute < 10 ? '0' : ''}${minute} ${ampm}`,
+        name: merchandiseTypes[
+          Math.floor(Math.random() * merchandiseTypes.length)
+        ],
+        beneficiary: {
+          name: beneficiaryName,
+          badge: badges[Math.floor(Math.random() * badges.length)],
+          initials,
+        },
+        dateTime: `${month}/${day}/${year} ${hour}:${
+          minute < 10 ? "0" : ""
+        }${minute} ${ampm}`,
         status: statuses[Math.floor(Math.random() * statuses.length)],
         serviceId: `FU${serviceNum}`,
         location: locations[Math.floor(Math.random() * locations.length)],
