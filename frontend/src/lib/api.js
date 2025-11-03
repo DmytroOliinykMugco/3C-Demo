@@ -121,5 +121,13 @@ export const api = {
       throw new Error('Failed to fetch balance');
     }
     return response.json();
+  },
+
+  getWallet: async () => {
+    const response = await fetch(`${API_BASE_URL}/api/wallet`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch wallet');
+    }
+    return response.json();
   }
 };
