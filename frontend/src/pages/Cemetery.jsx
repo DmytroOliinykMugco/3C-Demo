@@ -29,6 +29,7 @@ const Cemetery = () => {
   const [propertyViewMode, setPropertyViewMode] = useState("cards");
   const [servicesViewMode, setServicesViewMode] = useState("cards");
   const [merchandiseViewMode, setMerchandiseViewMode] = useState("cards");
+  const [designationTab, setDesignationTab] = useState("signed");
 
   // Property pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -774,84 +775,148 @@ const Cemetery = () => {
                   <li>Upload signed document</li>
                 </ol>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <h3 className="text-sm font-semibold text-gray-900 mb-3">
-                      Signed documents
-                    </h3>
-                    <Card>
-                      <CardContent className="p-6">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-gray-100 rounded flex items-center justify-center flex-shrink-0">
-                              <svg
-                                className="w-5 h-5 text-gray-600"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                />
-                              </svg>
-                            </div>
-                            <div>
-                              <p className="font-semibold text-gray-900">
-                                [TEMPLATE] Designation of In...
-                              </p>
-                              <p className="text-sm text-gray-500">2.4mb</p>
-                            </div>
-                          </div>
+                <Tabs value={designationTab} onValueChange={setDesignationTab}>
+                  <TabsList className="w-full grid grid-cols-2 mb-4">
+                    <TabsTrigger value="signed">Signed documents</TabsTrigger>
+                    <TabsTrigger value="example">Example</TabsTrigger>
+                  </TabsList>
 
-                          <div className="flex items-center gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() =>
-                                handleComingSoon("Preview template")
-                              }
-                            >
-                              Preview
-                            </Button>
-                            <button
-                              onClick={() =>
-                                handleComingSoon("Download template")
-                              }
-                              className="p-2 hover:bg-gray-100 rounded"
-                            >
-                              <Download className="w-4 h-4 text-gray-600" />
-                            </button>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
-
-                  <div>
-                    <h3 className="text-sm font-semibold text-gray-900 mb-3">
-                      Example
-                    </h3>
-                    <Card>
-                      <CardContent className="p-6">
-                        <div className="mb-4">
-                          <label className="block text-sm font-medium text-gray-900 mb-2">
+                  {designationTab === "signed" && (
+                    <div className="w-1/2">
+                      <Card>
+                        <CardContent className="p-6">
+                          <h3 className="text-sm font-semibold text-gray-900 mb-4">
                             Signed document
-                          </label>
-                          <Input type="file" className="mb-3" />
-                        </div>
-                        <Button
-                          onClick={() => handleComingSoon("Send to counselor")}
-                          className="w-full bg-black text-white hover:bg-gray-800"
-                        >
-                          Send to counselor
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  </div>
-                </div>
+                          </h3>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 bg-gray-100 rounded flex items-center justify-center flex-shrink-0">
+                                <svg
+                                  className="w-5 h-5 text-gray-600"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                  />
+                                </svg>
+                              </div>
+                              <div>
+                                <p className="font-semibold text-gray-900">
+                                  [TEMPLATE] Designation of In...
+                                </p>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <span className="px-2 py-0.5 text-xs font-medium rounded bg-green-100 text-green-800">
+                                    Signed
+                                  </span>
+                                  <span className="px-2 py-0.5 text-xs font-medium rounded bg-yellow-100 text-yellow-800">
+                                    On review
+                                  </span>
+                                  <p className="text-sm text-gray-500">2.4mb</p>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() =>
+                                  handleComingSoon("Preview template")
+                                }
+                              >
+                                Preview
+                              </Button>
+                              <button
+                                onClick={() =>
+                                  handleComingSoon("Download template")
+                                }
+                                className="p-2 hover:bg-gray-100 rounded"
+                              >
+                                <Download className="w-4 h-4 text-gray-600" />
+                              </button>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  )}
+
+                  {designationTab === "example" && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <Card>
+                        <CardContent className="p-6">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 bg-gray-100 rounded flex items-center justify-center flex-shrink-0">
+                                <svg
+                                  className="w-5 h-5 text-gray-600"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                  />
+                                </svg>
+                              </div>
+                              <div>
+                                <p className="font-semibold text-gray-900">
+                                  [TEMPLATE] Designation of In...
+                                </p>
+                                <p className="text-sm text-gray-500">2.4mb</p>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() =>
+                                  handleComingSoon("Preview template")
+                                }
+                              >
+                                Preview
+                              </Button>
+                              <button
+                                onClick={() =>
+                                  handleComingSoon("Download template")
+                                }
+                                className="p-2 hover:bg-gray-100 rounded"
+                              >
+                                <Download className="w-4 h-4 text-gray-600" />
+                              </button>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      <Card>
+                        <CardContent className="p-6">
+                          <h3 className="text-sm font-semibold text-gray-900 mb-4">
+                            Signed document
+                          </h3>
+                          <div className="flex gap-3">
+                            <Input type="file" className="flex-1" />
+                            <Button
+                              onClick={() => handleComingSoon("Send to counselor")}
+                              className="bg-black text-white hover:bg-gray-800 whitespace-nowrap"
+                            >
+                              Send to counselor
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  )}
+                </Tabs>
               </div>
 
               {/* Cemetery Services Section - same as dedicated tab */}
