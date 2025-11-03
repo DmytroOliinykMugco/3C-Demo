@@ -123,12 +123,13 @@ const Family = () => {
             </p>
           </div>
           <div className="flex gap-3">
-            <Button
+            {/* Temporarily hidden */}
+            {/* <Button
               variant="outline"
               onClick={() => handleComingSoon("Share contract access")}
             >
               Share contract access
-            </Button>
+            </Button> */}
             <Button onClick={() => setShowAddUserModal(true)}>
               Add user manually
             </Button>
