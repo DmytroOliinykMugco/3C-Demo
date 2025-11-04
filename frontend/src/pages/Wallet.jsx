@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/toast";
 import DocumentViewer from "@/components/DocumentViewer";
+import AddPaymentToContractModal from "@/components/AddPaymentToContractModal";
 
 // Formatting functions
 const formatCardNumber = (value) => {
@@ -104,6 +105,10 @@ const Wallet = () => {
 
   // Document viewer state
   const [viewerDocument, setViewerDocument] = useState(null);
+
+  // Add payment to contract modal state
+  const [showAddPaymentModal, setShowAddPaymentModal] = useState(false);
+  const [selectedContractId, setSelectedContractId] = useState(null);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -209,6 +214,17 @@ const Wallet = () => {
 
   const closeDocumentViewer = () => {
     setViewerDocument(null);
+  };
+
+  // Add payment to contract handlers
+  const handleAddPaymentToContract = (contractId) => {
+    setSelectedContractId(contractId);
+    setShowAddPaymentModal(true);
+  };
+
+  const closeAddPaymentModal = () => {
+    setShowAddPaymentModal(false);
+    setSelectedContractId(null);
   };
 
   // Click outside to close menu
@@ -487,7 +503,7 @@ const Wallet = () => {
                           {contract.nextPaymentDue}
                         </p>
                         <Button
-                          onClick={() => handleComingSoon("Add payment method")}
+                          onClick={() => handleAddPaymentToContract(contract.contractId)}
                           className="bg-black text-white hover:bg-gray-800 px-8"
                         >
                           Add method
@@ -532,13 +548,13 @@ const Wallet = () => {
                           <div className="flex justify-between text-sm">
                             <span className="text-gray-600">Next Payment</span>
                             <span className="text-gray-900">
-                              {contract.nextPayment.date}
+                              {contract.nextPayment?.date || "N/A"}
                             </span>
                           </div>
                           <div className="flex justify-between text-sm">
                             <span className="text-gray-600">Amount</span>
                             <span className="text-gray-900">
-                              {formatCurrency(contract.nextPayment.amount)}
+                              {contract.nextPayment?.amount ? formatCurrency(contract.nextPayment.amount) : "N/A"}
                             </span>
                           </div>
                         </div>
@@ -1165,6 +1181,13 @@ const Wallet = () => {
           onDownload={() => handleDownloadDocument(viewerDocument)}
         />
       )}
+
+      {/* Add Payment to Contract Modal */}
+      <AddPaymentToContractModal
+        isOpen={showAddPaymentModal}
+        onClose={closeAddPaymentModal}
+        contractId={selectedContractId}
+      />
     </div>
   );
 };

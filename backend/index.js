@@ -1287,6 +1287,56 @@ app.put("/api/wallet/payment-method/:id", (req, res) => {
   });
 });
 
+// Assign payment method to contract
+app.post("/api/wallet/contract/:contractId/assign-payment", (req, res) => {
+  const contractId = req.params.contractId;
+  const { methodId } = req.body;
+
+  // Find the contract
+  const contract = walletData.contractPaymentMethods.find(c => c.contractId === contractId);
+
+  if (!contract) {
+    return res.status(404).json({
+      success: false,
+      message: "Contract not found",
+    });
+  }
+
+  // Find the payment method
+  const method = walletData.allMethods.find(m => m.id === methodId);
+
+  if (!method) {
+    return res.status(404).json({
+      success: false,
+      message: "Payment method not found",
+    });
+  }
+
+  // Assign the payment method to the contract
+  contract.hasPaymentMethod = true;
+  contract.paymentMethod = {
+    type: method.type,
+    holderName: method.holderName,
+    lastDigits: method.lastDigits,
+    expiryDate: method.expiryDate,
+    icon: method.icon,
+  };
+
+  // Add nextPayment object if it doesn't exist
+  if (!contract.nextPayment) {
+    contract.nextPayment = {
+      date: contract.nextPaymentDue || "December 13, 2025",
+      amount: 2384.0,
+    };
+  }
+
+  res.json({
+    success: true,
+    message: "Payment method assigned to contract successfully",
+    data: contract,
+  });
+});
+
 // Delete payment method
 app.delete("/api/wallet/payment-method/:id", (req, res) => {
   const methodId = parseInt(req.params.id);

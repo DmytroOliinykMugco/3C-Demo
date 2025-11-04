@@ -214,4 +214,18 @@ export const api = {
     }
     return response.json();
   },
+
+  assignPaymentMethodToContract: async ({ contractId, methodId }) => {
+    const response = await fetch(`${API_BASE_URL}/api/wallet/contract/${contractId}/assign-payment`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ methodId }),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to assign payment method to contract');
+    }
+    return response.json();
+  },
 };
