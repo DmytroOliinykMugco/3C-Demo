@@ -1196,6 +1196,46 @@ app.get("/api/wallet", (req, res) => {
   res.json({ success: true, data: walletData });
 });
 
+// Add payment method
+app.post("/api/wallet/payment-method", (req, res) => {
+  const { type, formData } = req.body;
+
+  let newMethod;
+
+  if (type === "card") {
+    // Generate last 4 digits from card number
+    const lastDigits = formData.cardNumber.slice(-4);
+
+    newMethod = {
+      id: walletData.allMethods.length + 1,
+      type: "Credit card",
+      holderName: formData.cardholderName,
+      lastDigits: lastDigits,
+      expiryDate: formData.endDate,
+      icon: "card",
+    };
+  } else if (type === "bank") {
+    // Get last 3 digits (mock)
+    const lastDigits = "012";
+
+    newMethod = {
+      id: walletData.allMethods.length + 1,
+      type: "Bank account",
+      holderName: formData.fullLegalName,
+      lastDigits: lastDigits,
+      icon: "bank",
+    };
+  }
+
+  walletData.allMethods.push(newMethod);
+
+  res.json({
+    success: true,
+    data: newMethod,
+    message: "Payment method added successfully",
+  });
+});
+
 // Get cemetery data
 app.get("/api/cemetery", (req, res) => {
   res.json({ success: true, data: cemeteryData });

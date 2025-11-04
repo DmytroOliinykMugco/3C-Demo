@@ -175,5 +175,19 @@ export const api = {
 
   getDocumentDownloadUrl: (documentId) => {
     return `${API_BASE_URL}/api/documents/${documentId}/download`;
-  }
+  },
+
+  addPaymentMethod: async (type, formData) => {
+    const response = await fetch(`${API_BASE_URL}/api/wallet/payment-method`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ type, formData }),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to add payment method');
+    }
+    return response.json();
+  },
 };
