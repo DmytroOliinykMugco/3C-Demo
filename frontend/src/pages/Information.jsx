@@ -70,8 +70,14 @@ const Information = () => {
     setViewerDocument(doc);
   };
 
-  const handleDownload = (documentId) => {
-    window.open(api.getDocumentDownloadUrl(documentId), "_blank");
+  const handleDownload = (doc) => {
+    if (doc.url) {
+      // Example document with direct URL
+      window.open(doc.url, "_blank");
+    } else {
+      // Uploaded document with ID
+      window.open(api.getDocumentDownloadUrl(doc.id), "_blank");
+    }
   };
 
   const handleCloseViewer = () => {
@@ -81,8 +87,18 @@ const Information = () => {
   const signedDocuments = documentsResponse?.data || [];
 
   const exampleDocuments = [
-    { name: "Example Document 1", size: "1.2mb" },
-    { name: "Example Document 2", size: "3.1mb" },
+    {
+      id: "example_1",
+      name: "[TEMPLATE] Release Authorization",
+      size: "0.3mb",
+      url: "http://localhost:3000/example-pdfs/information_pdf_example_1.pdf"
+    },
+    {
+      id: "example_2",
+      name: "[TEMPLATE] Disposition Authorization",
+      size: "0.3mb",
+      url: "http://localhost:3000/example-pdfs/information_pdf_example_2.pdf"
+    },
   ];
 
   const documents = activeTab === "signed" ? signedDocuments : exampleDocuments;
@@ -319,22 +335,14 @@ const Information = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() =>
-                              activeTab === "signed"
-                                ? handlePreview(doc)
-                                : handleComingSoon()
-                            }
+                            onClick={() => handlePreview(doc)}
                           >
                             Preview
                           </Button>
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() =>
-                              activeTab === "signed"
-                                ? handleDownload(doc.id)
-                                : handleComingSoon()
-                            }
+                            onClick={() => handleDownload(doc)}
                           >
                             <Download className="w-4 h-4" />
                           </Button>
@@ -352,10 +360,10 @@ const Information = () => {
       {/* Document Viewer Modal */}
       {viewerDocument && (
         <DocumentViewer
-          documentUrl={api.getDocumentUrl(viewerDocument.id)}
+          documentUrl={viewerDocument.url || api.getDocumentUrl(viewerDocument.id)}
           documentName={viewerDocument.name}
           onClose={handleCloseViewer}
-          onDownload={() => handleDownload(viewerDocument.id)}
+          onDownload={() => handleDownload(viewerDocument)}
         />
       )}
     </div>

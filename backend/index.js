@@ -23,6 +23,7 @@ const upload = multer({
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use('/example-pdfs', express.static('pdf'));
 
 // Mocked Data - Star Wars Theme
 const profileData = {
