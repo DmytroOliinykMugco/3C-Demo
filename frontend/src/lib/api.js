@@ -190,4 +190,28 @@ export const api = {
     }
     return response.json();
   },
+
+  updatePaymentMethod: async (methodId, type, formData) => {
+    const response = await fetch(`${API_BASE_URL}/api/wallet/payment-method/${methodId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ type, formData }),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to update payment method');
+    }
+    return response.json();
+  },
+
+  deletePaymentMethod: async (methodId) => {
+    const response = await fetch(`${API_BASE_URL}/api/wallet/payment-method/${methodId}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to delete payment method');
+    }
+    return response.json();
+  },
 };

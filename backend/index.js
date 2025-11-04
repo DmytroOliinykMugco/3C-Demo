@@ -1044,17 +1044,17 @@ const walletData = {
   legalDocuments: [
     {
       id: 1,
-      name: "Authorization Agreement for...",
-      fileName: "AuthorizationAgreement_2025.pdf",
-      size: "2.4mb",
-      uploadDate: "2025-01-15",
+      name: "Wallet Legal Document 1",
+      fileName: "my_services_wallet_legal_document_1.pdf",
+      size: "301kb",
+      uploadDate: "2025-11-04",
     },
     {
       id: 2,
-      name: "Payment Terms and Conditions",
-      fileName: "PaymentTerms_2025.pdf",
-      size: "1.8mb",
-      uploadDate: "2025-01-10",
+      name: "Wallet Legal Document 2",
+      fileName: "my_services_wallet_legal_document_2.pdf",
+      size: "301kb",
+      uploadDate: "2025-11-04",
     },
   ],
 };
@@ -1233,6 +1233,78 @@ app.post("/api/wallet/payment-method", (req, res) => {
     success: true,
     data: newMethod,
     message: "Payment method added successfully",
+  });
+});
+
+// Update payment method
+app.put("/api/wallet/payment-method/:id", (req, res) => {
+  const methodId = parseInt(req.params.id);
+  const { type, formData } = req.body;
+
+  const index = walletData.allMethods.findIndex(method => method.id === methodId);
+
+  if (index === -1) {
+    return res.status(404).json({
+      success: false,
+      message: "Payment method not found",
+    });
+  }
+
+  const existingMethod = walletData.allMethods[index];
+  let updatedMethod;
+
+  if (type === "card") {
+    // If card number is masked (contains *), keep existing lastDigits
+    const isMasked = formData.cardNumber.includes('*');
+    const lastDigits = isMasked ? existingMethod.lastDigits : formData.cardNumber.slice(-4);
+
+    updatedMethod = {
+      id: methodId,
+      type: "Credit card",
+      holderName: formData.cardholderName,
+      lastDigits: lastDigits,
+      expiryDate: formData.endDate,
+      icon: "card",
+    };
+  } else if (type === "bank") {
+    const lastDigits = existingMethod.lastDigits || "012";
+
+    updatedMethod = {
+      id: methodId,
+      type: "Bank account",
+      holderName: formData.fullLegalName,
+      lastDigits: lastDigits,
+      icon: "bank",
+    };
+  }
+
+  walletData.allMethods[index] = updatedMethod;
+
+  res.json({
+    success: true,
+    data: updatedMethod,
+    message: "Payment method updated successfully",
+  });
+});
+
+// Delete payment method
+app.delete("/api/wallet/payment-method/:id", (req, res) => {
+  const methodId = parseInt(req.params.id);
+
+  const index = walletData.allMethods.findIndex(method => method.id === methodId);
+
+  if (index === -1) {
+    return res.status(404).json({
+      success: false,
+      message: "Payment method not found",
+    });
+  }
+
+  walletData.allMethods.splice(index, 1);
+
+  res.json({
+    success: true,
+    message: "Payment method deleted successfully",
   });
 });
 
