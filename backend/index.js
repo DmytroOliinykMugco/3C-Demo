@@ -269,18 +269,18 @@ const balanceData = {
       { name: "Christopher Walker", initials: "CW" },
     ];
 
-    const contractIds = [
-      "FU8434434",
-      "FU8434435",
-      "FU8434436",
-      "FU8434437",
-      "FU8434438",
-      "CE8434434",
-      "CE8434435",
-      "CE8434436",
-      "CE8434437",
-      "CE8434438",
-    ];
+    // Generate 200 unique contract IDs (150 funeral, 50 cemetery)
+    const contractIds = [];
+
+    // Add 150 funeral contracts
+    for (let i = 1; i <= 150; i++) {
+      contractIds.push(`FU${String(1000 + i).padStart(4, '0')}`);
+    }
+
+    // Add 50 cemetery contracts
+    for (let i = 1; i <= 50; i++) {
+      contractIds.push(`CE${String(2000 + i).padStart(4, '0')}`);
+    }
 
     const paymentMethods = [
       "Cash in store",
@@ -299,61 +299,47 @@ const balanceData = {
 
     const badges = ["AN", "PN", "BN", "OK"];
 
-    const amounts = [
-      500, 750, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 7500,
-      10000, 12500, 15000, 20000, 25000,
-    ];
+    // Generate 200 unique payments (one per contract)
+    for (let i = 0; i < 200; i++) {
+      // Each payment gets its own unique contract ID
+      const contractId = contractIds[i];
 
-    // Start from recent date and go backwards
-    let currentDate = new Date("2025-11-03");
-    let runningBalances = {}; // Track balance per contract
+      // Select beneficiary
+      const beneficiary = beneficiaries[i % beneficiaries.length];
 
-    // Initialize balances for each contract
-    contractIds.forEach((contractId) => {
-      runningBalances[contractId] = 0;
-    });
+      // Rotate through badges
+      const badge = badges[i % badges.length];
 
-    for (let i = 1; i <= 200; i++) {
-      // Random contract
-      const contractId =
-        contractIds[Math.floor(Math.random() * contractIds.length)];
+      // Rotate through payment methods
+      const paymentMethod = paymentMethods[i % paymentMethods.length];
 
-      // Random beneficiary
-      const beneficiary =
-        beneficiaries[Math.floor(Math.random() * beneficiaries.length)];
+      // Generate varied amounts (between $100 and $30,000)
+      const baseAmounts = [100, 250, 500, 750, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 6000, 7500, 10000, 12500, 15000, 20000, 25000, 30000];
+      const amount = baseAmounts[i % baseAmounts.length];
 
-      // Random badge
-      const badge = badges[Math.floor(Math.random() * badges.length)];
+      // Simple incremental balance
+      const balance = amount * (i + 1);
 
-      // Random payment method
-      const paymentMethod =
-        paymentMethods[Math.floor(Math.random() * paymentMethods.length)];
+      // Generate unique dates
+      const paymentDate = new Date("2025-11-03");
+      paymentDate.setDate(paymentDate.getDate() - Math.floor(i / 3));
+      paymentDate.setHours(23 - (i % 24));
+      paymentDate.setMinutes(i % 60);
 
-      // Random amount
-      const amount = amounts[Math.floor(Math.random() * amounts.length)];
-
-      // Calculate balance (add payment to current balance)
-      const balance = runningBalances[contractId];
-      runningBalances[contractId] += amount;
-
-      // Generate date (go backwards in time)
-      const daysBack = Math.floor(Math.random() * 15) + 1; // 1-15 days back
-      currentDate.setDate(currentDate.getDate() - daysBack);
-
-      const month = currentDate.getMonth() + 1;
-      const day = currentDate.getDate();
-      const year = currentDate.getFullYear();
-      const hours = Math.floor(Math.random() * 12) + 1;
-      const minutes = Math.floor(Math.random() * 60);
-      const period = Math.random() > 0.5 ? "PM" : "AM";
+      const month = paymentDate.getMonth() + 1;
+      const day = paymentDate.getDate();
+      const year = paymentDate.getFullYear();
+      const hours = paymentDate.getHours() % 12 || 12;
+      const minutes = paymentDate.getMinutes();
+      const period = paymentDate.getHours() >= 12 ? "PM" : "AM";
 
       const dateTime = `${month}/${String(day).padStart(
         2,
         "0"
       )}/${year} ${hours}:${String(minutes).padStart(2, "0")} ${period}`;
 
-      payments.unshift({
-        id: i,
+      payments.push({
+        id: `PAY-${String(i + 1).padStart(6, '0')}`,
         contractId,
         beneficiary: {
           name: beneficiary.name,
