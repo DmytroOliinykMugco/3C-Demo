@@ -228,4 +228,14 @@ export const api = {
     }
     return response.json();
   },
+
+  removePaymentMethodFromContract: async (contractId) => {
+    const response = await fetch(`${API_BASE_URL}/api/wallet/contract/${contractId}/payment`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to remove payment method from contract');
+    }
+    return response.json();
+  },
 };

@@ -110,6 +110,9 @@ const Wallet = () => {
   const [showAddPaymentModal, setShowAddPaymentModal] = useState(false);
   const [selectedContractId, setSelectedContractId] = useState(null);
 
+  // Contract menu state
+  const [activeContractMenu, setActiveContractMenu] = useState(null);
+
   // Form state
   const [formData, setFormData] = useState({
     // Card fields
@@ -180,6 +183,18 @@ const Wallet = () => {
     }
   });
 
+  // Mutation for removing payment method from contract
+  const removePaymentFromContractMutation = useMutation({
+    mutationFn: (contractId) => api.removePaymentMethodFromContract(contractId),
+    onSuccess: () => {
+      queryClient.invalidateQueries(["wallet"]);
+      addToast("Payment method removed from contract", "success");
+    },
+    onError: () => {
+      addToast("Failed to remove payment method from contract", "error");
+    }
+  });
+
   const handleComingSoon = (feature) => {
     addToast(`${feature} will be developed soon`, "success");
   };
@@ -227,17 +242,44 @@ const Wallet = () => {
     setSelectedContractId(null);
   };
 
+  // Contract menu handlers
+  const toggleContractMenu = (contractId) => {
+    setActiveContractMenu(activeContractMenu === contractId ? null : contractId);
+  };
+
+  const handleEditContractPayment = (contract) => {
+    // Open edit payment modal with the contract's payment method
+    const method = {
+      id: contract.contractId, // Use contractId as a placeholder
+      type: contract.paymentMethod.type,
+      holderName: contract.paymentMethod.holderName,
+      lastDigits: contract.paymentMethod.lastDigits,
+      expiryDate: contract.paymentMethod.expiryDate,
+      icon: contract.paymentMethod.icon,
+    };
+    handleEditMethod(method);
+    setActiveContractMenu(null);
+  };
+
+  const handleRemoveContractPayment = (contractId) => {
+    removePaymentFromContractMutation.mutate(contractId);
+    setActiveContractMenu(null);
+  };
+
   // Click outside to close menu
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (activeMenu && !event.target.closest('.payment-method-menu-container')) {
         setActiveMenu(null);
       }
+      if (activeContractMenu && !event.target.closest('.contract-menu-container')) {
+        setActiveContractMenu(null);
+      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [activeMenu]);
+  }, [activeMenu, activeContractMenu]);
 
   // Menu handlers
   const toggleMenu = (methodId) => {
@@ -481,14 +523,6 @@ const Wallet = () => {
                         ID: {contract.contractId}
                       </span>
                     </h3>
-                    {contract.hasPaymentMethod && (
-                      <button
-                        onClick={() => handleComingSoon("Edit payment method")}
-                        className="text-sm font-medium text-gray-900 hover:text-gray-700"
-                      >
-                        Edit
-                      </button>
-                    )}
                   </div>
 
                   {!contract.hasPaymentMethod ? (
@@ -534,14 +568,33 @@ const Wallet = () => {
                               </p>
                             </div>
                           </div>
-                          <button
-                            onClick={() =>
-                              handleComingSoon("Payment method actions")
-                            }
-                            className="p-1 hover:bg-gray-100 rounded"
-                          >
-                            <MoreHorizontal className="w-5 h-5 text-gray-600" />
-                          </button>
+                          <div className="relative contract-menu-container">
+                            <button
+                              onClick={() => toggleContractMenu(contract.contractId)}
+                              className="p-1 hover:bg-gray-100 rounded"
+                            >
+                              <MoreHorizontal className="w-5 h-5 text-gray-600" />
+                            </button>
+
+                            {activeContractMenu === contract.contractId && (
+                              <div className="absolute right-0 top-8 bg-white border rounded-lg shadow-lg py-1 z-10 min-w-[140px]">
+                                <button
+                                  onClick={() => handleEditContractPayment(contract)}
+                                  className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                >
+                                  <Edit2 className="w-4 h-4" />
+                                  Edit
+                                </button>
+                                <button
+                                  onClick={() => handleRemoveContractPayment(contract.contractId)}
+                                  className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                  Remove
+                                </button>
+                              </div>
+                            )}
+                          </div>
                         </div>
 
                         <div className="pt-4 border-t space-y-2">
@@ -575,70 +628,86 @@ const Wallet = () => {
               Additional accounts that are not linked to any contract directly
             </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {walletData?.allMethods.map((method) => (
-                <Card key={method.id}>
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <h3 className="text-lg font-semibold text-gray-900">
-                        {method.type}
-                      </h3>
-                      <div className="relative payment-method-menu-container">
-                        <button
-                          onClick={() => toggleMenu(method.id)}
-                          className="p-1 hover:bg-gray-100 rounded"
-                        >
-                          <MoreHorizontal className="w-5 h-5 text-gray-600" />
-                        </button>
+            {walletData?.allMethods.length === 0 ? (
+              <Card className="border-2 border-dashed border-gray-300 shadow-none">
+                <CardContent className="p-12 flex flex-col items-center text-center justify-center">
+                  <h4 className="text-xl font-semibold text-gray-900 mb-6">
+                    Add payment method
+                  </h4>
+                  <Button
+                    onClick={openPaymentModal}
+                    className="bg-black text-white hover:bg-gray-800 px-8"
+                  >
+                    Add method
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {walletData?.allMethods.map((method) => (
+                  <Card key={method.id}>
+                    <CardContent className="p-6">
+                      <div className="flex items-start justify-between mb-4">
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          {method.type}
+                        </h3>
+                        <div className="relative payment-method-menu-container">
+                          <button
+                            onClick={() => toggleMenu(method.id)}
+                            className="p-1 hover:bg-gray-100 rounded"
+                          >
+                            <MoreHorizontal className="w-5 h-5 text-gray-600" />
+                          </button>
 
-                        {activeMenu === method.id && (
-                          <div className="absolute right-0 top-8 bg-white border rounded-lg shadow-lg py-1 z-10 min-w-[140px]">
-                            <button
-                              onClick={() => handleEditMethod(method)}
-                              className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                            >
-                              <Edit2 className="w-4 h-4" />
-                              Edit
-                            </button>
-                            <button
-                              onClick={() => handleDeleteClick(method)}
-                              className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                              Delete
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <div className="w-14 h-14 bg-gray-200 rounded-xl flex items-center justify-center">
-                        {method.icon === "bank" ? (
-                          <Building2 className="w-7 h-7 text-gray-600" />
-                        ) : (
-                          <CreditCard className="w-7 h-7 text-gray-600" />
-                        )}
-                      </div>
-                      <div>
-                        <p className="text-lg font-semibold text-gray-900">
-                          {method.holderName}
-                        </p>
-                        <div className="flex items-center gap-2">
-                          {method.icon === "card" && (
-                            <span className="px-2 py-0.5 bg-blue-600 text-white text-xs font-bold rounded">
-                              VISA
-                            </span>
+                          {activeMenu === method.id && (
+                            <div className="absolute right-0 top-8 bg-white border rounded-lg shadow-lg py-1 z-10 min-w-[140px]">
+                              <button
+                                onClick={() => handleEditMethod(method)}
+                                className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                              >
+                                <Edit2 className="w-4 h-4" />
+                                Edit
+                              </button>
+                              <button
+                                onClick={() => handleDeleteClick(method)}
+                                className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                                Delete
+                              </button>
+                            </div>
                           )}
-                          <p className="text-sm text-gray-600">
-                            **** {method.lastDigits}
-                          </p>
                         </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                      <div className="flex items-center gap-3">
+                        <div className="w-14 h-14 bg-gray-200 rounded-xl flex items-center justify-center">
+                          {method.icon === "bank" ? (
+                            <Building2 className="w-7 h-7 text-gray-600" />
+                          ) : (
+                            <CreditCard className="w-7 h-7 text-gray-600" />
+                          )}
+                        </div>
+                        <div>
+                          <p className="text-lg font-semibold text-gray-900">
+                            {method.holderName}
+                          </p>
+                          <div className="flex items-center gap-2">
+                            {method.icon === "card" && (
+                              <span className="px-2 py-0.5 bg-blue-600 text-white text-xs font-bold rounded">
+                                VISA
+                              </span>
+                            )}
+                            <p className="text-sm text-gray-600">
+                              **** {method.lastDigits}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </section>
 
           {/* Legal documents section */}

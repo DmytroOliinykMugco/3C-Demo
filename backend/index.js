@@ -1337,6 +1337,32 @@ app.post("/api/wallet/contract/:contractId/assign-payment", (req, res) => {
   });
 });
 
+// Remove payment method from contract
+app.delete("/api/wallet/contract/:contractId/payment", (req, res) => {
+  const contractId = req.params.contractId;
+
+  // Find the contract
+  const contract = walletData.contractPaymentMethods.find(c => c.contractId === contractId);
+
+  if (!contract) {
+    return res.status(404).json({
+      success: false,
+      message: "Contract not found",
+    });
+  }
+
+  // Remove the payment method from the contract
+  contract.hasPaymentMethod = false;
+  delete contract.paymentMethod;
+  delete contract.nextPayment;
+
+  res.json({
+    success: true,
+    message: "Payment method removed from contract successfully",
+    data: contract,
+  });
+});
+
 // Delete payment method
 app.delete("/api/wallet/payment-method/:id", (req, res) => {
   const methodId = parseInt(req.params.id);
