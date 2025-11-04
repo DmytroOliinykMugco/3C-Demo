@@ -12,6 +12,7 @@ import Balance from "@/pages/Balance";
 import Wallet from "@/pages/Wallet";
 import Cemetery from "@/pages/Cemetery";
 import Funeral from "@/pages/Funeral";
+import Property from "@/pages/Property";
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
           <Route path="wallet" element={<Wallet />} />
           <Route path="cemetery" element={<Cemetery />} />
           <Route path="funeral" element={<Funeral />} />
+          <Route path="property/:id" element={<Property />} />
         </Route>
       </Routes>
     </Router>

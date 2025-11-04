@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   ChevronLeft,
@@ -32,8 +32,10 @@ const Balance = () => {
   const [activeTab, setActiveTab] = useState("all");
   const [funeralShowAll, setFuneralShowAll] = useState(false);
   const [cemeteryShowAll, setCemeteryShowAll] = useState(false);
+  const [contractsShowAll, setContractsShowAll] = useState(false);
   const funeralScrollRef = useRef(null);
   const cemeteryScrollRef = useRef(null);
+  const contractsScrollRef = useRef(null);
 
   // Payment history table state
   const [currentPage, setCurrentPage] = useState(1);
@@ -45,6 +47,7 @@ const Balance = () => {
   // Owned property carousel state
   const [propertyShowAll, setPropertyShowAll] = useState(false);
   const propertyScrollRef = useRef(null);
+  const [propertyMenuOpen, setPropertyMenuOpen] = useState(null); // ID of property with open menu
 
   // Additional Invoices state
   const [invoiceViewMode, setInvoiceViewMode] = useState("grid"); // grid or list
@@ -86,6 +89,13 @@ const Balance = () => {
   // Document viewer state
   const [viewerDocument, setViewerDocument] = useState(null);
 
+  // Share contract modal state
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [shareContractIds, setShareContractIds] = useState([]); // Array of contract IDs
+  const [shareAccessType, setShareAccessType] = useState("emails"); // "link" or "emails"
+  const [shareEmails, setShareEmails] = useState("");
+  const [linkCopied, setLinkCopied] = useState(false);
+
   const {
     data: balanceResponse,
     isLoading,
@@ -96,6 +106,24 @@ const Balance = () => {
   });
 
   const balanceData = balanceResponse?.data;
+
+  // Close property menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (propertyMenuOpen !== null) {
+        // Check if click is outside the menu
+        const isOutside = !event.target.closest('.property-menu-container');
+        if (isOutside) {
+          setPropertyMenuOpen(null);
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [propertyMenuOpen]);
 
   // Mock payment handler
   const handlePay = async (contractId) => {
@@ -177,42 +205,57 @@ const Balance = () => {
     }
   };
 
-  // Share contract
-  const handleShareContract = async (contractId) => {
-    const contract = balanceData?.contracts.find(c => c.id === contractId);
-    if (contract) {
-      // Mock share link
-      const shareLink = `${window.location.origin}/contracts/${contractId}`;
-
-      // Try to use Web Share API if available
-      if (navigator.share) {
-        try {
-          await navigator.share({
-            title: `${contract.type} Contract`,
-            text: `Check out this ${contract.type} contract`,
-            url: shareLink,
-          });
-          addToast("Contract shared successfully!", "success");
-        } catch (err) {
-          if (err.name !== "AbortError") {
-            // Fallback to copying link
-            copyToClipboard(shareLink);
-          }
-        }
-      } else {
-        // Fallback to copying link
-        copyToClipboard(shareLink);
-      }
-    }
+  // Open share contract modal
+  const handleShareContract = (contractId) => {
+    setShareContractIds([contractId]);
+    setShowShareModal(true);
+    setLinkCopied(false);
+    setShareEmails("");
+    setShareAccessType("emails");
   };
 
-  // Copy to clipboard helper
-  const copyToClipboard = (text) => {
-    navigator.clipboard.writeText(text).then(() => {
-      addToast("Contract link copied to clipboard!", "success");
+  // Close share modal
+  const closeShareModal = () => {
+    setShowShareModal(false);
+    setShareContractIds([]);
+    setLinkCopied(false);
+    setShareEmails("");
+  };
+
+  // Remove contract from selection
+  const removeContractFromSelection = (contractId) => {
+    setShareContractIds((prev) => prev.filter((id) => id !== contractId));
+  };
+
+  // Copy share link
+  const handleCopyLink = () => {
+    if (shareContractIds.length === 0) {
+      addToast("Please select at least one contract", "error");
+      return;
+    }
+    const shareLink = `${window.location.origin}/contracts/${shareContractIds.join(",")}`;
+    navigator.clipboard.writeText(shareLink).then(() => {
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 2000);
     }).catch(() => {
       addToast("Failed to copy link", "error");
     });
+  };
+
+  // Send invite
+  const handleSendInvite = () => {
+    if (shareContractIds.length === 0) {
+      addToast("Please select at least one contract", "error");
+      return;
+    }
+    if (shareAccessType === "emails" && !shareEmails.trim()) {
+      addToast("Please enter at least one email address", "error");
+      return;
+    }
+
+    // Mock sending invite
+    addToast("Invite sent successfully!", "success");
+    closeShareModal();
   };
 
   // Toggle invoice view mode
@@ -271,26 +314,31 @@ const Balance = () => {
 
   // Property menu actions
   const handlePropertyMenu = (property) => {
-    // In a real app, this would open a dropdown menu with options
-    // For now, we'll show a mock menu via toast
-    const actions = [
-      "View Details",
-      "Edit Property",
-      "Share",
-      "Download Documents",
-      "View on Map"
-    ];
+    setPropertyMenuOpen(propertyMenuOpen === property.id ? null : property.id);
+  };
 
-    // Mock: Just show that menu was opened
-    // In real app, would show a dropdown/modal with these options
-    addToast(`Property menu opened for ${property.type}`, "success");
+  const handleOpenPropertyPage = (property) => {
+    setPropertyMenuOpen(null);
+    navigate(`/property/${property.id}`);
+  };
 
-    // For demo purposes, you could implement actual actions:
-    // - View Details: Show property details modal
-    // - Edit: Navigate to edit page
-    // - Share: Copy link to clipboard
-    // - Download: Download property documents
-    // - View on Map: Open map with property location
+  const handleShareProperty = (property) => {
+    // Find contract associated with this property
+    const contract = balanceData?.contracts.find(
+      c => c.contractNumber === property.contractId
+    );
+
+    if (contract) {
+      setShareContractIds([contract.id]);
+      setShowShareModal(true);
+      setLinkCopied(false);
+      setShareEmails("");
+      setShareAccessType("emails");
+    } else {
+      addToast("No contract found for this property", "error");
+    }
+
+    setPropertyMenuOpen(null);
   };
 
   // Export payment history
@@ -410,6 +458,18 @@ const Balance = () => {
     }
   };
 
+  const handleContractsPrev = () => {
+    if (contractsScrollRef.current) {
+      contractsScrollRef.current.scrollBy({ left: -400, behavior: "smooth" });
+    }
+  };
+
+  const handleContractsNext = () => {
+    if (contractsScrollRef.current) {
+      contractsScrollRef.current.scrollBy({ left: 400, behavior: "smooth" });
+    }
+  };
+
   // Filter invoices
   const filteredInvoices = balanceData?.additionalInvoices.filter((invoice) => {
     // Status filter
@@ -498,9 +558,10 @@ const Balance = () => {
     if (!contractSearchQuery) return true;
     const query = contractSearchQuery.toLowerCase();
     return (
-      contract.id.toLowerCase().includes(query) ||
+      contract.contractNumber.toLowerCase().includes(query) ||
+      contract.type.toLowerCase().includes(query) ||
       contract.role.toLowerCase().includes(query) ||
-      contract.status.toLowerCase().includes(query)
+      (contract.status && contract.status.toLowerCase().includes(query))
     );
   }) || [];
 
@@ -1119,19 +1180,72 @@ const Balance = () => {
               </section>
             )}
 
-            {/* Contracts Section - Show in "all" and "contracts" tabs */}
-            {(activeTab === "all" || activeTab === "contracts") && (
+            {/* Contracts Section - Show in "all" tab */}
+            {activeTab === "all" && (
               <section>
                 <h2 className="text-2xl font-semibold text-gray-900 mb-2">
-                  Contracts
+                  Active Contracts
                 </h2>
                 <p className="text-gray-600 mb-4">
-                  All contracts associated with your account, where you are an
-                  owner, next of kin or beneficiary.
+                  All ongoing contracts associated with your account, where you are an owner or beneficiary. You can see more on Contracts page.
                 </p>
 
-                <div className="mb-4">
-                  <div className="relative">
+                {/* Search input above contracts */}
+                <div className="relative max-w-sm mb-4">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Input
+                    type="text"
+                    placeholder="Search contract"
+                    value={contractSearchQuery}
+                    onChange={(e) => setContractSearchQuery(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+
+                {/* Show first 2 contracts or filtered results */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {contractSearchQuery ? (
+                    filteredContracts.length > 0 ? (
+                      filteredContracts.slice(0, 2).map((contract) => (
+                        <ContractCard
+                          key={contract.id}
+                          contract={contract}
+                          onShare={() => handleShareContract(contract.id)}
+                          onOpenContract={() => handleOpenContract(contract.id)}
+                        />
+                      ))
+                    ) : (
+                      <div className="text-center py-12 text-gray-500 col-span-2">
+                        No contracts found matching your search.
+                      </div>
+                    )
+                  ) : (
+                    balanceData?.contracts?.slice(0, 2).map((contract) => (
+                      <ContractCard
+                        key={contract.id}
+                        contract={contract}
+                        onShare={() => handleShareContract(contract.id)}
+                        onOpenContract={() => handleOpenContract(contract.id)}
+                      />
+                    ))
+                  )}
+                </div>
+              </section>
+            )}
+
+            {/* Contracts Section - Show in "contracts" tab */}
+            {activeTab === "contracts" && (
+              <section>
+                <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+                  Active Contracts
+                </h2>
+                <p className="text-gray-600 mb-4">
+                  All ongoing contracts associated with your account, where you are an owner or beneficiary. You can see more on Contracts page.
+                </p>
+
+                {/* Search and See All on same line */}
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="relative flex-1 max-w-sm">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <Input
                       type="text"
@@ -1141,17 +1255,35 @@ const Balance = () => {
                       className="pl-10"
                     />
                   </div>
+                  <button
+                    onClick={() => setContractsShowAll(!contractsShowAll)}
+                    className="text-sm font-medium text-gray-900 hover:text-gray-700 transition-colors whitespace-nowrap"
+                  >
+                    {contractsShowAll
+                      ? "Show less"
+                      : `See all (${balanceData?.contracts?.length || 0})`}
+                  </button>
                 </div>
 
+                {/* Contracts grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {filteredContracts.map((contract) => (
-                    <ContractCard
-                      key={contract.id}
-                      contract={contract}
-                      onShare={() => handleShareContract(contract.id)}
-                      onOpenContract={() => handleOpenContract(contract.id)}
-                    />
-                  ))}
+                  {contractsShowAll
+                    ? filteredContracts.map((contract) => (
+                        <ContractCard
+                          key={contract.id}
+                          contract={contract}
+                          onShare={() => handleShareContract(contract.id)}
+                          onOpenContract={() => handleOpenContract(contract.id)}
+                        />
+                      ))
+                    : filteredContracts.slice(0, 2).map((contract) => (
+                        <ContractCard
+                          key={contract.id}
+                          contract={contract}
+                          onShare={() => handleShareContract(contract.id)}
+                          onOpenContract={() => handleOpenContract(contract.id)}
+                        />
+                      ))}
                 </div>
                 {filteredContracts.length === 0 && (
                   <div className="text-center py-12 text-gray-500">
@@ -1205,6 +1337,9 @@ const Balance = () => {
                         key={property.id}
                         property={property}
                         onMenuClick={() => handlePropertyMenu(property)}
+                        menuOpen={propertyMenuOpen === property.id}
+                        onOpenPropertyPage={handleOpenPropertyPage}
+                        onShare={handleShareProperty}
                       />
                     ))}
                   </div>
@@ -1222,6 +1357,9 @@ const Balance = () => {
                         <PropertyCard
                           property={property}
                           onMenuClick={() => handlePropertyMenu(property)}
+                          menuOpen={propertyMenuOpen === property.id}
+                          onOpenPropertyPage={handleOpenPropertyPage}
+                          onShare={handleShareProperty}
                         />
                       </div>
                     ))}
@@ -1517,6 +1655,174 @@ const Balance = () => {
             window.open(viewerDocument.url, "_blank");
           }}
         />
+      )}
+
+      {/* Share Contract Modal */}
+      {showShareModal && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
+            {/* Header */}
+            <div className="p-6 border-b sticky top-0 bg-white">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-xl font-semibold text-gray-900">
+                  Share contract access
+                </h3>
+                <button
+                  onClick={closeShareModal}
+                  className="p-1 hover:bg-gray-100 rounded"
+                >
+                  <X className="w-5 h-5 text-gray-500" />
+                </button>
+              </div>
+              <p className="text-sm text-gray-600">
+                Enter the email addresses of the people you want to share the contract with.
+              </p>
+            </div>
+
+            {/* Body */}
+            <div className="p-6 space-y-6">
+              {/* Contract Multi-Selection */}
+              <div>
+                <label className="text-sm font-medium text-gray-900 mb-2 block">
+                  Share contract
+                </label>
+                <div className="space-y-3">
+                  {/* Selected contracts as chips */}
+                  <div className="flex flex-wrap gap-2 min-h-[40px] p-2 border border-gray-200 rounded-md">
+                    {shareContractIds.length > 0 ? (
+                      shareContractIds.map((contractId) => {
+                        const contract = balanceData?.contracts.find(c => c.id === contractId);
+                        return (
+                          <div
+                            key={contractId}
+                            className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 rounded-md text-sm"
+                          >
+                            <span>ID: {contract?.contractNumber}</span>
+                            <button
+                              onClick={() => removeContractFromSelection(contractId)}
+                              className="hover:bg-gray-200 rounded p-0.5"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          </div>
+                        );
+                      })
+                    ) : null}
+                  </div>
+
+                  {/* Add contract dropdown */}
+                  <select
+                    onChange={(e) => {
+                      const contractId = parseInt(e.target.value);
+                      if (contractId && !shareContractIds.includes(contractId)) {
+                        setShareContractIds([...shareContractIds, contractId]);
+                      }
+                      e.target.value = '';
+                    }}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-black"
+                    defaultValue=""
+                  >
+                    <option value="">Select contract to add</option>
+                    {balanceData?.contracts
+                      .filter(contract => !shareContractIds.includes(contract.id))
+                      .map((contract) => (
+                        <option key={contract.id} value={contract.id}>
+                          ID: {contract.contractNumber}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Access Type */}
+              <div>
+                <label className="text-sm font-medium text-gray-900 mb-3 block">
+                  Access type
+                </label>
+                <div className="space-y-2">
+                  <label className="flex items-start gap-3 cursor-pointer p-3 border rounded-lg hover:bg-gray-50">
+                    <input
+                      type="radio"
+                      name="accessType"
+                      value="link"
+                      checked={shareAccessType === "link"}
+                      onChange={(e) => setShareAccessType(e.target.value)}
+                      className="mt-0.5"
+                    />
+                    <div>
+                      <div className="font-medium text-sm text-gray-900">
+                        Allow access to anyone by link
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        Anyone with the link can view the contract
+                      </div>
+                    </div>
+                  </label>
+                  <label className="flex items-start gap-3 cursor-pointer p-3 border rounded-lg hover:bg-gray-50">
+                    <input
+                      type="radio"
+                      name="accessType"
+                      value="emails"
+                      checked={shareAccessType === "emails"}
+                      onChange={(e) => setShareAccessType(e.target.value)}
+                      className="mt-0.5"
+                    />
+                    <div>
+                      <div className="font-medium text-sm text-gray-900">
+                        Allow access only to added emails
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        Only specified email addresses can view
+                      </div>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              {/* Email Input (only show when emails option selected) */}
+              {shareAccessType === "emails" && (
+                <div>
+                  <label className="text-sm font-medium text-gray-900 mb-2 block">
+                    Email addresses
+                  </label>
+                  <textarea
+                    placeholder="Enter email addresses (comma-separated)"
+                    value={shareEmails}
+                    onChange={(e) => setShareEmails(e.target.value)}
+                    className="w-full px-3 py-2 border rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-black"
+                    rows={3}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Separate multiple emails with commas
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="p-6 border-t bg-gray-50 rounded-b-lg sticky bottom-0">
+              <div className="flex gap-3">
+                {shareAccessType === "link" && (
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={handleCopyLink}
+                  >
+                    {linkCopied ? "Link copied ✓" : "Copy link"}
+                  </Button>
+                )}
+                {shareAccessType === "emails" && (
+                  <Button
+                    className="flex-1 bg-black text-white hover:bg-gray-800"
+                    onClick={handleSendInvite}
+                  >
+                    Send invite
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

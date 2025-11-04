@@ -1,7 +1,7 @@
-import { MapPin, MoreVertical } from "lucide-react";
+import { MapPin, MoreVertical, Share2, ExternalLink } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
-const PropertyCard = ({ property, onMenuClick }) => {
+const PropertyCard = ({ property, onMenuClick, menuOpen, onOpenPropertyPage, onShare }) => {
   return (
     <Card className="overflow-hidden">
       {/* Image */}
@@ -22,7 +22,7 @@ const PropertyCard = ({ property, onMenuClick }) => {
           <h3 className="text-lg font-semibold text-gray-900">
             {property.type}
           </h3>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 relative property-menu-container">
             <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded font-medium">
               {property.status}
             </span>
@@ -32,6 +32,26 @@ const PropertyCard = ({ property, onMenuClick }) => {
             >
               <MoreVertical className="w-4 h-4 text-gray-600" />
             </button>
+
+            {/* Dropdown Menu */}
+            {menuOpen && (
+              <div className="absolute right-0 top-8 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-10 min-w-[200px]">
+                <button
+                  onClick={() => onOpenPropertyPage(property)}
+                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  Open Property page
+                </button>
+                <button
+                  onClick={() => onShare(property)}
+                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                >
+                  <Share2 className="w-4 h-4" />
+                  Share
+                </button>
+              </div>
+            )}
           </div>
         </div>
 

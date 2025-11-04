@@ -17,13 +17,13 @@ const upload = multer({
     } else {
       cb(new Error("Only PDF files are allowed"), false);
     }
-  }
+  },
 });
 
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use('/example-pdfs', express.static('pdf'));
+app.use("/example-pdfs", express.static("pdf"));
 
 // Mocked Data - Star Wars Theme
 const profileData = {
@@ -274,12 +274,12 @@ const balanceData = {
 
     // Add 150 funeral contracts
     for (let i = 1; i <= 150; i++) {
-      contractIds.push(`FU${String(1000 + i).padStart(4, '0')}`);
+      contractIds.push(`FU${String(1000 + i).padStart(4, "0")}`);
     }
 
     // Add 50 cemetery contracts
     for (let i = 1; i <= 50; i++) {
-      contractIds.push(`CE${String(2000 + i).padStart(4, '0')}`);
+      contractIds.push(`CE${String(2000 + i).padStart(4, "0")}`);
     }
 
     const paymentMethods = [
@@ -314,7 +314,10 @@ const balanceData = {
       const paymentMethod = paymentMethods[i % paymentMethods.length];
 
       // Generate varied amounts (between $100 and $30,000)
-      const baseAmounts = [100, 250, 500, 750, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 6000, 7500, 10000, 12500, 15000, 20000, 25000, 30000];
+      const baseAmounts = [
+        100, 250, 500, 750, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500,
+        5000, 6000, 7500, 10000, 12500, 15000, 20000, 25000, 30000,
+      ];
       const amount = baseAmounts[i % baseAmounts.length];
 
       // Simple incremental balance
@@ -339,7 +342,7 @@ const balanceData = {
       )}/${year} ${hours}:${String(minutes).padStart(2, "0")} ${period}`;
 
       payments.push({
-        id: `PAY-${String(i + 1).padStart(6, '0')}`,
+        id: `PAY-${String(i + 1).padStart(6, "0")}`,
         contractId,
         beneficiary: {
           name: beneficiary.name,
@@ -359,7 +362,7 @@ const balanceData = {
     {
       id: 1,
       type: "Funeral trust contract",
-      contractNumber: "FU8434434",
+      contractNumber: "FU8434433",
       status: "Fully payed",
       role: "Owner",
       beneficiary: { name: "Marie Parker", badge: "PN", initials: "MP" },
@@ -377,6 +380,50 @@ const balanceData = {
       beneficiary: { name: "Marie Parker", badge: "PN", initials: "MP" },
       sharedWith: 5,
       totalAmount: 25000.0,
+    },
+    {
+      id: 3,
+      type: "Cemetery contract",
+      contractNumber: "CE8434435",
+      status: "Active",
+      role: "Next of Kin",
+      beneficiary: { name: "Ken Parker", badge: "PN", initials: "KP" },
+      sharedWith: 3,
+      totalAmount: 18000.0,
+      balanceDue: 5000.0,
+    },
+    {
+      id: 4,
+      type: "Funeral trust contract",
+      contractNumber: "FU8434436",
+      status: "Pending",
+      role: "Beneficiary",
+      beneficiary: { name: "Luna Miller", badge: "PN", initials: "LM" },
+      sharedWith: 2,
+      totalAmount: 30000.0,
+      balanceDue: 20000.0,
+    },
+    {
+      id: 5,
+      type: "Cemetery contract",
+      contractNumber: "CE8434437",
+      status: "Fully payed",
+      role: "Owner",
+      beneficiary: { name: "John Smith", badge: "PN", initials: "JS" },
+      sharedWith: 4,
+      totalAmount: 22000.0,
+      balanceDue: 0,
+    },
+    {
+      id: 6,
+      type: "Funeral insurance contract",
+      contractNumber: "FU8434438",
+      policyId: "INS-843435",
+      insuranceCarrier: "FamilyLife Insurance",
+      role: "Owner",
+      beneficiary: { name: "Sarah Johnson", badge: "PN", initials: "SJ" },
+      sharedWith: 6,
+      totalAmount: 28000.0,
     },
   ],
   ownedProperty: (() => {
@@ -1416,19 +1463,21 @@ app.post("/api/documents/upload", (req, res) => {
         if (err.code === "LIMIT_FILE_SIZE") {
           return res.status(400).json({
             success: false,
-            message: "File size too large. Maximum size is 10MB"
+            message: "File size too large. Maximum size is 10MB",
           });
         }
       }
       return res.status(400).json({
         success: false,
-        message: err.message || "Failed to upload document"
+        message: err.message || "Failed to upload document",
       });
     }
 
     try {
       if (!req.file) {
-        return res.status(400).json({ success: false, message: "No file uploaded" });
+        return res
+          .status(400)
+          .json({ success: false, message: "No file uploaded" });
       }
 
       const document = {
@@ -1438,7 +1487,7 @@ app.post("/api/documents/upload", (req, res) => {
         mimeType: req.file.mimetype,
         buffer: req.file.buffer,
         uploadedAt: new Date().toISOString(),
-        status: "Pending"
+        status: "Pending",
       };
 
       uploadedDocuments.push(document);
@@ -1451,23 +1500,25 @@ app.post("/api/documents/upload", (req, res) => {
           name: document.name,
           size: document.size,
           uploadedAt: document.uploadedAt,
-          status: document.status
-        }
+          status: document.status,
+        },
       });
     } catch (error) {
-      res.status(500).json({ success: false, message: "Failed to upload document" });
+      res
+        .status(500)
+        .json({ success: false, message: "Failed to upload document" });
     }
   });
 });
 
 // Get all uploaded documents
 app.get("/api/documents", (req, res) => {
-  const documents = uploadedDocuments.map(doc => ({
+  const documents = uploadedDocuments.map((doc) => ({
     id: doc.id,
     name: doc.name,
     size: doc.size,
     uploadedAt: doc.uploadedAt,
-    status: doc.status
+    status: doc.status,
   }));
 
   res.json({ success: true, data: documents });
@@ -1476,10 +1527,12 @@ app.get("/api/documents", (req, res) => {
 // Download/view document
 app.get("/api/documents/:id", (req, res) => {
   const documentId = parseInt(req.params.id);
-  const document = uploadedDocuments.find(doc => doc.id === documentId);
+  const document = uploadedDocuments.find((doc) => doc.id === documentId);
 
   if (!document) {
-    return res.status(404).json({ success: false, message: "Document not found" });
+    return res
+      .status(404)
+      .json({ success: false, message: "Document not found" });
   }
 
   res.setHeader("Content-Type", document.mimeType);
@@ -1490,14 +1543,19 @@ app.get("/api/documents/:id", (req, res) => {
 // Download document (force download)
 app.get("/api/documents/:id/download", (req, res) => {
   const documentId = parseInt(req.params.id);
-  const document = uploadedDocuments.find(doc => doc.id === documentId);
+  const document = uploadedDocuments.find((doc) => doc.id === documentId);
 
   if (!document) {
-    return res.status(404).json({ success: false, message: "Document not found" });
+    return res
+      .status(404)
+      .json({ success: false, message: "Document not found" });
   }
 
   res.setHeader("Content-Type", document.mimeType);
-  res.setHeader("Content-Disposition", `attachment; filename="${document.name}"`);
+  res.setHeader(
+    "Content-Disposition",
+    `attachment; filename="${document.name}"`
+  );
   res.send(document.buffer);
 });
 
