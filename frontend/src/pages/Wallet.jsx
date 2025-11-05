@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/toast";
 import DocumentViewer from "@/components/DocumentViewer";
 import AddPaymentToContractModal from "@/components/AddPaymentToContractModal";
+import EditContractPaymentModal from "@/components/EditContractPaymentModal";
 
 // Formatting functions
 const formatCardNumber = (value) => {
@@ -112,6 +113,10 @@ const Wallet = () => {
 
   // Contract menu state
   const [activeContractMenu, setActiveContractMenu] = useState(null);
+
+  // Edit contract payment modal state
+  const [showEditContractPaymentModal, setShowEditContractPaymentModal] = useState(false);
+  const [editingContract, setEditingContract] = useState(null);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -247,18 +252,31 @@ const Wallet = () => {
     setActiveContractMenu(activeContractMenu === contractId ? null : contractId);
   };
 
+  // Handler for header Edit button - opens "Edit payment method" form (with contract selection, documents, etc.)
   const handleEditContractPayment = (contract) => {
-    // Open edit payment modal with the contract's payment method
-    const method = {
-      id: contract.contractId, // Use contractId as a placeholder
-      type: contract.paymentMethod.type,
-      holderName: contract.paymentMethod.holderName,
-      lastDigits: contract.paymentMethod.lastDigits,
-      expiryDate: contract.paymentMethod.expiryDate,
-      icon: contract.paymentMethod.icon,
+    // Find the payment method from allMethods
+    const paymentMethod = walletData?.allMethods.find(m => m.id === contract.paymentMethodId);
+
+    // Create contract object with payment method included
+    const contractWithPaymentMethod = {
+      ...contract,
+      paymentMethod: paymentMethod
     };
-    handleEditMethod(method);
+
+    setEditingContract(contractWithPaymentMethod);
+    setShowEditContractPaymentModal(true);
     setActiveContractMenu(null);
+  };
+
+  // Handler for 3-dot menu Edit button - opens "Change payment method" form (card details editing)
+  const handleEditContractPaymentMethod = (contract) => {
+    // Find the actual payment method from allMethods
+    const paymentMethod = walletData?.allMethods.find(m => m.id === contract.paymentMethodId);
+
+    if (paymentMethod) {
+      handleEditMethod(paymentMethod);
+      setActiveContractMenu(null);
+    }
   };
 
   const handleRemoveContractPayment = (contractId) => {
@@ -514,108 +532,125 @@ const Wallet = () => {
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {walletData?.contractPaymentMethods.map((contract, index) => (
-                <div key={index} className="flex flex-col">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="text-lg font-semibold text-gray-900">
-                      Contract{" "}
-                      <span className="text-gray-600">
-                        ID: {contract.contractId}
-                      </span>
-                    </h3>
-                  </div>
+              {walletData?.contractPaymentMethods.map((contract, index) => {
+                // Look up the payment method from allMethods
+                const paymentMethod = contract.paymentMethodId
+                  ? walletData?.allMethods.find(m => m.id === contract.paymentMethodId)
+                  : null;
 
-                  {!contract.hasPaymentMethod ? (
-                    <Card className="border-2 border-dashed border-gray-300 shadow-none min-h-[280px]">
-                      <CardContent className="p-12 flex flex-col items-center text-center justify-center min-h-[280px]">
-                        <h4 className="text-xl font-semibold text-gray-900 mb-6">
-                          Add payment method
-                        </h4>
-                        <p className="text-sm text-gray-600 mb-8 px-8">
-                          That is crucial that you have a payment method to
-                          ongoing contract. Next payment is due on{" "}
-                          {contract.nextPaymentDue}
-                        </p>
+                return (
+                  <div key={index} className="flex flex-col">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        Contract{" "}
+                        <span className="text-gray-600">
+                          ID: {contract.contractId}
+                        </span>
+                      </h3>
+                      {paymentMethod && (
                         <Button
-                          onClick={() => handleAddPaymentToContract(contract.contractId)}
-                          className="bg-black text-white hover:bg-gray-800 px-8"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEditContractPayment(contract)}
+                          className="bg-gray-100 border-gray-200 text-gray-700 hover:bg-gray-200"
                         >
-                          Add method
+                          Edit
                         </Button>
-                      </CardContent>
-                    </Card>
-                  ) : (
-                    <Card className=" h-full">
-                      <CardContent className="p-6">
-                        <div className="flex items-start justify-between mb-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
-                              {contract.paymentMethod.icon === "bank" ? (
-                                <Building2 className="w-6 h-6 text-gray-600" />
-                              ) : (
-                                <CreditCard className="w-6 h-6 text-gray-600" />
+                      )}
+                    </div>
+
+                    {!paymentMethod ? (
+                      <Card className="border-2 border-dashed border-gray-300 shadow-none min-h-[280px]">
+                        <CardContent className="p-12 flex flex-col items-center text-center justify-center min-h-[280px]">
+                          <h4 className="text-xl font-semibold text-gray-900 mb-6">
+                            Add payment method
+                          </h4>
+                          <p className="text-sm text-gray-600 mb-8 px-8">
+                            That is crucial that you have a payment method to
+                            ongoing contract. Next payment is due on{" "}
+                            {contract.nextPaymentDue}
+                          </p>
+                          <Button
+                            onClick={() => handleAddPaymentToContract(contract.contractId)}
+                            className="bg-black text-white hover:bg-gray-800 px-8"
+                          >
+                            Add method
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    ) : (
+                      <Card className=" h-full">
+                        <CardContent className="p-6">
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
+                                {paymentMethod.icon === "bank" ? (
+                                  <Building2 className="w-6 h-6 text-gray-600" />
+                                ) : (
+                                  <CreditCard className="w-6 h-6 text-gray-600" />
+                                )}
+                              </div>
+                              <div>
+                                <p className="text-sm text-gray-600">
+                                  {paymentMethod.type}
+                                </p>
+                                <p className="text-lg font-semibold text-gray-900">
+                                  {paymentMethod.holderName}
+                                </p>
+                                <p className="text-sm text-gray-600">
+                                  **** {paymentMethod.lastDigits}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="relative contract-menu-container">
+                              <button
+                                onClick={() => toggleContractMenu(contract.contractId)}
+                                className="p-1 hover:bg-gray-100 rounded"
+                              >
+                                <MoreHorizontal className="w-5 h-5 text-gray-600" />
+                              </button>
+
+                              {activeContractMenu === contract.contractId && (
+                                <div className="absolute right-0 top-8 bg-white border rounded-lg shadow-lg py-1 z-10 min-w-[140px]">
+                                  <button
+                                    onClick={() => handleEditContractPaymentMethod(contract)}
+                                    className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                  >
+                                    <Edit2 className="w-4 h-4" />
+                                    Edit
+                                  </button>
+                                  <button
+                                    onClick={() => handleRemoveContractPayment(contract.contractId)}
+                                    className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                    Remove
+                                  </button>
+                                </div>
                               )}
                             </div>
-                            <div>
-                              <p className="text-sm text-gray-600">
-                                {contract.paymentMethod.type}
-                              </p>
-                              <p className="text-lg font-semibold text-gray-900">
-                                {contract.paymentMethod.holderName}
-                              </p>
-                              <p className="text-sm text-gray-600">
-                                **** {contract.paymentMethod.lastDigits}
-                              </p>
+                          </div>
+
+                          <div className="pt-4 border-t space-y-2">
+                            <div className="flex justify-between text-sm">
+                              <span className="text-gray-600">Next Payment</span>
+                              <span className="text-gray-900">
+                                {contract.nextPayment?.date || "N/A"}
+                              </span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                              <span className="text-gray-600">Amount</span>
+                              <span className="text-gray-900">
+                                {contract.nextPayment?.amount ? formatCurrency(contract.nextPayment.amount) : "N/A"}
+                              </span>
                             </div>
                           </div>
-                          <div className="relative contract-menu-container">
-                            <button
-                              onClick={() => toggleContractMenu(contract.contractId)}
-                              className="p-1 hover:bg-gray-100 rounded"
-                            >
-                              <MoreHorizontal className="w-5 h-5 text-gray-600" />
-                            </button>
-
-                            {activeContractMenu === contract.contractId && (
-                              <div className="absolute right-0 top-8 bg-white border rounded-lg shadow-lg py-1 z-10 min-w-[140px]">
-                                <button
-                                  onClick={() => handleEditContractPayment(contract)}
-                                  className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                >
-                                  <Edit2 className="w-4 h-4" />
-                                  Edit
-                                </button>
-                                <button
-                                  onClick={() => handleRemoveContractPayment(contract.contractId)}
-                                  className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                  Remove
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="pt-4 border-t space-y-2">
-                          <div className="flex justify-between text-sm">
-                            <span className="text-gray-600">Next Payment</span>
-                            <span className="text-gray-900">
-                              {contract.nextPayment?.date || "N/A"}
-                            </span>
-                          </div>
-                          <div className="flex justify-between text-sm">
-                            <span className="text-gray-600">Amount</span>
-                            <span className="text-gray-900">
-                              {contract.nextPayment?.amount ? formatCurrency(contract.nextPayment.amount) : "N/A"}
-                            </span>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
-                </div>
-              ))}
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </section>
 
@@ -1256,6 +1291,16 @@ const Wallet = () => {
         isOpen={showAddPaymentModal}
         onClose={closeAddPaymentModal}
         contractId={selectedContractId}
+      />
+
+      {/* Edit Contract Payment Modal */}
+      <EditContractPaymentModal
+        isOpen={showEditContractPaymentModal}
+        onClose={() => {
+          setShowEditContractPaymentModal(false);
+          setEditingContract(null);
+        }}
+        contract={editingContract}
       />
     </div>
   );

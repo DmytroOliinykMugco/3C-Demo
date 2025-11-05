@@ -2,10 +2,17 @@ import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from './button';
 
-export const Dialog = ({ isOpen, onClose, children, variant = 'center' }) => {
+export const Dialog = ({ isOpen, onClose, children, variant = 'center', size = 'md' }) => {
   if (!isOpen) return null;
 
   const isRightSide = variant === 'right';
+
+  const sizeClasses = {
+    sm: 'max-w-sm',
+    md: 'max-w-md',
+    lg: 'max-w-2xl',
+    xl: 'max-w-4xl',
+  };
 
   return (
     <div className={cn(
@@ -23,7 +30,7 @@ export const Dialog = ({ isOpen, onClose, children, variant = 'center' }) => {
         "relative bg-white shadow-lg",
         isRightSide
           ? "h-full w-full max-w-lg animate-in slide-in-from-right overflow-y-auto"
-          : "rounded-lg max-w-md w-full mx-4 animate-in fade-in zoom-in-95"
+          : `rounded-lg ${sizeClasses[size]} w-full mx-4 my-8 max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95`
       )}>
         {children}
       </div>

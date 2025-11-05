@@ -997,18 +997,12 @@ const walletData = {
   contractPaymentMethods: [
     {
       contractId: "CE8434434",
-      hasPaymentMethod: false,
+      paymentMethodId: null, // No payment method assigned
       nextPaymentDue: "Sep 23, 2025",
     },
     {
       contractId: "FU8434434",
-      hasPaymentMethod: true,
-      paymentMethod: {
-        type: "Bank account",
-        holderName: "Scott Milli Miller",
-        lastDigits: "012",
-        icon: "bank",
-      },
+      paymentMethodId: 2, // References payment method with id: 2 from allMethods
       nextPayment: {
         date: "December 13, 2025",
         amount: 2384.0,
@@ -1020,22 +1014,21 @@ const walletData = {
       id: 1,
       type: "Credit card",
       holderName: "Scott Miller",
-      lastDigits: "5758",
-      expiryDate: "12/2026",
+      lastDigits: "4242",
+      expiryDate: "08/2027",
       icon: "card",
     },
     {
       id: 2,
-      type: "Credit card",
-      holderName: "Scott Miller",
-      lastDigits: "5758",
-      expiryDate: "12/2026",
-      icon: "card",
+      type: "Bank account",
+      holderName: "Scott Milli Miller",
+      lastDigits: "789",
+      icon: "bank",
     },
     {
       id: 3,
       type: "Credit card",
-      holderName: "Scott Miller",
+      holderName: "Marie S. Miller",
       lastDigits: "5758",
       expiryDate: "12/2026",
       icon: "card",
@@ -1312,15 +1305,8 @@ app.post("/api/wallet/contract/:contractId/assign-payment", (req, res) => {
     });
   }
 
-  // Assign the payment method to the contract
-  contract.hasPaymentMethod = true;
-  contract.paymentMethod = {
-    type: method.type,
-    holderName: method.holderName,
-    lastDigits: method.lastDigits,
-    expiryDate: method.expiryDate,
-    icon: method.icon,
-  };
+  // Assign the payment method ID to the contract
+  contract.paymentMethodId = methodId;
 
   // Add nextPayment object if it doesn't exist
   if (!contract.nextPayment) {
@@ -1352,8 +1338,7 @@ app.delete("/api/wallet/contract/:contractId/payment", (req, res) => {
   }
 
   // Remove the payment method from the contract
-  contract.hasPaymentMethod = false;
-  delete contract.paymentMethod;
+  contract.paymentMethodId = null;
   delete contract.nextPayment;
 
   res.json({
@@ -1375,6 +1360,14 @@ app.delete("/api/wallet/payment-method/:id", (req, res) => {
       message: "Payment method not found",
     });
   }
+
+  // Remove this payment method from any contracts using it
+  walletData.contractPaymentMethods.forEach(contract => {
+    if (contract.paymentMethodId === methodId) {
+      contract.paymentMethodId = null;
+      delete contract.nextPayment;
+    }
+  });
 
   walletData.allMethods.splice(index, 1);
 
