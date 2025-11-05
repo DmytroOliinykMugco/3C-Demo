@@ -23,7 +23,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        - VITE_API_URL=http://localhost:3000
+        - VITE_API_URL=
     container_name: 3c-frontend
     ports:
       - "80:80"

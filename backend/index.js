@@ -490,7 +490,7 @@ const balanceData = {
     const statuses = ["Paid", "Active", "Reserved"];
     const badges = ["AN", "PN", "BN", "OK"];
 
-    const image = "http://localhost:3000/img/owned_property_picture.png";
+    const image = "/img/owned_property_picture.png";
 
     // Generate properties - spanning several years
     const years = [2020, 2021, 2022, 2023, 2024, 2025];
@@ -693,7 +693,7 @@ const cemeteryData = {
       "Mausoleum",
       "Crypt",
     ];
-    const image = "http://localhost:3000/img/my_service_cemetery_property.png";
+    const image = "/img/my_service_cemetery_property.png";
 
     const properties = [];
     for (let i = 1; i <= 100; i++) {
@@ -779,7 +779,7 @@ const cemeteryData = {
       "Memorial Hall",
       "East Garden",
     ];
-    const image = "http://localhost:3000/img/my_service_cemetery_cem_services.png";
+    const image = "/img/my_service_cemetery_cem_services.png";
 
     const services = [];
     for (let i = 1; i <= 100; i++) {
@@ -861,7 +861,7 @@ const cemeteryData = {
       "Philadelphia, PA",
       "San Antonio, TX",
     ];
-    const image = "http://localhost:3000/img/my_service_cemetery_cem_services_merchandise.png";
+    const image = "/img/my_service_cemetery_cem_services_merchandise.png";
 
     const merchandise = [];
     for (let i = 1; i <= 100; i++) {
@@ -1378,7 +1378,7 @@ const funeralData = {
       "Graveside service",
       "Cremation service",
     ];
-    const image = "http://localhost:3000/img/my_services_funeral_fun_service.png";
+    const image = "/img/my_services_funeral_fun_service.png";
     const locations = [
       "San Francisco, CA",
       "Crematory A",
@@ -1445,7 +1445,7 @@ const funeralData = {
       "Prayer cards",
       "Guest book",
     ];
-    const image = "http://localhost:3000/img/my_services_funeral_fun_merchandise.png";
+    const image = "/img/my_services_funeral_fun_merchandise.png";
     const locations = [
       "San Francisco, CA",
       "Garden Area",
