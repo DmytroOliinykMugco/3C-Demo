@@ -24,6 +24,7 @@ const upload = multer({
 app.use(cors());
 app.use(express.json());
 app.use("/example-pdfs", express.static("pdf"));
+app.use("/img", express.static("img"));
 
 // Mocked Data - Star Wars Theme
 const profileData = {
@@ -489,13 +490,7 @@ const balanceData = {
     const statuses = ["Paid", "Active", "Reserved"];
     const badges = ["AN", "PN", "BN", "OK"];
 
-    const images = [
-      "https://images.unsplash.com/photo-1566305977571-5666677c6e98?w=400",
-      "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400",
-      "https://images.unsplash.com/photo-1615461066841-6116e61058f4?w=400",
-      "https://images.unsplash.com/photo-1605116959016-b4e8afbbb7c5?w=400",
-      "https://images.unsplash.com/photo-1571380401583-72ca84994796?w=400",
-    ];
+    const image = "http://localhost:3000/img/owned_property_picture.png";
 
     // Generate properties - spanning several years
     const years = [2020, 2021, 2022, 2023, 2024, 2025];
@@ -514,7 +509,6 @@ const balanceData = {
           contractIds[Math.floor(Math.random() * contractIds.length)];
         const status = statuses[Math.floor(Math.random() * statuses.length)];
         const badge = badges[Math.floor(Math.random() * badges.length)];
-        const image = images[Math.floor(Math.random() * images.length)];
 
         properties.push({
           id: properties.length + 1,
@@ -699,13 +693,7 @@ const cemeteryData = {
       "Mausoleum",
       "Crypt",
     ];
-    const images = [
-      "https://images.unsplash.com/photo-1566305977571-5666677c6e98?w=400",
-      "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400",
-      "https://images.unsplash.com/photo-1615461066841-6116e61058f4?w=400",
-      "https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=400",
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400",
-    ];
+    const image = "http://localhost:3000/img/my_service_cemetery_property.png";
 
     const properties = [];
     for (let i = 1; i <= 100; i++) {
@@ -743,7 +731,7 @@ const cemeteryData = {
         location: `${
           sections[Math.floor(Math.random() * sections.length)]
         }, Row ${Math.floor(Math.random() * 20) + 1}`,
-        image: images[Math.floor(Math.random() * images.length)],
+        image,
       });
     }
     return properties;
@@ -791,14 +779,7 @@ const cemeteryData = {
       "Memorial Hall",
       "East Garden",
     ];
-    const images = [
-      "https://images.unsplash.com/photo-1566305977571-5666677c6e98?w=400",
-      "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400",
-      "https://images.unsplash.com/photo-1615461066841-6116e61058f4?w=400",
-      "https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=400",
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400",
-      "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400",
-    ];
+    const image = "http://localhost:3000/img/my_service_cemetery_cem_services.png";
 
     const services = [];
     for (let i = 1; i <= 100; i++) {
@@ -832,7 +813,7 @@ const cemeteryData = {
         status: statuses[Math.floor(Math.random() * statuses.length)],
         serviceId: `FU${serviceNum}`,
         location: locations[Math.floor(Math.random() * locations.length)],
-        image: images[Math.floor(Math.random() * images.length)],
+        image,
       });
     }
     return services;
@@ -880,14 +861,7 @@ const cemeteryData = {
       "Philadelphia, PA",
       "San Antonio, TX",
     ];
-    const images = [
-      "https://images.unsplash.com/photo-1566305977571-5666677c6e98?w=400",
-      "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400",
-      "https://images.unsplash.com/photo-1615461066841-6116e61058f4?w=400",
-      "https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=400",
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400",
-      "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400",
-    ];
+    const image = "http://localhost:3000/img/my_service_cemetery_cem_services_merchandise.png";
 
     const merchandise = [];
     for (let i = 1; i <= 100; i++) {
@@ -926,7 +900,7 @@ const cemeteryData = {
           Math.random() > 0.5
             ? locations[Math.floor(Math.random() * locations.length)]
             : null,
-        image: images[Math.floor(Math.random() * images.length)],
+        image,
       });
     }
     return merchandise;
@@ -1404,13 +1378,7 @@ const funeralData = {
       "Graveside service",
       "Cremation service",
     ];
-    const images = [
-      "https://images.unsplash.com/photo-1564501049412-61c2a3083791?w=400",
-      "https://images.unsplash.com/photo-1590650046871-92c887180603?w=400",
-      "https://images.unsplash.com/photo-1556911220-bff31c812dba?w=400",
-      "https://images.unsplash.com/photo-1590650213165-f9bb42984f9f?w=400",
-      "https://images.unsplash.com/photo-1528459801416-a9e53bbf4e17?w=400",
-    ];
+    const image = "http://localhost:3000/img/my_services_funeral_fun_service.png";
     const locations = [
       "San Francisco, CA",
       "Crematory A",
@@ -1451,7 +1419,7 @@ const funeralData = {
         status: statuses[Math.floor(Math.random() * statuses.length)],
         serviceId: `FU${serviceNum}`,
         location: locations[Math.floor(Math.random() * locations.length)],
-        image: images[Math.floor(Math.random() * images.length)],
+        image,
       });
     }
     return services;
@@ -1477,13 +1445,7 @@ const funeralData = {
       "Prayer cards",
       "Guest book",
     ];
-    const images = [
-      "https://images.unsplash.com/photo-1614267157481-ca2b81ac6fcc?w=400",
-      "https://images.unsplash.com/photo-1615529182904-14819c35db37?w=400",
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400",
-      "https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=400",
-      "https://images.unsplash.com/photo-1563207153-f403bf289096?w=400",
-    ];
+    const image = "http://localhost:3000/img/my_services_funeral_fun_merchandise.png";
     const locations = [
       "San Francisco, CA",
       "Garden Area",
@@ -1526,7 +1488,7 @@ const funeralData = {
         status: statuses[Math.floor(Math.random() * statuses.length)],
         serviceId: `FU${serviceNum}`,
         location: locations[Math.floor(Math.random() * locations.length)],
-        image: images[Math.floor(Math.random() * images.length)],
+        image,
       });
     }
     return merchandise;
