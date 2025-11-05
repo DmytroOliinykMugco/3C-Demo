@@ -207,14 +207,14 @@ const Wallet = () => {
   // Document handlers
   const handlePreviewDocument = (doc) => {
     setViewerDocument({
-      url: `http://localhost:3000/example-pdfs/${doc.fileName}`,
+      url: `/example-pdfs/${doc.fileName}`,
       name: doc.name,
       fileName: doc.fileName
     });
   };
 
   const handleDownloadDocument = (doc) => {
-    const url = `http://localhost:3000/example-pdfs/${doc.fileName}`;
+    const url = `/example-pdfs/${doc.fileName}`;
     fetch(url)
       .then(response => response.blob())
       .then(blob => {

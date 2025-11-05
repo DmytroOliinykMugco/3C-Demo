@@ -730,9 +730,9 @@ const Balance = () => {
                       onPreview={() => handlePreviewDocument({
                         id: invoice.id,
                         name: `Invoice ${invoice.id}`,
-                        url: `http://localhost:3000/example-pdfs/information_pdf_example_1.pdf`
+                        url: `/example-pdfs/information_pdf_example_1.pdf`
                       })}
-                      onDownload={() => handleDownloadStatement(invoice.id, `http://localhost:3000/example-pdfs/information_pdf_example_1.pdf`)}
+                      onDownload={() => handleDownloadStatement(invoice.id, `/example-pdfs/information_pdf_example_1.pdf`)}
                       isLoading={downloadingStatements[invoice.id]}
                     />
                   ))}
@@ -793,10 +793,10 @@ const Balance = () => {
                             key={index}
                             statement={statement}
                             onPreview={() =>
-                              handlePreviewStatement(statement, `http://localhost:3000/example-pdfs/my_services_balance_account_statements_funeral_contract.pdf`)
+                              handlePreviewStatement(statement, `/example-pdfs/my_services_balance_account_statements_funeral_contract.pdf`)
                             }
                             onDownload={() =>
-                              handleDownloadStatement(`funeral-${index}`, `http://localhost:3000/example-pdfs/my_services_balance_account_statements_funeral_contract.pdf`)
+                              handleDownloadStatement(`funeral-${index}`, `/example-pdfs/my_services_balance_account_statements_funeral_contract.pdf`)
                             }
                             isLoading={downloadingStatements[`funeral-${index}`]}
                           />
@@ -821,10 +821,10 @@ const Balance = () => {
                             <StatementCard
                               statement={statement}
                               onPreview={() =>
-                                handlePreviewStatement(statement, `http://localhost:3000/example-pdfs/my_services_balance_account_statements_funeral_contract.pdf`)
+                                handlePreviewStatement(statement, `/example-pdfs/my_services_balance_account_statements_funeral_contract.pdf`)
                               }
                               onDownload={() =>
-                                handleDownloadStatement(`funeral-${index}`, `http://localhost:3000/example-pdfs/my_services_balance_account_statements_funeral_contract.pdf`)
+                                handleDownloadStatement(`funeral-${index}`, `/example-pdfs/my_services_balance_account_statements_funeral_contract.pdf`)
                               }
                               isLoading={downloadingStatements[`funeral-${index}`]}
                             />
@@ -876,10 +876,10 @@ const Balance = () => {
                             key={index}
                             statement={statement}
                             onPreview={() =>
-                              handlePreviewStatement(statement, `http://localhost:3000/example-pdfs/my_services_balance_account_statements_cemetery_contract.pdf`)
+                              handlePreviewStatement(statement, `/example-pdfs/my_services_balance_account_statements_cemetery_contract.pdf`)
                             }
                             onDownload={() =>
-                              handleDownloadStatement(`cemetery-${index}`, `http://localhost:3000/example-pdfs/my_services_balance_account_statements_cemetery_contract.pdf`)
+                              handleDownloadStatement(`cemetery-${index}`, `/example-pdfs/my_services_balance_account_statements_cemetery_contract.pdf`)
                             }
                             isLoading={downloadingStatements[`cemetery-${index}`]}
                           />
@@ -904,10 +904,10 @@ const Balance = () => {
                             <StatementCard
                               statement={statement}
                               onPreview={() =>
-                                handlePreviewStatement(statement, `http://localhost:3000/example-pdfs/my_services_balance_account_statements_cemetery_contract.pdf`)
+                                handlePreviewStatement(statement, `/example-pdfs/my_services_balance_account_statements_cemetery_contract.pdf`)
                               }
                               onDownload={() =>
-                                handleDownloadStatement(`cemetery-${index}`, `http://localhost:3000/example-pdfs/my_services_balance_account_statements_cemetery_contract.pdf`)
+                                handleDownloadStatement(`cemetery-${index}`, `/example-pdfs/my_services_balance_account_statements_cemetery_contract.pdf`)
                               }
                               isLoading={downloadingStatements[`cemetery-${index}`]}
                             />

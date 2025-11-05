@@ -91,13 +91,13 @@ const Information = () => {
       id: "example_1",
       name: "[TEMPLATE] Release Authorization",
       size: "0.3mb",
-      url: "http://localhost:3000/example-pdfs/information_pdf_example_1.pdf"
+      url: "/example-pdfs/information_pdf_example_1.pdf"
     },
     {
       id: "example_2",
       name: "[TEMPLATE] Disposition Authorization",
       size: "0.3mb",
-      url: "http://localhost:3000/example-pdfs/information_pdf_example_2.pdf"
+      url: "/example-pdfs/information_pdf_example_2.pdf"
     },
   ];
 

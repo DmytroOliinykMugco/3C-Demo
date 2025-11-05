@@ -84,11 +84,11 @@ const EditContractPaymentModal = ({ isOpen, onClose, contract }) => {
   };
 
   const handlePreviewDocument = (doc) => {
-    window.open(`http://localhost:3000/example-pdfs/${doc.fileName}`, '_blank');
+    window.open(`/example-pdfs/${doc.fileName}`, '_blank');
   };
 
   const handleDownloadDocument = (doc) => {
-    const url = `http://localhost:3000/example-pdfs/${doc.fileName}`;
+    const url = `/example-pdfs/${doc.fileName}`;
     fetch(url)
       .then(response => response.blob())
       .then(blob => {
