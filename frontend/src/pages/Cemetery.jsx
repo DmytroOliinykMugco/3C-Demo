@@ -12,6 +12,8 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
+  ChevronDown,
+  X,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { Card, CardContent } from "@/components/ui/card";
@@ -53,6 +55,51 @@ const Cemetery = () => {
 
   // Document viewer state
   const [viewerDocument, setViewerDocument] = useState(null);
+
+  // Filter states - Property
+  const [propertyFilters, setPropertyFilters] = useState({
+    contractId: "",
+    status: [],
+  });
+  const [tempPropertyFilters, setTempPropertyFilters] = useState({
+    contractId: "",
+    status: [],
+  });
+  const [showPropertyFilters, setShowPropertyFilters] = useState(false);
+  const [expandedPropertyFilters, setExpandedPropertyFilters] = useState({
+    contractId: true,
+    status: false,
+  });
+
+  // Filter states - Services
+  const [servicesFilters, setServicesFilters] = useState({
+    contractId: "",
+    status: [],
+  });
+  const [tempServicesFilters, setTempServicesFilters] = useState({
+    contractId: "",
+    status: [],
+  });
+  const [showServicesFilters, setShowServicesFilters] = useState(false);
+  const [expandedServicesFilters, setExpandedServicesFilters] = useState({
+    contractId: true,
+    status: false,
+  });
+
+  // Filter states - Merchandise
+  const [merchandiseFilters, setMerchandiseFilters] = useState({
+    contractId: "",
+    status: [],
+  });
+  const [tempMerchandiseFilters, setTempMerchandiseFilters] = useState({
+    contractId: "",
+    status: [],
+  });
+  const [showMerchandiseFilters, setShowMerchandiseFilters] = useState(false);
+  const [expandedMerchandiseFilters, setExpandedMerchandiseFilters] = useState({
+    contractId: true,
+    status: false,
+  });
 
   const {
     data: cemeteryResponse,
@@ -101,16 +148,111 @@ const Cemetery = () => {
     setViewerDocument(null);
   };
 
+  // Filter helper functions - Property
+  const togglePropertyFilterSection = (section) => {
+    setExpandedPropertyFilters(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
+
+  const handlePropertyFilterToggle = (key, value) => {
+    setTempPropertyFilters(prev => {
+      const currentArray = prev[key];
+      if (currentArray.includes(value)) {
+        return { ...prev, [key]: currentArray.filter(v => v !== value) };
+      } else {
+        return { ...prev, [key]: [...currentArray, value] };
+      }
+    });
+  };
+
+  const applyPropertyFilters = () => {
+    setPropertyFilters(tempPropertyFilters);
+    setShowPropertyFilters(false);
+    setCurrentPage(1);
+  };
+
+  const cancelPropertyFilters = () => {
+    setTempPropertyFilters(propertyFilters);
+    setShowPropertyFilters(false);
+  };
+
+  // Filter helper functions - Services
+  const toggleServicesFilterSection = (section) => {
+    setExpandedServicesFilters(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
+
+  const handleServicesFilterToggle = (key, value) => {
+    setTempServicesFilters(prev => {
+      const currentArray = prev[key];
+      if (currentArray.includes(value)) {
+        return { ...prev, [key]: currentArray.filter(v => v !== value) };
+      } else {
+        return { ...prev, [key]: [...currentArray, value] };
+      }
+    });
+  };
+
+  const applyServicesFilters = () => {
+    setServicesFilters(tempServicesFilters);
+    setShowServicesFilters(false);
+    setServicesCurrentPage(1);
+  };
+
+  const cancelServicesFilters = () => {
+    setTempServicesFilters(servicesFilters);
+    setShowServicesFilters(false);
+  };
+
+  // Filter helper functions - Merchandise
+  const toggleMerchandiseFilterSection = (section) => {
+    setExpandedMerchandiseFilters(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
+
+  const handleMerchandiseFilterToggle = (key, value) => {
+    setTempMerchandiseFilters(prev => {
+      const currentArray = prev[key];
+      if (currentArray.includes(value)) {
+        return { ...prev, [key]: currentArray.filter(v => v !== value) };
+      } else {
+        return { ...prev, [key]: [...currentArray, value] };
+      }
+    });
+  };
+
+  const applyMerchandiseFilters = () => {
+    setMerchandiseFilters(tempMerchandiseFilters);
+    setShowMerchandiseFilters(false);
+    setMerchandiseCurrentPage(1);
+  };
+
+  const cancelMerchandiseFilters = () => {
+    setTempMerchandiseFilters(merchandiseFilters);
+    setShowMerchandiseFilters(false);
+  };
+
+  // Apply filters to properties
+  const filteredProperties = cemeteryData?.properties.filter((property) => {
+    const matchesContractId = !propertyFilters.contractId ||
+      property.contractId.toLowerCase().includes(propertyFilters.contractId.toLowerCase());
+    const matchesStatus = propertyFilters.status.length === 0 ||
+      propertyFilters.status.includes(property.status);
+
+    return matchesContractId && matchesStatus;
+  }) || [];
+
   // Pagination helpers
-  const totalPages = Math.ceil(
-    (cemeteryData?.properties.length || 0) / rowsPerPage
-  );
+  const totalPages = Math.ceil(filteredProperties.length / rowsPerPage);
   const startIndex = (currentPage - 1) * rowsPerPage;
   const endIndex = startIndex + rowsPerPage;
-  const paginatedProperties = cemeteryData?.properties.slice(
-    startIndex,
-    endIndex
-  );
+  const paginatedProperties = filteredProperties.slice(startIndex, endIndex);
 
   const handleFirstPage = () => setCurrentPage(1);
   const handlePrevPage = () => setCurrentPage((prev) => Math.max(prev - 1, 1));
@@ -141,16 +283,21 @@ const Cemetery = () => {
     }
   };
 
+  // Apply filters to services
+  const filteredServices = cemeteryData?.services.filter((service) => {
+    const matchesContractId = !servicesFilters.contractId ||
+      service.contractId.toLowerCase().includes(servicesFilters.contractId.toLowerCase());
+    const matchesStatus = servicesFilters.status.length === 0 ||
+      servicesFilters.status.includes(service.status);
+
+    return matchesContractId && matchesStatus;
+  }) || [];
+
   // Services pagination helpers
-  const servicesTotalPages = Math.ceil(
-    (cemeteryData?.services.length || 0) / servicesRowsPerPage
-  );
+  const servicesTotalPages = Math.ceil(filteredServices.length / servicesRowsPerPage);
   const servicesStartIndex = (servicesCurrentPage - 1) * servicesRowsPerPage;
   const servicesEndIndex = servicesStartIndex + servicesRowsPerPage;
-  const paginatedServices = cemeteryData?.services.slice(
-    servicesStartIndex,
-    servicesEndIndex
-  );
+  const paginatedServices = filteredServices.slice(servicesStartIndex, servicesEndIndex);
 
   const handleServicesFirstPage = () => setServicesCurrentPage(1);
   const handleServicesPrevPage = () =>
@@ -186,8 +333,8 @@ const Cemetery = () => {
   };
 
   const displayedServices = showAllServices
-    ? cemeteryData?.services
-    : cemeteryData?.services.slice(0, 5);
+    ? filteredServices
+    : filteredServices.slice(0, 5);
 
   const getServiceStatusColor = (status) => {
     switch (status) {
@@ -202,17 +349,21 @@ const Cemetery = () => {
     }
   };
 
+  // Apply filters to merchandise
+  const filteredMerchandise = cemeteryData?.merchandise.filter((item) => {
+    const matchesContractId = !merchandiseFilters.contractId ||
+      item.contractId.toLowerCase().includes(merchandiseFilters.contractId.toLowerCase());
+    const matchesStatus = merchandiseFilters.status.length === 0 ||
+      merchandiseFilters.status.includes(item.status);
+
+    return matchesContractId && matchesStatus;
+  }) || [];
+
   // Merchandise pagination helpers
-  const merchandiseTotalPages = Math.ceil(
-    (cemeteryData?.merchandise.length || 0) / merchandiseRowsPerPage
-  );
-  const merchandiseStartIndex =
-    (merchandiseCurrentPage - 1) * merchandiseRowsPerPage;
+  const merchandiseTotalPages = Math.ceil(filteredMerchandise.length / merchandiseRowsPerPage);
+  const merchandiseStartIndex = (merchandiseCurrentPage - 1) * merchandiseRowsPerPage;
   const merchandiseEndIndex = merchandiseStartIndex + merchandiseRowsPerPage;
-  const paginatedMerchandise = cemeteryData?.merchandise.slice(
-    merchandiseStartIndex,
-    merchandiseEndIndex
-  );
+  const paginatedMerchandise = filteredMerchandise.slice(merchandiseStartIndex, merchandiseEndIndex);
 
   const handleMerchandiseFirstPage = () => setMerchandiseCurrentPage(1);
   const handleMerchandisePrevPage = () =>
@@ -250,8 +401,8 @@ const Cemetery = () => {
   };
 
   const displayedMerchandise = showAllMerchandise
-    ? cemeteryData?.merchandise
-    : cemeteryData?.merchandise.slice(0, 5);
+    ? filteredMerchandise
+    : filteredMerchandise.slice(0, 5);
 
   const getMerchandiseStatusColor = (status) => {
     switch (status) {
@@ -366,23 +517,14 @@ const Cemetery = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleComingSoon("Filters")}
+                    onClick={() => setShowPropertyFilters(true)}
                   >
                     <Filter className="w-4 h-4 mr-2" />
                     Filters
+                    {(propertyFilters.contractId || propertyFilters.status.length > 0) && (
+                      <span className="ml-2 px-1.5 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full">Active</span>
+                    )}
                   </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleComingSoon("View options")}
-                  >
-                    <LayoutList className="w-4 h-4 mr-2" />
-                    View
-                  </Button>
-                  <div className="relative flex-1 max-w-xs">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <Input type="text" placeholder="Search" className="pl-10" />
-                  </div>
                 </div>
 
                 {/* Table View */}
@@ -501,7 +643,7 @@ const Cemetery = () => {
                       <div className="flex items-center justify-between mt-4 text-sm text-gray-600">
                         <p>
                           {selectedRows.size} of{" "}
-                          {cemeteryData?.properties.length || 0} row(s)
+                          {filteredProperties.length || 0} row(s)
                           selected.
                         </p>
                         <div className="flex items-center gap-4">
@@ -563,7 +705,7 @@ const Cemetery = () => {
                 {/* Card View */}
                 {propertyViewMode === "cards" && (
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {cemeteryData?.properties.map((property) => (
+                    {filteredProperties.map((property) => (
                       <Card key={property.id}>
                         <CardContent className="p-0">
                           {/* Contract ID Badge */}
@@ -992,23 +1134,14 @@ const Cemetery = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleComingSoon("Filters")}
+                    onClick={() => setShowServicesFilters(true)}
                   >
                     <Filter className="w-4 h-4 mr-2" />
                     Filters
+                    {(servicesFilters.contractId || servicesFilters.status.length > 0) && (
+                      <span className="ml-2 px-1.5 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full">Active</span>
+                    )}
                   </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleComingSoon("View options")}
-                  >
-                    <LayoutList className="w-4 h-4 mr-2" />
-                    View
-                  </Button>
-                  <div className="relative flex-1 max-w-xs">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <Input type="text" placeholder="Search" className="pl-10" />
-                  </div>
                 </div>
 
                 {/* Table View */}
@@ -1129,7 +1262,7 @@ const Cemetery = () => {
                       <div className="flex items-center justify-between mt-4 text-sm text-gray-600">
                         <p>
                           {servicesSelectedRows.size} of{" "}
-                          {cemeteryData?.services.length || 0} row(s) selected.
+                          {filteredServices.length || 0} row(s) selected.
                         </p>
                         <div className="flex items-center gap-4">
                           <div className="flex items-center gap-2">
@@ -1259,13 +1392,13 @@ const Cemetery = () => {
                       ))}
                     </div>
 
-                    {!showAllServices && cemeteryData?.services.length > 5 && (
+                    {!showAllServices && filteredServices.length > 5 && (
                       <div className="flex justify-center">
                         <Button
                           variant="outline"
                           onClick={() => setShowAllServices(true)}
                         >
-                          Load all ({cemeteryData?.services.length})
+                          Load all ({filteredServices.length})
                         </Button>
                       </div>
                     )}
@@ -1315,23 +1448,14 @@ const Cemetery = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleComingSoon("Filters")}
+                    onClick={() => setShowMerchandiseFilters(true)}
                   >
                     <Filter className="w-4 h-4 mr-2" />
                     Filters
+                    {(merchandiseFilters.contractId || merchandiseFilters.status.length > 0) && (
+                      <span className="ml-2 px-1.5 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full">Active</span>
+                    )}
                   </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleComingSoon("View options")}
-                  >
-                    <LayoutList className="w-4 h-4 mr-2" />
-                    View
-                  </Button>
-                  <div className="relative flex-1 max-w-xs">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <Input type="text" placeholder="Search" className="pl-10" />
-                  </div>
                 </div>
 
                 {/* Table View */}
@@ -1452,7 +1576,7 @@ const Cemetery = () => {
                       <div className="flex items-center justify-between mt-4 text-sm text-gray-600">
                         <p>
                           {merchandiseSelectedRows.size} of{" "}
-                          {cemeteryData?.merchandise.length || 0} row(s)
+                          {filteredMerchandise.length || 0} row(s)
                           selected.
                         </p>
                         <div className="flex items-center gap-4">
@@ -1589,13 +1713,13 @@ const Cemetery = () => {
                     </div>
 
                     {!showAllMerchandise &&
-                      cemeteryData?.merchandise.length > 5 && (
+                      filteredMerchandise.length > 5 && (
                         <div className="flex justify-center">
                           <Button
                             variant="outline"
                             onClick={() => setShowAllMerchandise(true)}
                           >
-                            Load all ({cemeteryData?.merchandise.length})
+                            Load all ({filteredMerchandise.length})
                           </Button>
                         </div>
                       )}
@@ -1648,23 +1772,14 @@ const Cemetery = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleComingSoon("Filters")}
+                    onClick={() => setShowPropertyFilters(true)}
                   >
                     <Filter className="w-4 h-4 mr-2" />
                     Filters
+                    {(propertyFilters.contractId || propertyFilters.status.length > 0) && (
+                      <span className="ml-2 px-1.5 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full">Active</span>
+                    )}
                   </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleComingSoon("View options")}
-                  >
-                    <LayoutList className="w-4 h-4 mr-2" />
-                    View
-                  </Button>
-                  <div className="relative flex-1 max-w-xs">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <Input type="text" placeholder="Search" className="pl-10" />
-                  </div>
                 </div>
 
                 {/* Table View */}
@@ -1783,7 +1898,7 @@ const Cemetery = () => {
                       <div className="flex items-center justify-between mt-4 text-sm text-gray-600">
                         <p>
                           {selectedRows.size} of{" "}
-                          {cemeteryData?.properties.length || 0} row(s)
+                          {filteredProperties.length || 0} row(s)
                           selected.
                         </p>
                         <div className="flex items-center gap-4">
@@ -2033,10 +2148,13 @@ const Cemetery = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleComingSoon("Filters")}
+                    onClick={() => setShowServicesFilters(true)}
                   >
                     <Filter className="w-4 h-4 mr-2" />
                     Filters
+                    {(servicesFilters.contractId || servicesFilters.status.length > 0) && (
+                      <span className="ml-2 px-1.5 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full">Active</span>
+                    )}
                   </Button>
                   <Button
                     variant="outline"
@@ -2170,7 +2288,7 @@ const Cemetery = () => {
                       <div className="flex items-center justify-between mt-4 text-sm text-gray-600">
                         <p>
                           {servicesSelectedRows.size} of{" "}
-                          {cemeteryData?.services.length || 0} row(s) selected.
+                          {filteredServices.length || 0} row(s) selected.
                         </p>
                         <div className="flex items-center gap-4">
                           <div className="flex items-center gap-2">
@@ -2305,13 +2423,13 @@ const Cemetery = () => {
                     </div>
 
                     {/* Load All Button */}
-                    {!showAllServices && cemeteryData?.services.length > 5 && (
+                    {!showAllServices && filteredServices.length > 5 && (
                       <div className="flex justify-center">
                         <Button
                           variant="outline"
                           onClick={() => setShowAllServices(true)}
                         >
-                          Load all ({cemeteryData?.services.length})
+                          Load all ({filteredServices.length})
                         </Button>
                       </div>
                     )}
@@ -2391,10 +2509,13 @@ const Cemetery = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleComingSoon("Filters")}
+                    onClick={() => setShowMerchandiseFilters(true)}
                   >
                     <Filter className="w-4 h-4 mr-2" />
                     Filters
+                    {(merchandiseFilters.contractId || merchandiseFilters.status.length > 0) && (
+                      <span className="ml-2 px-1.5 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full">Active</span>
+                    )}
                   </Button>
                   <Button
                     variant="outline"
@@ -2528,7 +2649,7 @@ const Cemetery = () => {
                       <div className="flex items-center justify-between mt-4 text-sm text-gray-600">
                         <p>
                           {merchandiseSelectedRows.size} of{" "}
-                          {cemeteryData?.merchandise.length || 0} row(s)
+                          {filteredMerchandise.length || 0} row(s)
                           selected.
                         </p>
                         <div className="flex items-center gap-4">
@@ -2670,13 +2791,13 @@ const Cemetery = () => {
 
                     {/* Load All Button */}
                     {!showAllMerchandise &&
-                      cemeteryData?.merchandise.length > 5 && (
+                      filteredMerchandise.length > 5 && (
                         <div className="flex justify-center">
                           <Button
                             variant="outline"
                             onClick={() => setShowAllMerchandise(true)}
                           >
-                            Load all ({cemeteryData?.merchandise.length})
+                            Load all ({filteredMerchandise.length})
                           </Button>
                         </div>
                       )}
@@ -2725,6 +2846,471 @@ const Cemetery = () => {
             fileName: viewerDocument.fileName
           })}
         />
+      )}
+
+      {/* Property Filters Modal */}
+      {showPropertyFilters && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex justify-end p-4">
+          <div className="bg-white w-full max-w-md h-full flex flex-col rounded-lg">
+            {/* Header */}
+            <div className="p-6 border-b">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-xl font-semibold text-gray-900">
+                  Table filters
+                </h3>
+                <button
+                  onClick={() => setShowPropertyFilters(false)}
+                  className="p-1 hover:bg-gray-100 rounded"
+                >
+                  <X className="w-5 h-5 text-gray-500" />
+                </button>
+              </div>
+              <p className="text-sm text-gray-600">
+                Here you can customise your table view to find needed data.
+              </p>
+            </div>
+
+            {/* Filter Sections */}
+            <div className="flex-1 overflow-y-auto p-6">
+              <div className="space-y-2">
+                {/* Contract ID Filter */}
+                <div className="border rounded-lg">
+                  <button
+                    onClick={() => togglePropertyFilterSection("contractId")}
+                    className="w-full flex items-center justify-between p-4 hover:bg-gray-50"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-gray-900">Contract ID</span>
+                      {tempPropertyFilters.contractId && (
+                        <span className="text-sm text-gray-500">1</span>
+                      )}
+                    </div>
+                    <ChevronDown
+                      className={`w-5 h-5 text-gray-500 transition-transform ${
+                        expandedPropertyFilters.contractId ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+                  {expandedPropertyFilters.contractId && (
+                    <div className="px-4 pb-4">
+                      <Input
+                        type="text"
+                        placeholder="Search by contract ID..."
+                        value={tempPropertyFilters.contractId}
+                        onChange={(e) =>
+                          setTempPropertyFilters((prev) => ({
+                            ...prev,
+                            contractId: e.target.value,
+                          }))
+                        }
+                        className="w-full"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Status Filter */}
+                <div className="border rounded-lg">
+                  <button
+                    onClick={() => togglePropertyFilterSection("status")}
+                    className="w-full flex items-center justify-between p-4 hover:bg-gray-50"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-gray-900">Status</span>
+                      {tempPropertyFilters.status.length > 0 && (
+                        <span className="text-sm text-gray-500">
+                          {tempPropertyFilters.status.length}
+                        </span>
+                      )}
+                    </div>
+                    <ChevronDown
+                      className={`w-5 h-5 text-gray-500 transition-transform ${
+                        expandedPropertyFilters.status ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+                  {expandedPropertyFilters.status && (
+                    <div className="px-4 pb-4 space-y-2">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className="rounded accent-black"
+                          checked={tempPropertyFilters.status.includes("In Trust")}
+                          onChange={() =>
+                            handlePropertyFilterToggle("status", "In Trust")
+                          }
+                        />
+                        <span className="text-sm text-gray-700">In Trust</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className="rounded accent-black"
+                          checked={tempPropertyFilters.status.includes("Not Purchased")}
+                          onChange={() =>
+                            handlePropertyFilterToggle("status", "Not Purchased")
+                          }
+                        />
+                        <span className="text-sm text-gray-700">Not Purchased</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className="rounded accent-black"
+                          checked={tempPropertyFilters.status.includes("Used")}
+                          onChange={() =>
+                            handlePropertyFilterToggle("status", "Used")
+                          }
+                        />
+                        <span className="text-sm text-gray-700">Used</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className="rounded accent-black"
+                          checked={tempPropertyFilters.status.includes("Paid")}
+                          onChange={() =>
+                            handlePropertyFilterToggle("status", "Paid")
+                          }
+                        />
+                        <span className="text-sm text-gray-700">Paid</span>
+                      </label>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="p-6 border-t bg-gray-50 rounded-b-lg">
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={cancelPropertyFilters}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="flex-1 bg-black text-white hover:bg-gray-800"
+                  onClick={applyPropertyFilters}
+                >
+                  Save
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Services Filters Modal */}
+      {showServicesFilters && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex justify-end p-4">
+          <div className="bg-white w-full max-w-md h-full flex flex-col rounded-lg">
+            {/* Header */}
+            <div className="p-6 border-b">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-xl font-semibold text-gray-900">
+                  Table filters
+                </h3>
+                <button
+                  onClick={() => setShowServicesFilters(false)}
+                  className="p-1 hover:bg-gray-100 rounded"
+                >
+                  <X className="w-5 h-5 text-gray-500" />
+                </button>
+              </div>
+              <p className="text-sm text-gray-600">
+                Here you can customise your table view to find needed data.
+              </p>
+            </div>
+
+            {/* Filter Sections */}
+            <div className="flex-1 overflow-y-auto p-6">
+              <div className="space-y-2">
+                {/* Contract ID Filter */}
+                <div className="border rounded-lg">
+                  <button
+                    onClick={() => toggleServicesFilterSection("contractId")}
+                    className="w-full flex items-center justify-between p-4 hover:bg-gray-50"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-gray-900">Contract ID</span>
+                      {tempServicesFilters.contractId && (
+                        <span className="text-sm text-gray-500">1</span>
+                      )}
+                    </div>
+                    <ChevronDown
+                      className={`w-5 h-5 text-gray-500 transition-transform ${
+                        expandedServicesFilters.contractId ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+                  {expandedServicesFilters.contractId && (
+                    <div className="px-4 pb-4">
+                      <Input
+                        type="text"
+                        placeholder="Search by contract ID..."
+                        value={tempServicesFilters.contractId}
+                        onChange={(e) =>
+                          setTempServicesFilters((prev) => ({
+                            ...prev,
+                            contractId: e.target.value,
+                          }))
+                        }
+                        className="w-full"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Status Filter */}
+                <div className="border rounded-lg">
+                  <button
+                    onClick={() => toggleServicesFilterSection("status")}
+                    className="w-full flex items-center justify-between p-4 hover:bg-gray-50"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-gray-900">Status</span>
+                      {tempServicesFilters.status.length > 0 && (
+                        <span className="text-sm text-gray-500">
+                          {tempServicesFilters.status.length}
+                        </span>
+                      )}
+                    </div>
+                    <ChevronDown
+                      className={`w-5 h-5 text-gray-500 transition-transform ${
+                        expandedServicesFilters.status ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+                  {expandedServicesFilters.status && (
+                    <div className="px-4 pb-4 space-y-2">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className="rounded accent-black"
+                          checked={tempServicesFilters.status.includes("Paid")}
+                          onChange={() =>
+                            handleServicesFilterToggle("status", "Paid")
+                          }
+                        />
+                        <span className="text-sm text-gray-700">Paid</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className="rounded accent-black"
+                          checked={tempServicesFilters.status.includes("In Trust")}
+                          onChange={() =>
+                            handleServicesFilterToggle("status", "In Trust")
+                          }
+                        />
+                        <span className="text-sm text-gray-700">In Trust</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className="rounded accent-black"
+                          checked={tempServicesFilters.status.includes("Not Purchased")}
+                          onChange={() =>
+                            handleServicesFilterToggle("status", "Not Purchased")
+                          }
+                        />
+                        <span className="text-sm text-gray-700">Not Purchased</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className="rounded accent-black"
+                          checked={tempServicesFilters.status.includes("Used")}
+                          onChange={() =>
+                            handleServicesFilterToggle("status", "Used")
+                          }
+                        />
+                        <span className="text-sm text-gray-700">Used</span>
+                      </label>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="p-6 border-t bg-gray-50 rounded-b-lg">
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={cancelServicesFilters}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="flex-1 bg-black text-white hover:bg-gray-800"
+                  onClick={applyServicesFilters}
+                >
+                  Save
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Merchandise Filters Modal */}
+      {showMerchandiseFilters && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex justify-end p-4">
+          <div className="bg-white w-full max-w-md h-full flex flex-col rounded-lg">
+            {/* Header */}
+            <div className="p-6 border-b">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-xl font-semibold text-gray-900">
+                  Table filters
+                </h3>
+                <button
+                  onClick={() => setShowMerchandiseFilters(false)}
+                  className="p-1 hover:bg-gray-100 rounded"
+                >
+                  <X className="w-5 h-5 text-gray-500" />
+                </button>
+              </div>
+              <p className="text-sm text-gray-600">
+                Here you can customise your table view to find needed data.
+              </p>
+            </div>
+
+            {/* Filter Sections */}
+            <div className="flex-1 overflow-y-auto p-6">
+              <div className="space-y-2">
+                {/* Contract ID Filter */}
+                <div className="border rounded-lg">
+                  <button
+                    onClick={() => toggleMerchandiseFilterSection("contractId")}
+                    className="w-full flex items-center justify-between p-4 hover:bg-gray-50"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-gray-900">Contract ID</span>
+                      {tempMerchandiseFilters.contractId && (
+                        <span className="text-sm text-gray-500">1</span>
+                      )}
+                    </div>
+                    <ChevronDown
+                      className={`w-5 h-5 text-gray-500 transition-transform ${
+                        expandedMerchandiseFilters.contractId ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+                  {expandedMerchandiseFilters.contractId && (
+                    <div className="px-4 pb-4">
+                      <Input
+                        type="text"
+                        placeholder="Search by contract ID..."
+                        value={tempMerchandiseFilters.contractId}
+                        onChange={(e) =>
+                          setTempMerchandiseFilters((prev) => ({
+                            ...prev,
+                            contractId: e.target.value,
+                          }))
+                        }
+                        className="w-full"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Status Filter */}
+                <div className="border rounded-lg">
+                  <button
+                    onClick={() => toggleMerchandiseFilterSection("status")}
+                    className="w-full flex items-center justify-between p-4 hover:bg-gray-50"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-gray-900">Status</span>
+                      {tempMerchandiseFilters.status.length > 0 && (
+                        <span className="text-sm text-gray-500">
+                          {tempMerchandiseFilters.status.length}
+                        </span>
+                      )}
+                    </div>
+                    <ChevronDown
+                      className={`w-5 h-5 text-gray-500 transition-transform ${
+                        expandedMerchandiseFilters.status ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+                  {expandedMerchandiseFilters.status && (
+                    <div className="px-4 pb-4 space-y-2">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className="rounded accent-black"
+                          checked={tempMerchandiseFilters.status.includes("Paid")}
+                          onChange={() =>
+                            handleMerchandiseFilterToggle("status", "Paid")
+                          }
+                        />
+                        <span className="text-sm text-gray-700">Paid</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className="rounded accent-black"
+                          checked={tempMerchandiseFilters.status.includes("In Trust")}
+                          onChange={() =>
+                            handleMerchandiseFilterToggle("status", "In Trust")
+                          }
+                        />
+                        <span className="text-sm text-gray-700">In Trust</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className="rounded accent-black"
+                          checked={tempMerchandiseFilters.status.includes("Not Purchased")}
+                          onChange={() =>
+                            handleMerchandiseFilterToggle("status", "Not Purchased")
+                          }
+                        />
+                        <span className="text-sm text-gray-700">Not Purchased</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className="rounded accent-black"
+                          checked={tempMerchandiseFilters.status.includes("Used")}
+                          onChange={() =>
+                            handleMerchandiseFilterToggle("status", "Used")
+                          }
+                        />
+                        <span className="text-sm text-gray-700">Used</span>
+                      </label>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="p-6 border-t bg-gray-50 rounded-b-lg">
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={cancelMerchandiseFilters}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="flex-1 bg-black text-white hover:bg-gray-800"
+                  onClick={applyMerchandiseFilters}
+                >
+                  Save
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
