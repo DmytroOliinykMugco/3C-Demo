@@ -7,10 +7,6 @@ import {
   MapPin,
   MoreHorizontal,
   Search,
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { Card, CardContent } from "@/components/ui/card";
@@ -18,29 +14,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/toast";
+import { useSectionData } from "@/hooks/useSectionData";
+import FilterModal from "@/components/cemetery/FilterModal";
+import Pagination from "@/components/cemetery/Pagination";
 
 const Funeral = () => {
   const { addToast } = useToast();
   const [activeTab, setActiveTab] = useState("all");
   const [viewMode, setViewMode] = useState("cards"); // 'cards' or 'table' - for dedicated tabs
-
-  // View mode states for All tab sections
-  const [servicesViewMode, setServicesViewMode] = useState("cards");
-  const [merchandiseViewMode, setMerchandiseViewMode] = useState("cards");
-
-  // Services pagination state
-  const [servicesCurrentPage, setServicesCurrentPage] = useState(1);
-  const [servicesRowsPerPage, setServicesRowsPerPage] = useState(5);
-  const [servicesSelectedRows, setServicesSelectedRows] = useState(new Set());
-  const [showAllServices, setShowAllServices] = useState(false);
-
-  // Merchandise pagination state
-  const [merchandiseCurrentPage, setMerchandiseCurrentPage] = useState(1);
-  const [merchandiseRowsPerPage, setMerchandiseRowsPerPage] = useState(5);
-  const [merchandiseSelectedRows, setMerchandiseSelectedRows] = useState(
-    new Set()
-  );
-  const [showAllMerchandise, setShowAllMerchandise] = useState(false);
 
   const {
     data: funeralResponse,
@@ -53,12 +34,18 @@ const Funeral = () => {
 
   const funeralData = funeralResponse?.data;
 
+  // Use custom hook for Services section
+  const services = useSectionData(funeralData?.funeralServices || [], 5);
+
+  // Use custom hook for Merchandise section
+  const merchandise = useSectionData(funeralData?.merchandise || [], 5);
+
   const handleComingSoon = (feature) => {
     addToast(`${feature} will be developed soon`, "success");
   };
 
   // Helper functions for status colors
-  const getServiceStatusColor = (status) => {
+  const getStatusColor = (status) => {
     switch (status) {
       case "In Trust":
         return "bg-blue-100 text-blue-900";
@@ -73,117 +60,12 @@ const Funeral = () => {
     }
   };
 
-  const getMerchandiseStatusColor = (status) => {
-    switch (status) {
-      case "In Trust":
-        return "bg-blue-100 text-blue-900";
-      case "Not Purchased":
-        return "bg-red-100 text-red-900";
-      case "Used":
-        return "bg-yellow-100 text-yellow-900";
-      case "Paid":
-        return "bg-green-100 text-green-900";
-      default:
-        return "bg-gray-100 text-gray-900";
-    }
-  };
+  const getServiceStatusColor = getStatusColor;
+  const getMerchandiseStatusColor = getStatusColor;
 
-  // Services pagination helpers
-  const servicesTotalPages = Math.ceil(
-    (funeralData?.funeralServices.length || 0) / servicesRowsPerPage
-  );
-  const servicesStartIndex = (servicesCurrentPage - 1) * servicesRowsPerPage;
-  const servicesEndIndex = servicesStartIndex + servicesRowsPerPage;
-  const paginatedServices = funeralData?.funeralServices.slice(
-    servicesStartIndex,
-    servicesEndIndex
-  );
-
-  const displayedServices = showAllServices
-    ? funeralData?.funeralServices
-    : funeralData?.funeralServices.slice(0, 5);
-
-  const handleServicesFirstPage = () => setServicesCurrentPage(1);
-  const handleServicesPrevPage = () =>
-    setServicesCurrentPage((prev) => Math.max(prev - 1, 1));
-  const handleServicesNextPage = () =>
-    setServicesCurrentPage((prev) => Math.min(prev + 1, servicesTotalPages));
-  const handleServicesLastPage = () =>
-    setServicesCurrentPage(servicesTotalPages);
-
-  const handleSelectServiceRow = (id) => {
-    const newSelected = new Set(servicesSelectedRows);
-    if (newSelected.has(id)) {
-      newSelected.delete(id);
-    } else {
-      newSelected.add(id);
-    }
-    setServicesSelectedRows(newSelected);
-  };
-
-  const handleSelectAllServices = (checked) => {
-    if (checked) {
-      const allIds = new Set(paginatedServices.map((s) => s.id));
-      setServicesSelectedRows(allIds);
-    } else {
-      setServicesSelectedRows(new Set());
-    }
-  };
-
-  const handleServicesRowsPerPageChange = (value) => {
-    setServicesRowsPerPage(Number(value));
-    setServicesCurrentPage(1);
-  };
-
-  // Merchandise pagination helpers
-  const merchandiseTotalPages = Math.ceil(
-    (funeralData?.merchandise.length || 0) / merchandiseRowsPerPage
-  );
-  const merchandiseStartIndex =
-    (merchandiseCurrentPage - 1) * merchandiseRowsPerPage;
-  const merchandiseEndIndex = merchandiseStartIndex + merchandiseRowsPerPage;
-  const paginatedMerchandise = funeralData?.merchandise.slice(
-    merchandiseStartIndex,
-    merchandiseEndIndex
-  );
-
-  const displayedMerchandise = showAllMerchandise
-    ? funeralData?.merchandise
-    : funeralData?.merchandise.slice(0, 5);
-
-  const handleMerchandiseFirstPage = () => setMerchandiseCurrentPage(1);
-  const handleMerchandisePrevPage = () =>
-    setMerchandiseCurrentPage((prev) => Math.max(prev - 1, 1));
-  const handleMerchandiseNextPage = () =>
-    setMerchandiseCurrentPage((prev) =>
-      Math.min(prev + 1, merchandiseTotalPages)
-    );
-  const handleMerchandiseLastPage = () =>
-    setMerchandiseCurrentPage(merchandiseTotalPages);
-
-  const handleSelectMerchandiseRow = (id) => {
-    const newSelected = new Set(merchandiseSelectedRows);
-    if (newSelected.has(id)) {
-      newSelected.delete(id);
-    } else {
-      newSelected.add(id);
-    }
-    setMerchandiseSelectedRows(newSelected);
-  };
-
-  const handleSelectAllMerchandise = (checked) => {
-    if (checked) {
-      const allIds = new Set(paginatedMerchandise.map((m) => m.id));
-      setMerchandiseSelectedRows(allIds);
-    } else {
-      setMerchandiseSelectedRows(new Set());
-    }
-  };
-
-  const handleMerchandiseRowsPerPageChange = (value) => {
-    setMerchandiseRowsPerPage(Number(value));
-    setMerchandiseCurrentPage(1);
-  };
+  // Status options for filters
+  const servicesStatusOptions = ["Paid", "Pending", "In Trust"];
+  const merchandiseStatusOptions = ["Paid", "Not Purchased", "Used"];
 
   if (isLoading) {
     return (
@@ -246,9 +128,9 @@ const Funeral = () => {
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-gray-600">View</span>
                     <button
-                      onClick={() => setServicesViewMode("cards")}
+                      onClick={() => services.setViewMode("cards")}
                       className={`p-2 rounded ${
-                        servicesViewMode === "cards"
+                        services.viewMode === "cards"
                           ? "bg-gray-200"
                           : "hover:bg-gray-100"
                       }`}
@@ -256,9 +138,9 @@ const Funeral = () => {
                       <LayoutGrid className="w-5 h-5" />
                     </button>
                     <button
-                      onClick={() => setServicesViewMode("table")}
+                      onClick={() => services.setViewMode("table")}
                       className={`p-2 rounded ${
-                        servicesViewMode === "table"
+                        services.viewMode === "table"
                           ? "bg-gray-200"
                           : "hover:bg-gray-100"
                       }`}
@@ -273,27 +155,18 @@ const Funeral = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleComingSoon("Filters")}
+                    onClick={() => services.setShowFilters(true)}
                   >
                     <Filter className="w-4 h-4 mr-2" />
                     Filters
+                    {(services.filters.contractId || services.filters.status.length > 0) && (
+                      <span className="ml-2 px-1.5 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full">Active</span>
+                    )}
                   </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleComingSoon("View options")}
-                  >
-                    <LayoutList className="w-4 h-4 mr-2" />
-                    View
-                  </Button>
-                  <div className="relative flex-1 max-w-xs">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <Input type="text" placeholder="Search" className="pl-10" />
-                  </div>
                 </div>
 
                 {/* Table View */}
-                {servicesViewMode === "table" && (
+                {services.viewMode === "table" && (
                   <Card>
                     <CardContent className="p-6">
                       <div className="overflow-x-auto">
@@ -305,13 +178,13 @@ const Funeral = () => {
                                   type="checkbox"
                                   className="rounded"
                                   checked={
-                                    paginatedServices?.length > 0 &&
-                                    paginatedServices.every((s) =>
-                                      servicesSelectedRows.has(s.id)
+                                    services.paginatedData?.length > 0 &&
+                                    services.paginatedData.every((s) =>
+                                      services.selectedRows.has(s.id)
                                     )
                                   }
                                   onChange={(e) =>
-                                    handleSelectAllServices(e.target.checked)
+                                    services.handleSelectAll(e.target.checked)
                                   }
                                 />
                               </th>
@@ -337,58 +210,58 @@ const Funeral = () => {
                             </tr>
                           </thead>
                           <tbody>
-                            {paginatedServices?.map((service) => (
+                            {services.paginatedData?.map((serviceItem) => (
                               <tr
-                                key={service.id}
+                                key={serviceItem.id}
                                 className="border-b hover:bg-gray-50"
                               >
                                 <td className="py-3 px-4">
                                   <input
                                     type="checkbox"
                                     className="rounded"
-                                    checked={servicesSelectedRows.has(
-                                      service.id
+                                    checked={services.selectedRows.has(
+                                      serviceItem.id
                                     )}
                                     onChange={() =>
-                                      handleSelectServiceRow(service.id)
+                                      services.handleSelectRow(serviceItem.id)
                                     }
                                   />
                                 </td>
                                 <td className="py-3 px-4 text-sm text-gray-900">
-                                  {service.contractId}
+                                  {serviceItem.contractId}
                                 </td>
                                 <td className="py-3 px-4 text-sm text-gray-900">
-                                  {service.name}
+                                  {serviceItem.name}
                                 </td>
                                 <td className="py-3 px-4">
                                   <div className="flex items-center gap-2">
                                     <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center">
                                       <span className="text-xs font-semibold text-gray-700">
-                                        {service.beneficiary.initials}
+                                        {serviceItem.beneficiary.initials}
                                       </span>
                                     </div>
                                     <span className="text-sm text-gray-900">
-                                      {service.beneficiary.name}
+                                      {serviceItem.beneficiary.name}
                                     </span>
                                     <span className="px-2 py-0.5 bg-blue-100 text-blue-900 text-xs rounded">
-                                      {service.beneficiary.badge}
+                                      {serviceItem.beneficiary.badge}
                                     </span>
                                   </div>
                                 </td>
                                 <td className="py-3 px-4 text-sm text-gray-900">
-                                  {service.dateTime}
+                                  {serviceItem.dateTime}
                                 </td>
                                 <td className="py-3 px-4">
                                   <span
                                     className={`px-3 py-1 text-sm rounded font-medium ${getServiceStatusColor(
-                                      service.status
+                                      serviceItem.status
                                     )}`}
                                   >
-                                    {service.status}
+                                    {serviceItem.status}
                                   </span>
                                 </td>
                                 <td className="py-3 px-4 text-sm text-gray-900">
-                                  {service.serviceId}
+                                  {serviceItem.serviceId}
                                 </td>
                                 <td className="py-3 px-4 text-center">
                                   <button
@@ -406,89 +279,35 @@ const Funeral = () => {
                         </table>
                       </div>
 
-                      {/* Pagination */}
-                      <div className="flex items-center justify-between mt-4 text-sm text-gray-600">
-                        <p>
-                          {servicesSelectedRows.size} of{" "}
-                          {funeralData?.funeralServices.length || 0} row(s)
-                          selected.
-                        </p>
-                        <div className="flex items-center gap-4">
-                          <div className="flex items-center gap-2">
-                            <span>Rows per page</span>
-                            <select
-                              value={servicesRowsPerPage}
-                              onChange={(e) =>
-                                handleServicesRowsPerPageChange(e.target.value)
-                              }
-                              className="border border-gray-300 rounded px-2 py-1 text-sm"
-                            >
-                              <option value={5}>5</option>
-                              <option value={10}>10</option>
-                              <option value={20}>20</option>
-                              <option value={50}>50</option>
-                              <option value={100}>100</option>
-                            </select>
-                          </div>
-                          <span>
-                            Page {servicesCurrentPage} of {servicesTotalPages}
-                          </span>
-                          <div className="flex items-center gap-1">
-                            <button
-                              onClick={handleServicesFirstPage}
-                              disabled={servicesCurrentPage === 1}
-                              className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <ChevronsLeft className="w-5 h-5" />
-                            </button>
-                            <button
-                              onClick={handleServicesPrevPage}
-                              disabled={servicesCurrentPage === 1}
-                              className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <ChevronLeft className="w-5 h-5" />
-                            </button>
-                            <button
-                              onClick={handleServicesNextPage}
-                              disabled={
-                                servicesCurrentPage === servicesTotalPages
-                              }
-                              className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <ChevronRight className="w-5 h-5" />
-                            </button>
-                            <button
-                              onClick={handleServicesLastPage}
-                              disabled={
-                                servicesCurrentPage === servicesTotalPages
-                              }
-                              className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <ChevronsRight className="w-5 h-5" />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
+                      <Pagination
+                        selectedCount={services.selectedRows.size}
+                        totalCount={services.filteredData.length}
+                        currentPage={services.currentPage}
+                        totalPages={services.totalPages}
+                        rowsPerPage={services.rowsPerPage}
+                        onPageChange={services.handlePageChange}
+                        onRowsPerPageChange={services.handleRowsPerPageChange}
+                      />
                     </CardContent>
                   </Card>
                 )}
 
                 {/* Card View */}
-                {servicesViewMode === "cards" && (
+                {services.viewMode === "cards" && (
                   <div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                      {displayedServices?.map((service) => (
-                        <Card key={service.id}>
+                      {services.displayedData?.map((serviceItem) => (
+                        <Card key={serviceItem.id}>
                           <CardContent className="p-0">
                             <div className="relative">
                               <img
-                                src={service.image}
-                                alt={service.name}
+                                src={serviceItem.image}
+                                alt={serviceItem.name}
                                 className="w-full h-48 object-cover rounded-t-lg"
                               />
                               <div className="absolute top-3 left-3">
                                 <span className="px-3 py-1 bg-white/90 backdrop-blur text-gray-900 text-xs font-medium rounded">
-                                  Contract ID: {service.contractId}
+                                  Contract ID: {serviceItem.contractId}
                                 </span>
                               </div>
                             </div>
@@ -496,7 +315,7 @@ const Funeral = () => {
                             <div className="p-4">
                               <div className="flex items-start justify-between mb-3">
                                 <h3 className="text-lg font-semibold text-gray-900 flex-1">
-                                  {service.name}
+                                  {serviceItem.name}
                                 </h3>
                                 <button
                                   onClick={() =>
@@ -509,31 +328,31 @@ const Funeral = () => {
                               </div>
                               <span
                                 className={`inline-block px-3 py-1 text-sm rounded font-medium mb-3 ${getServiceStatusColor(
-                                  service.status
+                                  serviceItem.status
                                 )}`}
                               >
-                                {service.status}
+                                {serviceItem.status}
                               </span>
 
                               <div className="flex items-center gap-2 mb-2">
                                 <div className="w-8 h-8 rounded-full bg-purple-200 flex items-center justify-center">
                                   <span className="text-xs font-semibold text-purple-700">
-                                    {service.beneficiary.initials}
+                                    {serviceItem.beneficiary.initials}
                                   </span>
                                 </div>
                                 <div>
                                   <p className="text-sm font-medium text-gray-900">
-                                    {service.beneficiary.name}
+                                    {serviceItem.beneficiary.name}
                                   </p>
                                   <span className="px-2 py-0.5 bg-red-100 text-red-900 text-xs rounded font-medium">
-                                    {service.beneficiary.badge}
+                                    {serviceItem.beneficiary.badge}
                                   </span>
                                 </div>
                               </div>
 
                               <div className="flex items-center gap-1 text-sm text-gray-600">
                                 <MapPin className="w-4 h-4" />
-                                <span>{service.location}</span>
+                                <span>{serviceItem.location}</span>
                               </div>
                             </div>
                           </CardContent>
@@ -541,17 +360,16 @@ const Funeral = () => {
                       ))}
                     </div>
 
-                    {!showAllServices &&
-                      funeralData?.funeralServices.length > 5 && (
-                        <div className="flex justify-center">
-                          <Button
-                            variant="outline"
-                            onClick={() => setShowAllServices(true)}
-                          >
-                            Load all ({funeralData?.funeralServices.length})
-                          </Button>
-                        </div>
-                      )}
+                    {!services.showAll && services.filteredData.length > 5 && (
+                      <div className="flex justify-center">
+                        <Button
+                          variant="outline"
+                          onClick={() => services.handleLoadAll()}
+                        >
+                          Load all ({services.filteredData.length})
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -571,9 +389,9 @@ const Funeral = () => {
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-gray-600">View</span>
                     <button
-                      onClick={() => setMerchandiseViewMode("cards")}
+                      onClick={() => merchandise.setViewMode("cards")}
                       className={`p-2 rounded ${
-                        merchandiseViewMode === "cards"
+                        merchandise.viewMode === "cards"
                           ? "bg-gray-200"
                           : "hover:bg-gray-100"
                       }`}
@@ -581,9 +399,9 @@ const Funeral = () => {
                       <LayoutGrid className="w-5 h-5" />
                     </button>
                     <button
-                      onClick={() => setMerchandiseViewMode("table")}
+                      onClick={() => merchandise.setViewMode("table")}
                       className={`p-2 rounded ${
-                        merchandiseViewMode === "table"
+                        merchandise.viewMode === "table"
                           ? "bg-gray-200"
                           : "hover:bg-gray-100"
                       }`}
@@ -598,27 +416,18 @@ const Funeral = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleComingSoon("Filters")}
+                    onClick={() => merchandise.setShowFilters(true)}
                   >
                     <Filter className="w-4 h-4 mr-2" />
                     Filters
+                    {(merchandise.filters.contractId || merchandise.filters.status.length > 0) && (
+                      <span className="ml-2 px-1.5 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full">Active</span>
+                    )}
                   </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleComingSoon("View options")}
-                  >
-                    <LayoutList className="w-4 h-4 mr-2" />
-                    View
-                  </Button>
-                  <div className="relative flex-1 max-w-xs">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <Input type="text" placeholder="Search" className="pl-10" />
-                  </div>
                 </div>
 
                 {/* Table View */}
-                {merchandiseViewMode === "table" && (
+                {merchandise.viewMode === "table" && (
                   <Card>
                     <CardContent className="p-6">
                       <div className="overflow-x-auto">
@@ -630,13 +439,13 @@ const Funeral = () => {
                                   type="checkbox"
                                   className="rounded"
                                   checked={
-                                    paginatedMerchandise?.length > 0 &&
-                                    paginatedMerchandise.every((m) =>
-                                      merchandiseSelectedRows.has(m.id)
+                                    merchandise.paginatedData?.length > 0 &&
+                                    merchandise.paginatedData.every((m) =>
+                                      merchandise.selectedRows.has(m.id)
                                     )
                                   }
                                   onChange={(e) =>
-                                    handleSelectAllMerchandise(e.target.checked)
+                                    merchandise.handleSelectAll(e.target.checked)
                                   }
                                 />
                               </th>
@@ -662,58 +471,58 @@ const Funeral = () => {
                             </tr>
                           </thead>
                           <tbody>
-                            {paginatedMerchandise?.map((item) => (
+                            {merchandise.paginatedData?.map((merchandiseItem) => (
                               <tr
-                                key={item.id}
+                                key={merchandiseItem.id}
                                 className="border-b hover:bg-gray-50"
                               >
                                 <td className="py-3 px-4">
                                   <input
                                     type="checkbox"
                                     className="rounded"
-                                    checked={merchandiseSelectedRows.has(
-                                      item.id
+                                    checked={merchandise.selectedRows.has(
+                                      merchandiseItem.id
                                     )}
                                     onChange={() =>
-                                      handleSelectMerchandiseRow(item.id)
+                                      merchandise.handleSelectRow(merchandiseItem.id)
                                     }
                                   />
                                 </td>
                                 <td className="py-3 px-4 text-sm text-gray-900">
-                                  {item.contractId}
+                                  {merchandiseItem.contractId}
                                 </td>
                                 <td className="py-3 px-4 text-sm text-gray-900">
-                                  {item.name}
+                                  {merchandiseItem.name}
                                 </td>
                                 <td className="py-3 px-4">
                                   <div className="flex items-center gap-2">
                                     <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center">
                                       <span className="text-xs font-semibold text-gray-700">
-                                        {item.beneficiary.initials}
+                                        {merchandiseItem.beneficiary.initials}
                                       </span>
                                     </div>
                                     <span className="text-sm text-gray-900">
-                                      {item.beneficiary.name}
+                                      {merchandiseItem.beneficiary.name}
                                     </span>
                                     <span className="px-2 py-0.5 bg-blue-100 text-blue-900 text-xs rounded">
-                                      {item.beneficiary.badge}
+                                      {merchandiseItem.beneficiary.badge}
                                     </span>
                                   </div>
                                 </td>
                                 <td className="py-3 px-4 text-sm text-gray-900">
-                                  {item.dateTime}
+                                  {merchandiseItem.dateTime}
                                 </td>
                                 <td className="py-3 px-4">
                                   <span
                                     className={`px-3 py-1 text-sm rounded font-medium ${getMerchandiseStatusColor(
-                                      item.status
+                                      merchandiseItem.status
                                     )}`}
                                   >
-                                    {item.status}
+                                    {merchandiseItem.status}
                                   </span>
                                 </td>
                                 <td className="py-3 px-4 text-sm text-gray-900">
-                                  {item.serviceId}
+                                  {merchandiseItem.serviceId}
                                 </td>
                                 <td className="py-3 px-4 text-center">
                                   <button
@@ -731,92 +540,35 @@ const Funeral = () => {
                         </table>
                       </div>
 
-                      {/* Pagination */}
-                      <div className="flex items-center justify-between mt-4 text-sm text-gray-600">
-                        <p>
-                          {merchandiseSelectedRows.size} of{" "}
-                          {funeralData?.merchandise.length || 0} row(s)
-                          selected.
-                        </p>
-                        <div className="flex items-center gap-4">
-                          <div className="flex items-center gap-2">
-                            <span>Rows per page</span>
-                            <select
-                              value={merchandiseRowsPerPage}
-                              onChange={(e) =>
-                                handleMerchandiseRowsPerPageChange(
-                                  e.target.value
-                                )
-                              }
-                              className="border border-gray-300 rounded px-2 py-1 text-sm"
-                            >
-                              <option value={5}>5</option>
-                              <option value={10}>10</option>
-                              <option value={20}>20</option>
-                              <option value={50}>50</option>
-                              <option value={100}>100</option>
-                            </select>
-                          </div>
-                          <span>
-                            Page {merchandiseCurrentPage} of{" "}
-                            {merchandiseTotalPages}
-                          </span>
-                          <div className="flex items-center gap-1">
-                            <button
-                              onClick={handleMerchandiseFirstPage}
-                              disabled={merchandiseCurrentPage === 1}
-                              className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <ChevronsLeft className="w-5 h-5" />
-                            </button>
-                            <button
-                              onClick={handleMerchandisePrevPage}
-                              disabled={merchandiseCurrentPage === 1}
-                              className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <ChevronLeft className="w-5 h-5" />
-                            </button>
-                            <button
-                              onClick={handleMerchandiseNextPage}
-                              disabled={
-                                merchandiseCurrentPage === merchandiseTotalPages
-                              }
-                              className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <ChevronRight className="w-5 h-5" />
-                            </button>
-                            <button
-                              onClick={handleMerchandiseLastPage}
-                              disabled={
-                                merchandiseCurrentPage === merchandiseTotalPages
-                              }
-                              className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <ChevronsRight className="w-5 h-5" />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
+                      <Pagination
+                        selectedCount={merchandise.selectedRows.size}
+                        totalCount={merchandise.filteredData.length}
+                        currentPage={merchandise.currentPage}
+                        totalPages={merchandise.totalPages}
+                        rowsPerPage={merchandise.rowsPerPage}
+                        onPageChange={merchandise.handlePageChange}
+                        onRowsPerPageChange={merchandise.handleRowsPerPageChange}
+                      />
                     </CardContent>
                   </Card>
                 )}
 
                 {/* Card View */}
-                {merchandiseViewMode === "cards" && (
+                {merchandise.viewMode === "cards" && (
                   <div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                      {displayedMerchandise?.map((item) => (
-                        <Card key={item.id}>
+                      {merchandise.displayedData?.map((merchandiseItem) => (
+                        <Card key={merchandiseItem.id}>
                           <CardContent className="p-0">
                             <div className="relative">
                               <img
-                                src={item.image}
-                                alt={item.name}
+                                src={merchandiseItem.image}
+                                alt={merchandiseItem.name}
                                 className="w-full h-48 object-cover rounded-t-lg"
                               />
                               <div className="absolute top-3 left-3">
                                 <span className="px-3 py-1 bg-white/90 backdrop-blur text-gray-900 text-xs font-medium rounded">
-                                  Contract ID: {item.contractId}
+                                  Contract ID: {merchandiseItem.contractId}
                                 </span>
                               </div>
                             </div>
@@ -824,7 +576,7 @@ const Funeral = () => {
                             <div className="p-4">
                               <div className="flex items-start justify-between mb-3">
                                 <h3 className="text-lg font-semibold text-gray-900 flex-1">
-                                  {item.name}
+                                  {merchandiseItem.name}
                                 </h3>
                                 <button
                                   onClick={() =>
@@ -837,32 +589,32 @@ const Funeral = () => {
                               </div>
                               <span
                                 className={`inline-block px-3 py-1 text-sm rounded font-medium mb-3 ${getMerchandiseStatusColor(
-                                  item.status
+                                  merchandiseItem.status
                                 )}`}
                               >
-                                {item.status}
+                                {merchandiseItem.status}
                               </span>
 
                               <div className="flex items-center gap-2 mb-2">
                                 <div className="w-8 h-8 rounded-full bg-purple-200 flex items-center justify-center">
                                   <span className="text-xs font-semibold text-purple-700">
-                                    {item.beneficiary.initials}
+                                    {merchandiseItem.beneficiary.initials}
                                   </span>
                                 </div>
                                 <div>
                                   <p className="text-sm font-medium text-gray-900">
-                                    {item.beneficiary.name}
+                                    {merchandiseItem.beneficiary.name}
                                   </p>
                                   <span className="px-2 py-0.5 bg-red-100 text-red-900 text-xs rounded font-medium">
-                                    {item.beneficiary.badge}
+                                    {merchandiseItem.beneficiary.badge}
                                   </span>
                                 </div>
                               </div>
 
-                              {item.location && (
+                              {merchandiseItem.location && (
                                 <div className="flex items-center gap-1 text-sm text-gray-600">
                                   <MapPin className="w-4 h-4" />
-                                  <span>{item.location}</span>
+                                  <span>{merchandiseItem.location}</span>
                                 </div>
                               )}
                             </div>
@@ -871,14 +623,14 @@ const Funeral = () => {
                       ))}
                     </div>
 
-                    {!showAllMerchandise &&
-                      funeralData?.merchandise.length > 5 && (
+                    {!merchandise.showAll &&
+                      merchandise.filteredData.length > 5 && (
                         <div className="flex justify-center">
                           <Button
                             variant="outline"
-                            onClick={() => setShowAllMerchandise(true)}
+                            onClick={() => merchandise.handleLoadAll()}
                           >
-                            Load all ({funeralData?.merchandise.length})
+                            Load all ({merchandise.filteredData.length})
                           </Button>
                         </div>
                       )}
@@ -931,23 +683,14 @@ const Funeral = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleComingSoon("Filters")}
+                    onClick={() => services.setShowFilters(true)}
                   >
                     <Filter className="w-4 h-4 mr-2" />
                     Filters
+                    {(services.filters.contractId || services.filters.status.length > 0) && (
+                      <span className="ml-2 px-1.5 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full">Active</span>
+                    )}
                   </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleComingSoon("View options")}
-                  >
-                    <LayoutList className="w-4 h-4 mr-2" />
-                    View
-                  </Button>
-                  <div className="relative flex-1 max-w-xs">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <Input type="text" placeholder="Search" className="pl-10" />
-                  </div>
                 </div>
 
                 {/* Table View */}
@@ -963,13 +706,13 @@ const Funeral = () => {
                                   type="checkbox"
                                   className="rounded"
                                   checked={
-                                    paginatedServices?.length > 0 &&
-                                    paginatedServices.every((s) =>
-                                      servicesSelectedRows.has(s.id)
+                                    services.paginatedData?.length > 0 &&
+                                    services.paginatedData.every((s) =>
+                                      services.selectedRows.has(s.id)
                                     )
                                   }
                                   onChange={(e) =>
-                                    handleSelectAllServices(e.target.checked)
+                                    services.handleSelectAll(e.target.checked)
                                   }
                                 />
                               </th>
@@ -995,58 +738,58 @@ const Funeral = () => {
                             </tr>
                           </thead>
                           <tbody>
-                            {paginatedServices?.map((service) => (
+                            {services.paginatedData?.map((serviceItem) => (
                               <tr
-                                key={service.id}
+                                key={serviceItem.id}
                                 className="border-b hover:bg-gray-50"
                               >
                                 <td className="py-3 px-4">
                                   <input
                                     type="checkbox"
                                     className="rounded"
-                                    checked={servicesSelectedRows.has(
-                                      service.id
+                                    checked={services.selectedRows.has(
+                                      serviceItem.id
                                     )}
                                     onChange={() =>
-                                      handleSelectServiceRow(service.id)
+                                      services.handleSelectRow(serviceItem.id)
                                     }
                                   />
                                 </td>
                                 <td className="py-3 px-4 text-sm text-gray-900">
-                                  {service.contractId}
+                                  {serviceItem.contractId}
                                 </td>
                                 <td className="py-3 px-4 text-sm text-gray-900">
-                                  {service.name}
+                                  {serviceItem.name}
                                 </td>
                                 <td className="py-3 px-4">
                                   <div className="flex items-center gap-2">
                                     <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center">
                                       <span className="text-xs font-semibold text-gray-700">
-                                        {service.beneficiary.initials}
+                                        {serviceItem.beneficiary.initials}
                                       </span>
                                     </div>
                                     <span className="text-sm text-gray-900">
-                                      {service.beneficiary.name}
+                                      {serviceItem.beneficiary.name}
                                     </span>
                                     <span className="px-2 py-0.5 bg-blue-100 text-blue-900 text-xs rounded">
-                                      {service.beneficiary.badge}
+                                      {serviceItem.beneficiary.badge}
                                     </span>
                                   </div>
                                 </td>
                                 <td className="py-3 px-4 text-sm text-gray-900">
-                                  {service.dateTime}
+                                  {serviceItem.dateTime}
                                 </td>
                                 <td className="py-3 px-4">
                                   <span
                                     className={`px-3 py-1 text-sm rounded font-medium ${getServiceStatusColor(
-                                      service.status
+                                      serviceItem.status
                                     )}`}
                                   >
-                                    {service.status}
+                                    {serviceItem.status}
                                   </span>
                                 </td>
                                 <td className="py-3 px-4 text-sm text-gray-900">
-                                  {service.serviceId}
+                                  {serviceItem.serviceId}
                                 </td>
                                 <td className="py-3 px-4 text-center">
                                   <button
@@ -1064,69 +807,15 @@ const Funeral = () => {
                         </table>
                       </div>
 
-                      {/* Pagination */}
-                      <div className="flex items-center justify-between mt-4 text-sm text-gray-600">
-                        <p>
-                          {servicesSelectedRows.size} of{" "}
-                          {funeralData?.funeralServices.length || 0} row(s)
-                          selected.
-                        </p>
-                        <div className="flex items-center gap-4">
-                          <div className="flex items-center gap-2">
-                            <span>Rows per page</span>
-                            <select
-                              value={servicesRowsPerPage}
-                              onChange={(e) =>
-                                handleServicesRowsPerPageChange(e.target.value)
-                              }
-                              className="border border-gray-300 rounded px-2 py-1 text-sm"
-                            >
-                              <option value={5}>5</option>
-                              <option value={10}>10</option>
-                              <option value={20}>20</option>
-                              <option value={50}>50</option>
-                              <option value={100}>100</option>
-                            </select>
-                          </div>
-                          <span>
-                            Page {servicesCurrentPage} of {servicesTotalPages}
-                          </span>
-                          <div className="flex items-center gap-1">
-                            <button
-                              onClick={handleServicesFirstPage}
-                              disabled={servicesCurrentPage === 1}
-                              className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <ChevronsLeft className="w-5 h-5" />
-                            </button>
-                            <button
-                              onClick={handleServicesPrevPage}
-                              disabled={servicesCurrentPage === 1}
-                              className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <ChevronLeft className="w-5 h-5" />
-                            </button>
-                            <button
-                              onClick={handleServicesNextPage}
-                              disabled={
-                                servicesCurrentPage === servicesTotalPages
-                              }
-                              className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <ChevronRight className="w-5 h-5" />
-                            </button>
-                            <button
-                              onClick={handleServicesLastPage}
-                              disabled={
-                                servicesCurrentPage === servicesTotalPages
-                              }
-                              className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <ChevronsRight className="w-5 h-5" />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
+                      <Pagination
+                        selectedCount={services.selectedRows.size}
+                        totalCount={services.filteredData.length}
+                        currentPage={services.currentPage}
+                        totalPages={services.totalPages}
+                        rowsPerPage={services.rowsPerPage}
+                        onPageChange={services.handlePageChange}
+                        onRowsPerPageChange={services.handleRowsPerPageChange}
+                      />
                     </CardContent>
                   </Card>
                 )}
@@ -1135,18 +824,18 @@ const Funeral = () => {
                 {viewMode === "cards" && (
                   <div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                      {displayedServices?.map((service) => (
-                        <Card key={service.id}>
+                      {services.displayedData?.map((serviceItem) => (
+                        <Card key={serviceItem.id}>
                           <CardContent className="p-0">
                             <div className="relative">
                               <img
-                                src={service.image}
-                                alt={service.name}
+                                src={serviceItem.image}
+                                alt={serviceItem.name}
                                 className="w-full h-48 object-cover rounded-t-lg"
                               />
                               <div className="absolute top-3 left-3">
                                 <span className="px-3 py-1 bg-white/90 backdrop-blur text-gray-900 text-xs font-medium rounded">
-                                  Contract ID: {service.contractId}
+                                  Contract ID: {serviceItem.contractId}
                                 </span>
                               </div>
                             </div>
@@ -1154,7 +843,7 @@ const Funeral = () => {
                             <div className="p-4">
                               <div className="flex items-start justify-between mb-3">
                                 <h3 className="text-lg font-semibold text-gray-900 flex-1">
-                                  {service.name}
+                                  {serviceItem.name}
                                 </h3>
                                 <button
                                   onClick={() =>
@@ -1167,31 +856,31 @@ const Funeral = () => {
                               </div>
                               <span
                                 className={`inline-block px-3 py-1 text-sm rounded font-medium mb-3 ${getServiceStatusColor(
-                                  service.status
+                                  serviceItem.status
                                 )}`}
                               >
-                                {service.status}
+                                {serviceItem.status}
                               </span>
 
                               <div className="flex items-center gap-2 mb-2">
                                 <div className="w-8 h-8 rounded-full bg-purple-200 flex items-center justify-center">
                                   <span className="text-xs font-semibold text-purple-700">
-                                    {service.beneficiary.initials}
+                                    {serviceItem.beneficiary.initials}
                                   </span>
                                 </div>
                                 <div>
                                   <p className="text-sm font-medium text-gray-900">
-                                    {service.beneficiary.name}
+                                    {serviceItem.beneficiary.name}
                                   </p>
                                   <span className="px-2 py-0.5 bg-red-100 text-red-900 text-xs rounded font-medium">
-                                    {service.beneficiary.badge}
+                                    {serviceItem.beneficiary.badge}
                                   </span>
                                 </div>
                               </div>
 
                               <div className="flex items-center gap-1 text-sm text-gray-600">
                                 <MapPin className="w-4 h-4" />
-                                <span>{service.location}</span>
+                                <span>{serviceItem.location}</span>
                               </div>
                             </div>
                           </CardContent>
@@ -1199,14 +888,14 @@ const Funeral = () => {
                       ))}
                     </div>
 
-                    {!showAllServices &&
-                      funeralData?.funeralServices.length > 5 && (
+                    {!services.showAll &&
+                      services.filteredData.length > 5 && (
                         <div className="flex justify-center">
                           <Button
                             variant="outline"
-                            onClick={() => setShowAllServices(true)}
+                            onClick={() => services.handleLoadAll()}
                           >
-                            Load all ({funeralData?.funeralServices.length})
+                            Load all ({services.filteredData.length})
                           </Button>
                         </div>
                       )}
@@ -1260,23 +949,14 @@ const Funeral = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleComingSoon("Filters")}
+                    onClick={() => merchandise.setShowFilters(true)}
                   >
                     <Filter className="w-4 h-4 mr-2" />
                     Filters
+                    {(merchandise.filters.contractId || merchandise.filters.status.length > 0) && (
+                      <span className="ml-2 px-1.5 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full">Active</span>
+                    )}
                   </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleComingSoon("View options")}
-                  >
-                    <LayoutList className="w-4 h-4 mr-2" />
-                    View
-                  </Button>
-                  <div className="relative flex-1 max-w-xs">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <Input type="text" placeholder="Search" className="pl-10" />
-                  </div>
                 </div>
 
                 {/* Table View */}
@@ -1292,13 +972,13 @@ const Funeral = () => {
                                   type="checkbox"
                                   className="rounded"
                                   checked={
-                                    paginatedMerchandise?.length > 0 &&
-                                    paginatedMerchandise.every((m) =>
-                                      merchandiseSelectedRows.has(m.id)
+                                    merchandise.paginatedData?.length > 0 &&
+                                    merchandise.paginatedData.every((m) =>
+                                      merchandise.selectedRows.has(m.id)
                                     )
                                   }
                                   onChange={(e) =>
-                                    handleSelectAllMerchandise(e.target.checked)
+                                    merchandise.handleSelectAll(e.target.checked)
                                   }
                                 />
                               </th>
@@ -1324,58 +1004,58 @@ const Funeral = () => {
                             </tr>
                           </thead>
                           <tbody>
-                            {paginatedMerchandise?.map((item) => (
+                            {merchandise.paginatedData?.map((merchandiseItem) => (
                               <tr
-                                key={item.id}
+                                key={merchandiseItem.id}
                                 className="border-b hover:bg-gray-50"
                               >
                                 <td className="py-3 px-4">
                                   <input
                                     type="checkbox"
                                     className="rounded"
-                                    checked={merchandiseSelectedRows.has(
-                                      item.id
+                                    checked={merchandise.selectedRows.has(
+                                      merchandiseItem.id
                                     )}
                                     onChange={() =>
-                                      handleSelectMerchandiseRow(item.id)
+                                      merchandise.handleSelectRow(merchandiseItem.id)
                                     }
                                   />
                                 </td>
                                 <td className="py-3 px-4 text-sm text-gray-900">
-                                  {item.contractId}
+                                  {merchandiseItem.contractId}
                                 </td>
                                 <td className="py-3 px-4 text-sm text-gray-900">
-                                  {item.name}
+                                  {merchandiseItem.name}
                                 </td>
                                 <td className="py-3 px-4">
                                   <div className="flex items-center gap-2">
                                     <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center">
                                       <span className="text-xs font-semibold text-gray-700">
-                                        {item.beneficiary.initials}
+                                        {merchandiseItem.beneficiary.initials}
                                       </span>
                                     </div>
                                     <span className="text-sm text-gray-900">
-                                      {item.beneficiary.name}
+                                      {merchandiseItem.beneficiary.name}
                                     </span>
                                     <span className="px-2 py-0.5 bg-blue-100 text-blue-900 text-xs rounded">
-                                      {item.beneficiary.badge}
+                                      {merchandiseItem.beneficiary.badge}
                                     </span>
                                   </div>
                                 </td>
                                 <td className="py-3 px-4 text-sm text-gray-900">
-                                  {item.dateTime}
+                                  {merchandiseItem.dateTime}
                                 </td>
                                 <td className="py-3 px-4">
                                   <span
                                     className={`px-3 py-1 text-sm rounded font-medium ${getMerchandiseStatusColor(
-                                      item.status
+                                      merchandiseItem.status
                                     )}`}
                                   >
-                                    {item.status}
+                                    {merchandiseItem.status}
                                   </span>
                                 </td>
                                 <td className="py-3 px-4 text-sm text-gray-900">
-                                  {item.serviceId}
+                                  {merchandiseItem.serviceId}
                                 </td>
                                 <td className="py-3 px-4 text-center">
                                   <button
@@ -1393,72 +1073,15 @@ const Funeral = () => {
                         </table>
                       </div>
 
-                      {/* Pagination */}
-                      <div className="flex items-center justify-between mt-4 text-sm text-gray-600">
-                        <p>
-                          {merchandiseSelectedRows.size} of{" "}
-                          {funeralData?.merchandise.length || 0} row(s)
-                          selected.
-                        </p>
-                        <div className="flex items-center gap-4">
-                          <div className="flex items-center gap-2">
-                            <span>Rows per page</span>
-                            <select
-                              value={merchandiseRowsPerPage}
-                              onChange={(e) =>
-                                handleMerchandiseRowsPerPageChange(
-                                  e.target.value
-                                )
-                              }
-                              className="border border-gray-300 rounded px-2 py-1 text-sm"
-                            >
-                              <option value={5}>5</option>
-                              <option value={10}>10</option>
-                              <option value={20}>20</option>
-                              <option value={50}>50</option>
-                              <option value={100}>100</option>
-                            </select>
-                          </div>
-                          <span>
-                            Page {merchandiseCurrentPage} of{" "}
-                            {merchandiseTotalPages}
-                          </span>
-                          <div className="flex items-center gap-1">
-                            <button
-                              onClick={handleMerchandiseFirstPage}
-                              disabled={merchandiseCurrentPage === 1}
-                              className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <ChevronsLeft className="w-5 h-5" />
-                            </button>
-                            <button
-                              onClick={handleMerchandisePrevPage}
-                              disabled={merchandiseCurrentPage === 1}
-                              className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <ChevronLeft className="w-5 h-5" />
-                            </button>
-                            <button
-                              onClick={handleMerchandiseNextPage}
-                              disabled={
-                                merchandiseCurrentPage === merchandiseTotalPages
-                              }
-                              className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <ChevronRight className="w-5 h-5" />
-                            </button>
-                            <button
-                              onClick={handleMerchandiseLastPage}
-                              disabled={
-                                merchandiseCurrentPage === merchandiseTotalPages
-                              }
-                              className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <ChevronsRight className="w-5 h-5" />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
+                      <Pagination
+                        selectedCount={merchandise.selectedRows.size}
+                        totalCount={merchandise.filteredData.length}
+                        currentPage={merchandise.currentPage}
+                        totalPages={merchandise.totalPages}
+                        rowsPerPage={merchandise.rowsPerPage}
+                        onPageChange={merchandise.handlePageChange}
+                        onRowsPerPageChange={merchandise.handleRowsPerPageChange}
+                      />
                     </CardContent>
                   </Card>
                 )}
@@ -1467,18 +1090,18 @@ const Funeral = () => {
                 {viewMode === "cards" && (
                   <div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                      {displayedMerchandise?.map((item) => (
-                        <Card key={item.id}>
+                      {merchandise.displayedData?.map((merchandiseItem) => (
+                        <Card key={merchandiseItem.id}>
                           <CardContent className="p-0">
                             <div className="relative">
                               <img
-                                src={item.image}
-                                alt={item.name}
+                                src={merchandiseItem.image}
+                                alt={merchandiseItem.name}
                                 className="w-full h-48 object-cover rounded-t-lg"
                               />
                               <div className="absolute top-3 left-3">
                                 <span className="px-3 py-1 bg-white/90 backdrop-blur text-gray-900 text-xs font-medium rounded">
-                                  Contract ID: {item.contractId}
+                                  Contract ID: {merchandiseItem.contractId}
                                 </span>
                               </div>
                             </div>
@@ -1486,7 +1109,7 @@ const Funeral = () => {
                             <div className="p-4">
                               <div className="flex items-start justify-between mb-3">
                                 <h3 className="text-lg font-semibold text-gray-900 flex-1">
-                                  {item.name}
+                                  {merchandiseItem.name}
                                 </h3>
                                 <button
                                   onClick={() =>
@@ -1499,32 +1122,32 @@ const Funeral = () => {
                               </div>
                               <span
                                 className={`inline-block px-3 py-1 text-sm rounded font-medium mb-3 ${getMerchandiseStatusColor(
-                                  item.status
+                                  merchandiseItem.status
                                 )}`}
                               >
-                                {item.status}
+                                {merchandiseItem.status}
                               </span>
 
                               <div className="flex items-center gap-2 mb-2">
                                 <div className="w-8 h-8 rounded-full bg-purple-200 flex items-center justify-center">
                                   <span className="text-xs font-semibold text-purple-700">
-                                    {item.beneficiary.initials}
+                                    {merchandiseItem.beneficiary.initials}
                                   </span>
                                 </div>
                                 <div>
                                   <p className="text-sm font-medium text-gray-900">
-                                    {item.beneficiary.name}
+                                    {merchandiseItem.beneficiary.name}
                                   </p>
                                   <span className="px-2 py-0.5 bg-red-100 text-red-900 text-xs rounded font-medium">
-                                    {item.beneficiary.badge}
+                                    {merchandiseItem.beneficiary.badge}
                                   </span>
                                 </div>
                               </div>
 
-                              {item.location && (
+                              {merchandiseItem.location && (
                                 <div className="flex items-center gap-1 text-sm text-gray-600">
                                   <MapPin className="w-4 h-4" />
-                                  <span>{item.location}</span>
+                                  <span>{merchandiseItem.location}</span>
                                 </div>
                               )}
                             </div>
@@ -1533,14 +1156,14 @@ const Funeral = () => {
                       ))}
                     </div>
 
-                    {!showAllMerchandise &&
-                      funeralData?.merchandise.length > 5 && (
+                    {!merchandise.showAll &&
+                      merchandise.filteredData.length > 5 && (
                         <div className="flex justify-center">
                           <Button
                             variant="outline"
-                            onClick={() => setShowAllMerchandise(true)}
+                            onClick={() => merchandise.handleLoadAll()}
                           >
-                            Load all ({funeralData?.merchandise.length})
+                            Load all ({merchandise.filteredData.length})
                           </Button>
                         </div>
                       )}
@@ -1551,6 +1174,32 @@ const Funeral = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Services Filter Modal */}
+      <FilterModal
+        isOpen={services.showFilters}
+        onClose={() => services.setShowFilters(false)}
+        tempFilters={services.tempFilters}
+        setTempFilters={services.setTempFilters}
+        expandedSections={services.expandedFilters}
+        onToggleSection={services.toggleFilterSection}
+        onApply={services.handleApplyFilters}
+        onCancel={services.handleCancelFilters}
+        statusOptions={servicesStatusOptions}
+      />
+
+      {/* Merchandise Filter Modal */}
+      <FilterModal
+        isOpen={merchandise.showFilters}
+        onClose={() => merchandise.setShowFilters(false)}
+        tempFilters={merchandise.tempFilters}
+        setTempFilters={merchandise.setTempFilters}
+        expandedSections={merchandise.expandedFilters}
+        onToggleSection={merchandise.toggleFilterSection}
+        onApply={merchandise.handleApplyFilters}
+        onCancel={merchandise.handleCancelFilters}
+        statusOptions={merchandiseStatusOptions}
+      />
     </div>
   );
 };
