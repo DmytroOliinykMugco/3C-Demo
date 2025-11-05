@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   Download,
@@ -28,6 +28,10 @@ const Cemetery = () => {
 
   // Document viewer state
   const [viewerDocument, setViewerDocument] = useState(null);
+
+  // Signed document upload state
+  const [uploadedFile, setUploadedFile] = useState(null);
+  const fileInputRef = useRef(null);
 
   const {
     data: cemeteryResponse,
@@ -83,6 +87,33 @@ const Cemetery = () => {
 
   const closeDocumentViewer = () => {
     setViewerDocument(null);
+  };
+
+  // Signed document upload handlers
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file && file.type === 'application/pdf') {
+      setUploadedFile(file);
+    } else if (file) {
+      addToast('Please select a PDF file', 'error');
+      e.target.value = '';
+    }
+  };
+
+  const handleSendToCounselor = () => {
+    if (!uploadedFile) {
+      addToast('Please select a file to send', 'error');
+      return;
+    }
+
+    // Clear the file input and state
+    setUploadedFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+
+    // Show success message
+    addToast('Document sent to counselor successfully', 'success');
   };
 
   // Helper functions for status colors
@@ -646,14 +677,20 @@ const Cemetery = () => {
                                 variant="outline"
                                 size="sm"
                                 onClick={() =>
-                                  handleComingSoon("Preview template")
+                                  handlePreviewDocument({
+                                    name: "Signed Cemetery Document",
+                                    fileName: "my_services_cemetery_signed_doc.pdf"
+                                  })
                                 }
                               >
                                 Preview
                               </Button>
                               <button
                                 onClick={() =>
-                                  handleComingSoon("Download template")
+                                  handleDownloadDocument({
+                                    name: "Signed Cemetery Document",
+                                    fileName: "my_services_cemetery_signed_doc.pdf"
+                                  })
                                 }
                                 className="p-2 hover:bg-gray-100 rounded"
                               >
@@ -700,14 +737,20 @@ const Cemetery = () => {
                                 variant="outline"
                                 size="sm"
                                 onClick={() =>
-                                  handleComingSoon("Preview template")
+                                  handlePreviewDocument({
+                                    name: "Example Cemetery Document Template",
+                                    fileName: "my_services_cemetery_signed_doc_example.pdf"
+                                  })
                                 }
                               >
                                 Preview
                               </Button>
                               <button
                                 onClick={() =>
-                                  handleComingSoon("Download template")
+                                  handleDownloadDocument({
+                                    name: "Example Cemetery Document Template",
+                                    fileName: "my_services_cemetery_signed_doc_example.pdf"
+                                  })
                                 }
                                 className="p-2 hover:bg-gray-100 rounded"
                               >
@@ -724,9 +767,15 @@ const Cemetery = () => {
                             Signed document
                           </h3>
                           <div className="flex gap-3">
-                            <Input type="file" className="flex-1" />
+                            <Input
+                              type="file"
+                              accept=".pdf,application/pdf"
+                              ref={fileInputRef}
+                              onChange={handleFileChange}
+                              className="flex-1"
+                            />
                             <Button
-                              onClick={() => handleComingSoon("Send to counselor")}
+                              onClick={handleSendToCounselor}
                               className="bg-black text-white hover:bg-gray-800 whitespace-nowrap"
                             >
                               Send to counselor
@@ -1657,18 +1706,6 @@ const Cemetery = () => {
                       <span className="ml-2 px-1.5 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full">Active</span>
                     )}
                   </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleComingSoon("View options")}
-                  >
-                    <LayoutList className="w-4 h-4 mr-2" />
-                    View
-                  </Button>
-                  <div className="relative flex-1 max-w-xs">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <Input type="text" placeholder="Search" className="pl-10" />
-                  </div>
                 </div>
 
                 {/* Table View */}
@@ -1965,18 +2002,6 @@ const Cemetery = () => {
                       <span className="ml-2 px-1.5 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full">Active</span>
                     )}
                   </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleComingSoon("View options")}
-                  >
-                    <LayoutList className="w-4 h-4 mr-2" />
-                    View
-                  </Button>
-                  <div className="relative flex-1 max-w-xs">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <Input type="text" placeholder="Search" className="pl-10" />
-                  </div>
                 </div>
 
                 {/* Table View */}
