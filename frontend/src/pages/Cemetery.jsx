@@ -8,12 +8,6 @@ import {
   MapPin,
   MoreHorizontal,
   Search,
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
-  ChevronDown,
-  X,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import { Card, CardContent } from "@/components/ui/card";
@@ -22,84 +16,18 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/toast";
 import DocumentViewer from "@/components/DocumentViewer";
+import { useSectionData } from "@/hooks/useSectionData";
+import FilterModal from "@/components/cemetery/FilterModal";
+import Pagination from "@/components/cemetery/Pagination";
 
 const Cemetery = () => {
   const { addToast } = useToast();
   const [activeTab, setActiveTab] = useState("all");
   const [viewMode, setViewMode] = useState("table"); // 'cards' or 'table' - for dedicated tabs
-
-  // View mode states for All tab sections
-  const [propertyViewMode, setPropertyViewMode] = useState("table");
-  const [servicesViewMode, setServicesViewMode] = useState("table");
-  const [merchandiseViewMode, setMerchandiseViewMode] = useState("table");
   const [designationTab, setDesignationTab] = useState("signed");
-
-  // Property pagination state
-  const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [selectedRows, setSelectedRows] = useState(new Set());
-
-  // Services pagination state
-  const [servicesCurrentPage, setServicesCurrentPage] = useState(1);
-  const [servicesRowsPerPage, setServicesRowsPerPage] = useState(5);
-  const [servicesSelectedRows, setServicesSelectedRows] = useState(new Set());
-  const [showAllServices, setShowAllServices] = useState(false);
-
-  // Merchandise pagination state
-  const [merchandiseCurrentPage, setMerchandiseCurrentPage] = useState(1);
-  const [merchandiseRowsPerPage, setMerchandiseRowsPerPage] = useState(5);
-  const [merchandiseSelectedRows, setMerchandiseSelectedRows] = useState(
-    new Set()
-  );
-  const [showAllMerchandise, setShowAllMerchandise] = useState(false);
 
   // Document viewer state
   const [viewerDocument, setViewerDocument] = useState(null);
-
-  // Filter states - Property
-  const [propertyFilters, setPropertyFilters] = useState({
-    contractId: "",
-    status: [],
-  });
-  const [tempPropertyFilters, setTempPropertyFilters] = useState({
-    contractId: "",
-    status: [],
-  });
-  const [showPropertyFilters, setShowPropertyFilters] = useState(false);
-  const [expandedPropertyFilters, setExpandedPropertyFilters] = useState({
-    contractId: true,
-    status: false,
-  });
-
-  // Filter states - Services
-  const [servicesFilters, setServicesFilters] = useState({
-    contractId: "",
-    status: [],
-  });
-  const [tempServicesFilters, setTempServicesFilters] = useState({
-    contractId: "",
-    status: [],
-  });
-  const [showServicesFilters, setShowServicesFilters] = useState(false);
-  const [expandedServicesFilters, setExpandedServicesFilters] = useState({
-    contractId: true,
-    status: false,
-  });
-
-  // Filter states - Merchandise
-  const [merchandiseFilters, setMerchandiseFilters] = useState({
-    contractId: "",
-    status: [],
-  });
-  const [tempMerchandiseFilters, setTempMerchandiseFilters] = useState({
-    contractId: "",
-    status: [],
-  });
-  const [showMerchandiseFilters, setShowMerchandiseFilters] = useState(false);
-  const [expandedMerchandiseFilters, setExpandedMerchandiseFilters] = useState({
-    contractId: true,
-    status: false,
-  });
 
   const {
     data: cemeteryResponse,
@@ -111,6 +39,15 @@ const Cemetery = () => {
   });
 
   const cemeteryData = cemeteryResponse?.data;
+
+  // Use custom hook for Property section
+  const property = useSectionData(cemeteryData?.properties || [], 5);
+
+  // Use custom hook for Services section
+  const services = useSectionData(cemeteryData?.services || [], 5);
+
+  // Use custom hook for Merchandise section
+  const merchandise = useSectionData(cemeteryData?.merchandise || [], 5);
 
   const handleComingSoon = (feature) => {
     addToast(`${feature} will be developed soon`, "success");
@@ -148,274 +85,31 @@ const Cemetery = () => {
     setViewerDocument(null);
   };
 
-  // Filter helper functions - Property
-  const togglePropertyFilterSection = (section) => {
-    setExpandedPropertyFilters(prev => ({
-      ...prev,
-      [section]: !prev[section]
-    }));
-  };
-
-  const handlePropertyFilterToggle = (key, value) => {
-    setTempPropertyFilters(prev => {
-      const currentArray = prev[key];
-      if (currentArray.includes(value)) {
-        return { ...prev, [key]: currentArray.filter(v => v !== value) };
-      } else {
-        return { ...prev, [key]: [...currentArray, value] };
-      }
-    });
-  };
-
-  const applyPropertyFilters = () => {
-    setPropertyFilters(tempPropertyFilters);
-    setShowPropertyFilters(false);
-    setCurrentPage(1);
-  };
-
-  const cancelPropertyFilters = () => {
-    setTempPropertyFilters(propertyFilters);
-    setShowPropertyFilters(false);
-  };
-
-  // Filter helper functions - Services
-  const toggleServicesFilterSection = (section) => {
-    setExpandedServicesFilters(prev => ({
-      ...prev,
-      [section]: !prev[section]
-    }));
-  };
-
-  const handleServicesFilterToggle = (key, value) => {
-    setTempServicesFilters(prev => {
-      const currentArray = prev[key];
-      if (currentArray.includes(value)) {
-        return { ...prev, [key]: currentArray.filter(v => v !== value) };
-      } else {
-        return { ...prev, [key]: [...currentArray, value] };
-      }
-    });
-  };
-
-  const applyServicesFilters = () => {
-    setServicesFilters(tempServicesFilters);
-    setShowServicesFilters(false);
-    setServicesCurrentPage(1);
-  };
-
-  const cancelServicesFilters = () => {
-    setTempServicesFilters(servicesFilters);
-    setShowServicesFilters(false);
-  };
-
-  // Filter helper functions - Merchandise
-  const toggleMerchandiseFilterSection = (section) => {
-    setExpandedMerchandiseFilters(prev => ({
-      ...prev,
-      [section]: !prev[section]
-    }));
-  };
-
-  const handleMerchandiseFilterToggle = (key, value) => {
-    setTempMerchandiseFilters(prev => {
-      const currentArray = prev[key];
-      if (currentArray.includes(value)) {
-        return { ...prev, [key]: currentArray.filter(v => v !== value) };
-      } else {
-        return { ...prev, [key]: [...currentArray, value] };
-      }
-    });
-  };
-
-  const applyMerchandiseFilters = () => {
-    setMerchandiseFilters(tempMerchandiseFilters);
-    setShowMerchandiseFilters(false);
-    setMerchandiseCurrentPage(1);
-  };
-
-  const cancelMerchandiseFilters = () => {
-    setTempMerchandiseFilters(merchandiseFilters);
-    setShowMerchandiseFilters(false);
-  };
-
-  // Apply filters to properties
-  const filteredProperties = cemeteryData?.properties.filter((property) => {
-    const matchesContractId = !propertyFilters.contractId ||
-      property.contractId.toLowerCase().includes(propertyFilters.contractId.toLowerCase());
-    const matchesStatus = propertyFilters.status.length === 0 ||
-      propertyFilters.status.includes(property.status);
-
-    return matchesContractId && matchesStatus;
-  }) || [];
-
-  // Pagination helpers
-  const totalPages = Math.ceil(filteredProperties.length / rowsPerPage);
-  const startIndex = (currentPage - 1) * rowsPerPage;
-  const endIndex = startIndex + rowsPerPage;
-  const paginatedProperties = filteredProperties.slice(startIndex, endIndex);
-
-  const handleFirstPage = () => setCurrentPage(1);
-  const handlePrevPage = () => setCurrentPage((prev) => Math.max(prev - 1, 1));
-  const handleNextPage = () =>
-    setCurrentPage((prev) => Math.min(prev + 1, totalPages));
-  const handleLastPage = () => setCurrentPage(totalPages);
-
-  const handleRowsPerPageChange = (value) => {
-    setRowsPerPage(Number(value));
-    setCurrentPage(1);
-  };
-
-  const handleSelectRow = (id) => {
-    const newSelected = new Set(selectedRows);
-    if (newSelected.has(id)) {
-      newSelected.delete(id);
-    } else {
-      newSelected.add(id);
-    }
-    setSelectedRows(newSelected);
-  };
-
-  const handleSelectAll = (checked) => {
-    if (checked) {
-      setSelectedRows(new Set(paginatedProperties?.map((p) => p.id) || []));
-    } else {
-      setSelectedRows(new Set());
-    }
-  };
-
-  // Apply filters to services
-  const filteredServices = cemeteryData?.services.filter((service) => {
-    const matchesContractId = !servicesFilters.contractId ||
-      service.contractId.toLowerCase().includes(servicesFilters.contractId.toLowerCase());
-    const matchesStatus = servicesFilters.status.length === 0 ||
-      servicesFilters.status.includes(service.status);
-
-    return matchesContractId && matchesStatus;
-  }) || [];
-
-  // Services pagination helpers
-  const servicesTotalPages = Math.ceil(filteredServices.length / servicesRowsPerPage);
-  const servicesStartIndex = (servicesCurrentPage - 1) * servicesRowsPerPage;
-  const servicesEndIndex = servicesStartIndex + servicesRowsPerPage;
-  const paginatedServices = filteredServices.slice(servicesStartIndex, servicesEndIndex);
-
-  const handleServicesFirstPage = () => setServicesCurrentPage(1);
-  const handleServicesPrevPage = () =>
-    setServicesCurrentPage((prev) => Math.max(prev - 1, 1));
-  const handleServicesNextPage = () =>
-    setServicesCurrentPage((prev) => Math.min(prev + 1, servicesTotalPages));
-  const handleServicesLastPage = () =>
-    setServicesCurrentPage(servicesTotalPages);
-
-  const handleServicesRowsPerPageChange = (value) => {
-    setServicesRowsPerPage(Number(value));
-    setServicesCurrentPage(1);
-  };
-
-  const handleSelectServiceRow = (id) => {
-    const newSelected = new Set(servicesSelectedRows);
-    if (newSelected.has(id)) {
-      newSelected.delete(id);
-    } else {
-      newSelected.add(id);
-    }
-    setServicesSelectedRows(newSelected);
-  };
-
-  const handleSelectAllServices = (checked) => {
-    if (checked) {
-      setServicesSelectedRows(
-        new Set(paginatedServices?.map((s) => s.id) || [])
-      );
-    } else {
-      setServicesSelectedRows(new Set());
-    }
-  };
-
-  const displayedServices = showAllServices
-    ? filteredServices
-    : filteredServices.slice(0, 5);
-
-  const getServiceStatusColor = (status) => {
+  // Helper functions for status colors
+  const getStatusColor = (status) => {
     switch (status) {
-      case "Paid":
-        return "bg-green-100 text-green-800";
-      case "Pending":
-        return "bg-yellow-100 text-yellow-800";
       case "In Trust":
         return "bg-blue-100 text-blue-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
-
-  // Apply filters to merchandise
-  const filteredMerchandise = cemeteryData?.merchandise.filter((item) => {
-    const matchesContractId = !merchandiseFilters.contractId ||
-      item.contractId.toLowerCase().includes(merchandiseFilters.contractId.toLowerCase());
-    const matchesStatus = merchandiseFilters.status.length === 0 ||
-      merchandiseFilters.status.includes(item.status);
-
-    return matchesContractId && matchesStatus;
-  }) || [];
-
-  // Merchandise pagination helpers
-  const merchandiseTotalPages = Math.ceil(filteredMerchandise.length / merchandiseRowsPerPage);
-  const merchandiseStartIndex = (merchandiseCurrentPage - 1) * merchandiseRowsPerPage;
-  const merchandiseEndIndex = merchandiseStartIndex + merchandiseRowsPerPage;
-  const paginatedMerchandise = filteredMerchandise.slice(merchandiseStartIndex, merchandiseEndIndex);
-
-  const handleMerchandiseFirstPage = () => setMerchandiseCurrentPage(1);
-  const handleMerchandisePrevPage = () =>
-    setMerchandiseCurrentPage((prev) => Math.max(prev - 1, 1));
-  const handleMerchandiseNextPage = () =>
-    setMerchandiseCurrentPage((prev) =>
-      Math.min(prev + 1, merchandiseTotalPages)
-    );
-  const handleMerchandiseLastPage = () =>
-    setMerchandiseCurrentPage(merchandiseTotalPages);
-
-  const handleMerchandiseRowsPerPageChange = (value) => {
-    setMerchandiseRowsPerPage(Number(value));
-    setMerchandiseCurrentPage(1);
-  };
-
-  const handleSelectMerchandiseRow = (id) => {
-    const newSelected = new Set(merchandiseSelectedRows);
-    if (newSelected.has(id)) {
-      newSelected.delete(id);
-    } else {
-      newSelected.add(id);
-    }
-    setMerchandiseSelectedRows(newSelected);
-  };
-
-  const handleSelectAllMerchandise = (checked) => {
-    if (checked) {
-      setMerchandiseSelectedRows(
-        new Set(paginatedMerchandise?.map((m) => m.id) || [])
-      );
-    } else {
-      setMerchandiseSelectedRows(new Set());
-    }
-  };
-
-  const displayedMerchandise = showAllMerchandise
-    ? filteredMerchandise
-    : filteredMerchandise.slice(0, 5);
-
-  const getMerchandiseStatusColor = (status) => {
-    switch (status) {
-      case "Paid":
-        return "bg-green-100 text-green-800";
       case "Not Purchased":
         return "bg-red-100 text-red-800";
       case "Used":
         return "bg-yellow-100 text-yellow-800";
+      case "Paid":
+        return "bg-green-100 text-green-800";
+      case "Pending":
+        return "bg-yellow-100 text-yellow-800";
       default:
         return "bg-gray-100 text-gray-800";
     }
   };
+
+  const getServiceStatusColor = getStatusColor;
+  const getMerchandiseStatusColor = getStatusColor;
+
+  // Status options for filters
+  const propertyStatusOptions = ["In Trust", "Not Purchased", "Used", "Paid"];
+  const servicesStatusOptions = ["Paid", "Pending", "In Trust"];
+  const merchandiseStatusOptions = ["Paid", "Not Purchased", "Used"];
 
   if (isLoading) {
     return (
@@ -438,19 +132,6 @@ const Cemetery = () => {
       </div>
     );
   }
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "In Trust":
-        return "bg-blue-100 text-blue-800";
-      case "Not Purchased":
-        return "bg-red-100 text-red-800";
-      case "Used":
-        return "bg-yellow-100 text-yellow-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
 
   return (
     <div className="p-8 bg-gray-50 min-h-screen">
@@ -490,9 +171,9 @@ const Cemetery = () => {
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-gray-600">View</span>
                     <button
-                      onClick={() => setPropertyViewMode("cards")}
+                      onClick={() => property.setViewMode("cards")}
                       className={`p-2 rounded ${
-                        propertyViewMode === "cards"
+                        property.viewMode === "cards"
                           ? "bg-gray-200"
                           : "hover:bg-gray-100"
                       }`}
@@ -500,9 +181,9 @@ const Cemetery = () => {
                       <LayoutGrid className="w-5 h-5" />
                     </button>
                     <button
-                      onClick={() => setPropertyViewMode("table")}
+                      onClick={() => property.setViewMode("table")}
                       className={`p-2 rounded ${
-                        propertyViewMode === "table"
+                        property.viewMode === "table"
                           ? "bg-gray-200"
                           : "hover:bg-gray-100"
                       }`}
@@ -517,18 +198,18 @@ const Cemetery = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setShowPropertyFilters(true)}
+                    onClick={() => property.setShowFilters(true)}
                   >
                     <Filter className="w-4 h-4 mr-2" />
                     Filters
-                    {(propertyFilters.contractId || propertyFilters.status.length > 0) && (
+                    {(property.filters.contractId || property.filters.status.length > 0) && (
                       <span className="ml-2 px-1.5 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full">Active</span>
                     )}
                   </Button>
                 </div>
 
                 {/* Table View */}
-                {propertyViewMode === "table" && (
+                {property.viewMode === "table" && (
                   <Card>
                     <CardContent className="p-6">
                       <div className="overflow-x-auto">
@@ -540,13 +221,13 @@ const Cemetery = () => {
                                   type="checkbox"
                                   className="rounded"
                                   checked={
-                                    paginatedProperties?.length > 0 &&
-                                    paginatedProperties.every((p) =>
-                                      selectedRows.has(p.id)
+                                    property.paginatedData?.length > 0 &&
+                                    property.paginatedData.every((p) =>
+                                      property.selectedRows.has(p.id)
                                     )
                                   }
                                   onChange={(e) =>
-                                    handleSelectAll(e.target.checked)
+                                    property.handleSelectAll(e.target.checked)
                                   }
                                 />
                               </th>
@@ -572,56 +253,56 @@ const Cemetery = () => {
                             </tr>
                           </thead>
                           <tbody>
-                            {paginatedProperties?.map((property) => (
+                            {property.paginatedData?.map((propertyItem) => (
                               <tr
-                                key={property.id}
+                                key={propertyItem.id}
                                 className="border-b hover:bg-gray-50"
                               >
                                 <td className="py-3 px-4">
                                   <input
                                     type="checkbox"
                                     className="rounded"
-                                    checked={selectedRows.has(property.id)}
+                                    checked={property.selectedRows.has(propertyItem.id)}
                                     onChange={() =>
-                                      handleSelectRow(property.id)
+                                      property.handleSelectRow(propertyItem.id)
                                     }
                                   />
                                 </td>
                                 <td className="py-3 px-4 text-sm text-gray-900">
-                                  {property.contractId}
+                                  {propertyItem.contractId}
                                 </td>
                                 <td className="py-3 px-4 text-sm text-gray-900">
-                                  {property.name}
+                                  {propertyItem.name}
                                 </td>
                                 <td className="py-3 px-4">
                                   <div className="flex items-center gap-2">
                                     <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center">
                                       <span className="text-xs font-semibold text-gray-700">
-                                        {property.beneficiary.initials}
+                                        {propertyItem.beneficiary.initials}
                                       </span>
                                     </div>
                                     <span className="text-sm text-gray-900">
-                                      {property.beneficiary.name}
+                                      {propertyItem.beneficiary.name}
                                     </span>
                                     <span className="px-2 py-0.5 bg-blue-100 text-blue-900 text-xs rounded">
-                                      {property.beneficiary.badge}
+                                      {propertyItem.beneficiary.badge}
                                     </span>
                                   </div>
                                 </td>
                                 <td className="py-3 px-4 text-sm text-gray-900">
-                                  {property.dateTime}
+                                  {propertyItem.dateTime}
                                 </td>
                                 <td className="py-3 px-4">
                                   <span
                                     className={`px-3 py-1 text-sm rounded font-medium ${getStatusColor(
-                                      property.status
+                                      propertyItem.status
                                     )}`}
                                   >
-                                    {property.status}
+                                    {propertyItem.status}
                                   </span>
                                 </td>
                                 <td className="py-3 px-4 text-sm text-gray-900">
-                                  {property.serviceId}
+                                  {propertyItem.serviceId}
                                 </td>
                                 <td className="py-3 px-4 text-center">
                                   <button
@@ -639,138 +320,103 @@ const Cemetery = () => {
                         </table>
                       </div>
 
-                      {/* Pagination */}
-                      <div className="flex items-center justify-between mt-4 text-sm text-gray-600">
-                        <p>
-                          {selectedRows.size} of{" "}
-                          {filteredProperties.length || 0} row(s)
-                          selected.
-                        </p>
-                        <div className="flex items-center gap-4">
-                          <div className="flex items-center gap-2">
-                            <span>Rows per page</span>
-                            <select
-                              value={rowsPerPage}
-                              onChange={(e) =>
-                                handleRowsPerPageChange(e.target.value)
-                              }
-                              className="border border-gray-300 rounded px-2 py-1 text-sm"
-                            >
-                              <option value={5}>5</option>
-                              <option value={10}>10</option>
-                              <option value={20}>20</option>
-                              <option value={50}>50</option>
-                              <option value={100}>100</option>
-                            </select>
-                          </div>
-                          <span>
-                            Page {currentPage} of {totalPages}
-                          </span>
-                          <div className="flex items-center gap-1">
-                            <button
-                              onClick={handleFirstPage}
-                              disabled={currentPage === 1}
-                              className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <ChevronsLeft className="w-5 h-5" />
-                            </button>
-                            <button
-                              onClick={handlePrevPage}
-                              disabled={currentPage === 1}
-                              className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <ChevronLeft className="w-5 h-5" />
-                            </button>
-                            <button
-                              onClick={handleNextPage}
-                              disabled={currentPage === totalPages}
-                              className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <ChevronRight className="w-5 h-5" />
-                            </button>
-                            <button
-                              onClick={handleLastPage}
-                              disabled={currentPage === totalPages}
-                              className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <ChevronsRight className="w-5 h-5" />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
+                      <Pagination
+                        selectedCount={property.selectedRows.size}
+                        totalCount={property.filteredData.length}
+                        currentPage={property.currentPage}
+                        totalPages={property.totalPages}
+                        rowsPerPage={property.rowsPerPage}
+                        onPageChange={property.handlePageChange}
+                        onRowsPerPageChange={property.handleRowsPerPageChange}
+                      />
                     </CardContent>
                   </Card>
                 )}
 
                 {/* Card View */}
-                {propertyViewMode === "cards" && (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {filteredProperties.map((property) => (
-                      <Card key={property.id}>
-                        <CardContent className="p-0">
-                          {/* Contract ID Badge */}
-                          <div className="relative">
-                            <img
-                              src={property.image}
-                              alt={property.name}
-                              className="w-full h-48 object-cover rounded-t-lg"
-                            />
-                            <div className="absolute top-3 left-3">
-                              <span className="px-3 py-1 bg-white/90 backdrop-blur text-gray-900 text-xs font-medium rounded">
-                                Contract ID: {property.contractId}
-                              </span>
+                {property.viewMode === "cards" && (
+                  <div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                      {property.displayedData?.map((propertyItem) => (
+                        <Card key={propertyItem.id}>
+                          <CardContent className="p-0">
+                            {/* Contract ID Badge */}
+                            <div className="relative">
+                              <img
+                                src={propertyItem.image}
+                                alt={propertyItem.name}
+                                className="w-full h-48 object-cover rounded-t-lg"
+                              />
+                              <div className="absolute top-3 left-3">
+                                <span className="px-3 py-1 bg-white/90 backdrop-blur text-gray-900 text-xs font-medium rounded">
+                                  Contract ID: {propertyItem.contractId}
+                                </span>
+                              </div>
                             </div>
-                          </div>
 
-                          <div className="p-4">
-                            {/* Title and Status */}
-                            <div className="flex items-start justify-between mb-3">
-                              <h3 className="text-lg font-semibold text-gray-900">
-                                {property.name}
-                              </h3>
-                              <button
-                                onClick={() =>
-                                  handleComingSoon("Property actions")
-                                }
-                                className="p-1 hover:bg-gray-100 rounded"
+                            <div className="p-4">
+                              {/* Title and Status */}
+                              <div className="flex items-start justify-between mb-3">
+                                <h3 className="text-lg font-semibold text-gray-900">
+                                  {propertyItem.name}
+                                </h3>
+                                <button
+                                  onClick={() =>
+                                    handleComingSoon("Property actions")
+                                  }
+                                  className="p-1 hover:bg-gray-100 rounded"
+                                >
+                                  <MoreHorizontal className="w-5 h-5 text-gray-600" />
+                                </button>
+                              </div>
+                              <span
+                                className={`inline-block px-3 py-1 text-sm rounded font-medium mb-3 ${getStatusColor(
+                                  propertyItem.status
+                                )}`}
                               >
-                                <MoreHorizontal className="w-5 h-5 text-gray-600" />
-                              </button>
-                            </div>
-                            <span
-                              className={`inline-block px-3 py-1 text-sm rounded font-medium mb-3 ${getStatusColor(
-                                property.status
-                              )}`}
-                            >
-                              {property.status}
-                            </span>
+                                {propertyItem.status}
+                              </span>
 
-                            {/* Beneficiary */}
-                            <div className="flex items-center gap-2 mb-2">
-                              <div className="w-8 h-8 rounded-full bg-purple-200 flex items-center justify-center">
-                                <span className="text-xs font-semibold text-purple-700">
-                                  {property.beneficiary.initials}
-                                </span>
+                              {/* Beneficiary */}
+                              <div className="flex items-center gap-2 mb-2">
+                                <div className="w-8 h-8 rounded-full bg-purple-200 flex items-center justify-center">
+                                  <span className="text-xs font-semibold text-purple-700">
+                                    {propertyItem.beneficiary.initials}
+                                  </span>
+                                </div>
+                                <div>
+                                  <p className="text-sm font-medium text-gray-900">
+                                    {propertyItem.beneficiary.name}
+                                  </p>
+                                  <span className="px-2 py-0.5 bg-red-100 text-red-900 text-xs rounded font-medium">
+                                    {propertyItem.beneficiary.badge}
+                                  </span>
+                                </div>
                               </div>
-                              <div>
-                                <p className="text-sm font-medium text-gray-900">
-                                  {property.beneficiary.name}
-                                </p>
-                                <span className="px-2 py-0.5 bg-red-100 text-red-900 text-xs rounded font-medium">
-                                  {property.beneficiary.badge}
-                                </span>
-                              </div>
-                            </div>
 
-                            {/* Location */}
-                            <div className="flex items-center gap-1 text-sm text-gray-600">
-                              <MapPin className="w-4 h-4" />
-                              <span>Location</span>
+                              {/* Location */}
+                              <div className="flex items-center gap-1 text-sm text-gray-600">
+                                <MapPin className="w-4 h-4" />
+                                <span>Location</span>
+                              </div>
                             </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+
+                    {/* Load All Button */}
+                    {!property.showAll &&
+                      property.filteredData.length > 5 && (
+                        <div className="flex justify-center">
+                          <Button
+                            variant="outline"
+                            onClick={property.handleLoadAll}
+                          >
+                            Load all ({property.filteredData.length})
+                          </Button>
+                        </div>
+                      )}
                   </div>
                 )}
               </div>
@@ -1107,9 +753,9 @@ const Cemetery = () => {
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-gray-600">View</span>
                     <button
-                      onClick={() => setServicesViewMode("cards")}
+                      onClick={() => services.setViewMode("cards")}
                       className={`p-2 rounded ${
-                        servicesViewMode === "cards"
+                        services.viewMode === "cards"
                           ? "bg-gray-200"
                           : "hover:bg-gray-100"
                       }`}
@@ -1117,9 +763,9 @@ const Cemetery = () => {
                       <LayoutGrid className="w-5 h-5" />
                     </button>
                     <button
-                      onClick={() => setServicesViewMode("table")}
+                      onClick={() => services.setViewMode("table")}
                       className={`p-2 rounded ${
-                        servicesViewMode === "table"
+                        services.viewMode === "table"
                           ? "bg-gray-200"
                           : "hover:bg-gray-100"
                       }`}
@@ -1134,18 +780,18 @@ const Cemetery = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setShowServicesFilters(true)}
+                    onClick={() => services.setShowFilters(true)}
                   >
                     <Filter className="w-4 h-4 mr-2" />
                     Filters
-                    {(servicesFilters.contractId || servicesFilters.status.length > 0) && (
+                    {(services.filters.contractId || services.filters.status.length > 0) && (
                       <span className="ml-2 px-1.5 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full">Active</span>
                     )}
                   </Button>
                 </div>
 
                 {/* Table View */}
-                {servicesViewMode === "table" && (
+                {services.viewMode === "table" && (
                   <Card>
                     <CardContent className="p-6">
                       <div className="overflow-x-auto">
@@ -1157,13 +803,13 @@ const Cemetery = () => {
                                   type="checkbox"
                                   className="rounded"
                                   checked={
-                                    paginatedServices?.length > 0 &&
-                                    paginatedServices.every((s) =>
-                                      servicesSelectedRows.has(s.id)
+                                    services.paginatedData?.length > 0 &&
+                                    services.paginatedData.every((s) =>
+                                      services.selectedRows.has(s.id)
                                     )
                                   }
                                   onChange={(e) =>
-                                    handleSelectAllServices(e.target.checked)
+                                    services.handleSelectAll(e.target.checked)
                                   }
                                 />
                               </th>
@@ -1189,58 +835,58 @@ const Cemetery = () => {
                             </tr>
                           </thead>
                           <tbody>
-                            {paginatedServices?.map((service) => (
+                            {services.paginatedData?.map((serviceItem) => (
                               <tr
-                                key={service.id}
+                                key={serviceItem.id}
                                 className="border-b hover:bg-gray-50"
                               >
                                 <td className="py-3 px-4">
                                   <input
                                     type="checkbox"
                                     className="rounded"
-                                    checked={servicesSelectedRows.has(
-                                      service.id
+                                    checked={services.selectedRows.has(
+                                      serviceItem.id
                                     )}
                                     onChange={() =>
-                                      handleSelectServiceRow(service.id)
+                                      services.handleSelectRow(serviceItem.id)
                                     }
                                   />
                                 </td>
                                 <td className="py-3 px-4 text-sm text-gray-900">
-                                  {service.contractId}
+                                  {serviceItem.contractId}
                                 </td>
                                 <td className="py-3 px-4 text-sm text-gray-900">
-                                  {service.name}
+                                  {serviceItem.name}
                                 </td>
                                 <td className="py-3 px-4">
                                   <div className="flex items-center gap-2">
                                     <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center">
                                       <span className="text-xs font-semibold text-gray-700">
-                                        {service.beneficiary.initials}
+                                        {serviceItem.beneficiary.initials}
                                       </span>
                                     </div>
                                     <span className="text-sm text-gray-900">
-                                      {service.beneficiary.name}
+                                      {serviceItem.beneficiary.name}
                                     </span>
                                     <span className="px-2 py-0.5 bg-blue-100 text-blue-900 text-xs rounded">
-                                      {service.beneficiary.badge}
+                                      {serviceItem.beneficiary.badge}
                                     </span>
                                   </div>
                                 </td>
                                 <td className="py-3 px-4 text-sm text-gray-900">
-                                  {service.dateTime}
+                                  {serviceItem.dateTime}
                                 </td>
                                 <td className="py-3 px-4">
                                   <span
                                     className={`px-3 py-1 text-sm rounded font-medium ${getServiceStatusColor(
-                                      service.status
+                                      serviceItem.status
                                     )}`}
                                   >
-                                    {service.status}
+                                    {serviceItem.status}
                                   </span>
                                 </td>
                                 <td className="py-3 px-4 text-sm text-gray-900">
-                                  {service.serviceId}
+                                  {serviceItem.serviceId}
                                 </td>
                                 <td className="py-3 px-4 text-center">
                                   <button
@@ -1258,88 +904,35 @@ const Cemetery = () => {
                         </table>
                       </div>
 
-                      {/* Pagination */}
-                      <div className="flex items-center justify-between mt-4 text-sm text-gray-600">
-                        <p>
-                          {servicesSelectedRows.size} of{" "}
-                          {filteredServices.length || 0} row(s) selected.
-                        </p>
-                        <div className="flex items-center gap-4">
-                          <div className="flex items-center gap-2">
-                            <span>Rows per page</span>
-                            <select
-                              value={servicesRowsPerPage}
-                              onChange={(e) =>
-                                handleServicesRowsPerPageChange(e.target.value)
-                              }
-                              className="border border-gray-300 rounded px-2 py-1 text-sm"
-                            >
-                              <option value={5}>5</option>
-                              <option value={10}>10</option>
-                              <option value={20}>20</option>
-                              <option value={50}>50</option>
-                              <option value={100}>100</option>
-                            </select>
-                          </div>
-                          <span>
-                            Page {servicesCurrentPage} of {servicesTotalPages}
-                          </span>
-                          <div className="flex items-center gap-1">
-                            <button
-                              onClick={handleServicesFirstPage}
-                              disabled={servicesCurrentPage === 1}
-                              className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <ChevronsLeft className="w-5 h-5" />
-                            </button>
-                            <button
-                              onClick={handleServicesPrevPage}
-                              disabled={servicesCurrentPage === 1}
-                              className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <ChevronLeft className="w-5 h-5" />
-                            </button>
-                            <button
-                              onClick={handleServicesNextPage}
-                              disabled={
-                                servicesCurrentPage === servicesTotalPages
-                              }
-                              className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <ChevronRight className="w-5 h-5" />
-                            </button>
-                            <button
-                              onClick={handleServicesLastPage}
-                              disabled={
-                                servicesCurrentPage === servicesTotalPages
-                              }
-                              className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <ChevronsRight className="w-5 h-5" />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
+                      <Pagination
+                        selectedCount={services.selectedRows.size}
+                        totalCount={services.filteredData.length}
+                        currentPage={services.currentPage}
+                        totalPages={services.totalPages}
+                        rowsPerPage={services.rowsPerPage}
+                        onPageChange={services.handlePageChange}
+                        onRowsPerPageChange={services.handleRowsPerPageChange}
+                      />
                     </CardContent>
                   </Card>
                 )}
 
                 {/* Card View */}
-                {servicesViewMode === "cards" && (
+                {services.viewMode === "cards" && (
                   <div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                      {displayedServices?.map((service) => (
-                        <Card key={service.id}>
+                      {services.displayedData?.map((serviceItem) => (
+                        <Card key={serviceItem.id}>
                           <CardContent className="p-0">
                             <div className="relative">
                               <img
-                                src={service.image}
-                                alt={service.name}
+                                src={serviceItem.image}
+                                alt={serviceItem.name}
                                 className="w-full h-48 object-cover rounded-t-lg"
                               />
                               <div className="absolute top-3 left-3">
                                 <span className="px-3 py-1 bg-white/90 backdrop-blur text-gray-900 text-xs font-medium rounded">
-                                  Contract ID: {service.contractId}
+                                  Contract ID: {serviceItem.contractId}
                                 </span>
                               </div>
                             </div>
@@ -1347,7 +940,7 @@ const Cemetery = () => {
                             <div className="p-4">
                               <div className="flex items-start justify-between mb-3">
                                 <h3 className="text-lg font-semibold text-gray-900 flex-1">
-                                  {service.name}
+                                  {serviceItem.name}
                                 </h3>
                                 <button
                                   onClick={() =>
@@ -1360,31 +953,31 @@ const Cemetery = () => {
                               </div>
                               <span
                                 className={`inline-block px-3 py-1 text-sm rounded font-medium mb-3 ${getServiceStatusColor(
-                                  service.status
+                                  serviceItem.status
                                 )}`}
                               >
-                                {service.status}
+                                {serviceItem.status}
                               </span>
 
                               <div className="flex items-center gap-2 mb-2">
                                 <div className="w-8 h-8 rounded-full bg-purple-200 flex items-center justify-center">
                                   <span className="text-xs font-semibold text-purple-700">
-                                    {service.beneficiary.initials}
+                                    {serviceItem.beneficiary.initials}
                                   </span>
                                 </div>
                                 <div>
                                   <p className="text-sm font-medium text-gray-900">
-                                    {service.beneficiary.name}
+                                    {serviceItem.beneficiary.name}
                                   </p>
                                   <span className="px-2 py-0.5 bg-red-100 text-red-900 text-xs rounded font-medium">
-                                    {service.beneficiary.badge}
+                                    {serviceItem.beneficiary.badge}
                                   </span>
                                 </div>
                               </div>
 
                               <div className="flex items-center gap-1 text-sm text-gray-600">
                                 <MapPin className="w-4 h-4" />
-                                <span>{service.location}</span>
+                                <span>{serviceItem.location}</span>
                               </div>
                             </div>
                           </CardContent>
@@ -1392,13 +985,13 @@ const Cemetery = () => {
                       ))}
                     </div>
 
-                    {!showAllServices && filteredServices.length > 5 && (
+                    {!services.showAll && services.filteredData.length > 5 && (
                       <div className="flex justify-center">
                         <Button
                           variant="outline"
-                          onClick={() => setShowAllServices(true)}
+                          onClick={() => services.handleLoadAll()}
                         >
-                          Load all ({filteredServices.length})
+                          Load all ({services.filteredData.length})
                         </Button>
                       </div>
                     )}
@@ -1421,9 +1014,9 @@ const Cemetery = () => {
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-gray-600">View</span>
                     <button
-                      onClick={() => setMerchandiseViewMode("cards")}
+                      onClick={() => merchandise.setViewMode("cards")}
                       className={`p-2 rounded ${
-                        merchandiseViewMode === "cards"
+                        merchandise.viewMode === "cards"
                           ? "bg-gray-200"
                           : "hover:bg-gray-100"
                       }`}
@@ -1431,9 +1024,9 @@ const Cemetery = () => {
                       <LayoutGrid className="w-5 h-5" />
                     </button>
                     <button
-                      onClick={() => setMerchandiseViewMode("table")}
+                      onClick={() => merchandise.setViewMode("table")}
                       className={`p-2 rounded ${
-                        merchandiseViewMode === "table"
+                        merchandise.viewMode === "table"
                           ? "bg-gray-200"
                           : "hover:bg-gray-100"
                       }`}
@@ -1448,18 +1041,18 @@ const Cemetery = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setShowMerchandiseFilters(true)}
+                    onClick={() => merchandise.setShowFilters(true)}
                   >
                     <Filter className="w-4 h-4 mr-2" />
                     Filters
-                    {(merchandiseFilters.contractId || merchandiseFilters.status.length > 0) && (
+                    {(merchandise.filters.contractId || merchandise.filters.status.length > 0) && (
                       <span className="ml-2 px-1.5 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full">Active</span>
                     )}
                   </Button>
                 </div>
 
                 {/* Table View */}
-                {merchandiseViewMode === "table" && (
+                {merchandise.viewMode === "table" && (
                   <Card>
                     <CardContent className="p-6">
                       <div className="overflow-x-auto">
@@ -1471,13 +1064,13 @@ const Cemetery = () => {
                                   type="checkbox"
                                   className="rounded"
                                   checked={
-                                    paginatedMerchandise?.length > 0 &&
-                                    paginatedMerchandise.every((m) =>
-                                      merchandiseSelectedRows.has(m.id)
+                                    merchandise.paginatedData?.length > 0 &&
+                                    merchandise.paginatedData.every((m) =>
+                                      merchandise.selectedRows.has(m.id)
                                     )
                                   }
                                   onChange={(e) =>
-                                    handleSelectAllMerchandise(e.target.checked)
+                                    merchandise.handleSelectAll(e.target.checked)
                                   }
                                 />
                               </th>
@@ -1503,7 +1096,7 @@ const Cemetery = () => {
                             </tr>
                           </thead>
                           <tbody>
-                            {paginatedMerchandise?.map((item) => (
+                            {merchandise.paginatedData?.map((item) => (
                               <tr
                                 key={item.id}
                                 className="border-b hover:bg-gray-50"
@@ -1512,11 +1105,11 @@ const Cemetery = () => {
                                   <input
                                     type="checkbox"
                                     className="rounded"
-                                    checked={merchandiseSelectedRows.has(
+                                    checked={merchandise.selectedRows.has(
                                       item.id
                                     )}
                                     onChange={() =>
-                                      handleSelectMerchandiseRow(item.id)
+                                      merchandise.handleSelectRow(item.id)
                                     }
                                   />
                                 </td>
@@ -1572,81 +1165,24 @@ const Cemetery = () => {
                         </table>
                       </div>
 
-                      {/* Pagination */}
-                      <div className="flex items-center justify-between mt-4 text-sm text-gray-600">
-                        <p>
-                          {merchandiseSelectedRows.size} of{" "}
-                          {filteredMerchandise.length || 0} row(s)
-                          selected.
-                        </p>
-                        <div className="flex items-center gap-4">
-                          <div className="flex items-center gap-2">
-                            <span>Rows per page</span>
-                            <select
-                              value={merchandiseRowsPerPage}
-                              onChange={(e) =>
-                                handleMerchandiseRowsPerPageChange(
-                                  e.target.value
-                                )
-                              }
-                              className="border border-gray-300 rounded px-2 py-1 text-sm"
-                            >
-                              <option value={5}>5</option>
-                              <option value={10}>10</option>
-                              <option value={20}>20</option>
-                              <option value={50}>50</option>
-                              <option value={100}>100</option>
-                            </select>
-                          </div>
-                          <span>
-                            Page {merchandiseCurrentPage} of{" "}
-                            {merchandiseTotalPages}
-                          </span>
-                          <div className="flex items-center gap-1">
-                            <button
-                              onClick={handleMerchandiseFirstPage}
-                              disabled={merchandiseCurrentPage === 1}
-                              className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <ChevronsLeft className="w-5 h-5" />
-                            </button>
-                            <button
-                              onClick={handleMerchandisePrevPage}
-                              disabled={merchandiseCurrentPage === 1}
-                              className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <ChevronLeft className="w-5 h-5" />
-                            </button>
-                            <button
-                              onClick={handleMerchandiseNextPage}
-                              disabled={
-                                merchandiseCurrentPage === merchandiseTotalPages
-                              }
-                              className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <ChevronRight className="w-5 h-5" />
-                            </button>
-                            <button
-                              onClick={handleMerchandiseLastPage}
-                              disabled={
-                                merchandiseCurrentPage === merchandiseTotalPages
-                              }
-                              className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <ChevronsRight className="w-5 h-5" />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
+                      <Pagination
+                        selectedCount={merchandise.selectedRows.size}
+                        totalCount={merchandise.filteredData.length}
+                        currentPage={merchandise.currentPage}
+                        totalPages={merchandise.totalPages}
+                        rowsPerPage={merchandise.rowsPerPage}
+                        onPageChange={merchandise.handlePageChange}
+                        onRowsPerPageChange={merchandise.handleRowsPerPageChange}
+                      />
                     </CardContent>
                   </Card>
                 )}
 
                 {/* Card View */}
-                {merchandiseViewMode === "cards" && (
+                {merchandise.viewMode === "cards" && (
                   <div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                      {displayedMerchandise?.map((item) => (
+                      {merchandise.displayedData?.map((item) => (
                         <Card key={item.id}>
                           <CardContent className="p-0">
                             <div className="relative">
@@ -1712,14 +1248,14 @@ const Cemetery = () => {
                       ))}
                     </div>
 
-                    {!showAllMerchandise &&
-                      filteredMerchandise.length > 5 && (
+                    {!merchandise.showAll &&
+                      merchandise.filteredData.length > 5 && (
                         <div className="flex justify-center">
                           <Button
                             variant="outline"
-                            onClick={() => setShowAllMerchandise(true)}
+                            onClick={() => merchandise.handleLoadAll()}
                           >
-                            Load all ({filteredMerchandise.length})
+                            Load all ({merchandise.filteredData.length})
                           </Button>
                         </div>
                       )}
@@ -1772,11 +1308,11 @@ const Cemetery = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setShowPropertyFilters(true)}
+                    onClick={() => property.setShowFilters(true)}
                   >
                     <Filter className="w-4 h-4 mr-2" />
                     Filters
-                    {(propertyFilters.contractId || propertyFilters.status.length > 0) && (
+                    {(property.filters.contractId || property.filters.status.length > 0) && (
                       <span className="ml-2 px-1.5 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full">Active</span>
                     )}
                   </Button>
@@ -1795,13 +1331,13 @@ const Cemetery = () => {
                                   type="checkbox"
                                   className="rounded"
                                   checked={
-                                    paginatedProperties?.length > 0 &&
-                                    paginatedProperties.every((p) =>
-                                      selectedRows.has(p.id)
+                                    property.paginatedData?.length > 0 &&
+                                    property.paginatedData.every((p) =>
+                                      property.selectedRows.has(p.id)
                                     )
                                   }
                                   onChange={(e) =>
-                                    handleSelectAll(e.target.checked)
+                                    property.handleSelectAll(e.target.checked)
                                   }
                                 />
                               </th>
@@ -1827,56 +1363,56 @@ const Cemetery = () => {
                             </tr>
                           </thead>
                           <tbody>
-                            {paginatedProperties?.map((property) => (
+                            {property.paginatedData?.map((propertyItem) => (
                               <tr
-                                key={property.id}
+                                key={propertyItem.id}
                                 className="border-b hover:bg-gray-50"
                               >
                                 <td className="py-3 px-4">
                                   <input
                                     type="checkbox"
                                     className="rounded"
-                                    checked={selectedRows.has(property.id)}
+                                    checked={property.selectedRows.has(propertyItem.id)}
                                     onChange={() =>
-                                      handleSelectRow(property.id)
+                                      property.handleSelectRow(propertyItem.id)
                                     }
                                   />
                                 </td>
                                 <td className="py-3 px-4 text-sm text-gray-900">
-                                  {property.contractId}
+                                  {propertyItem.contractId}
                                 </td>
                                 <td className="py-3 px-4 text-sm text-gray-900">
-                                  {property.name}
+                                  {propertyItem.name}
                                 </td>
                                 <td className="py-3 px-4">
                                   <div className="flex items-center gap-2">
                                     <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center">
                                       <span className="text-xs font-semibold text-gray-700">
-                                        {property.beneficiary.initials}
+                                        {propertyItem.beneficiary.initials}
                                       </span>
                                     </div>
                                     <span className="text-sm text-gray-900">
-                                      {property.beneficiary.name}
+                                      {propertyItem.beneficiary.name}
                                     </span>
                                     <span className="px-2 py-0.5 bg-blue-100 text-blue-900 text-xs rounded">
-                                      {property.beneficiary.badge}
+                                      {propertyItem.beneficiary.badge}
                                     </span>
                                   </div>
                                 </td>
                                 <td className="py-3 px-4 text-sm text-gray-900">
-                                  {property.dateTime}
+                                  {propertyItem.dateTime}
                                 </td>
                                 <td className="py-3 px-4">
                                   <span
                                     className={`px-3 py-1 text-sm rounded font-medium ${getStatusColor(
-                                      property.status
+                                      propertyItem.status
                                     )}`}
                                   >
-                                    {property.status}
+                                    {propertyItem.status}
                                   </span>
                                 </td>
                                 <td className="py-3 px-4 text-sm text-gray-900">
-                                  {property.serviceId}
+                                  {propertyItem.serviceId}
                                 </td>
                                 <td className="py-3 px-4 text-center">
                                   <button
@@ -1894,138 +1430,103 @@ const Cemetery = () => {
                         </table>
                       </div>
 
-                      {/* Pagination */}
-                      <div className="flex items-center justify-between mt-4 text-sm text-gray-600">
-                        <p>
-                          {selectedRows.size} of{" "}
-                          {filteredProperties.length || 0} row(s)
-                          selected.
-                        </p>
-                        <div className="flex items-center gap-4">
-                          <div className="flex items-center gap-2">
-                            <span>Rows per page</span>
-                            <select
-                              value={rowsPerPage}
-                              onChange={(e) =>
-                                handleRowsPerPageChange(e.target.value)
-                              }
-                              className="border border-gray-300 rounded px-2 py-1 text-sm"
-                            >
-                              <option value={5}>5</option>
-                              <option value={10}>10</option>
-                              <option value={20}>20</option>
-                              <option value={50}>50</option>
-                              <option value={100}>100</option>
-                            </select>
-                          </div>
-                          <span>
-                            Page {currentPage} of {totalPages}
-                          </span>
-                          <div className="flex items-center gap-1">
-                            <button
-                              onClick={handleFirstPage}
-                              disabled={currentPage === 1}
-                              className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <ChevronsLeft className="w-5 h-5" />
-                            </button>
-                            <button
-                              onClick={handlePrevPage}
-                              disabled={currentPage === 1}
-                              className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <ChevronLeft className="w-5 h-5" />
-                            </button>
-                            <button
-                              onClick={handleNextPage}
-                              disabled={currentPage === totalPages}
-                              className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <ChevronRight className="w-5 h-5" />
-                            </button>
-                            <button
-                              onClick={handleLastPage}
-                              disabled={currentPage === totalPages}
-                              className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <ChevronsRight className="w-5 h-5" />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
+                      <Pagination
+                        selectedCount={property.selectedRows.size}
+                        totalCount={property.filteredData.length}
+                        currentPage={property.currentPage}
+                        totalPages={property.totalPages}
+                        rowsPerPage={property.rowsPerPage}
+                        onPageChange={property.handlePageChange}
+                        onRowsPerPageChange={property.handleRowsPerPageChange}
+                      />
                     </CardContent>
                   </Card>
                 )}
 
                 {/* Card View */}
                 {viewMode === "cards" && (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {cemeteryData?.properties.map((property) => (
-                      <Card key={property.id}>
-                        <CardContent className="p-0">
-                          {/* Contract ID Badge */}
-                          <div className="relative">
-                            <img
-                              src={property.image}
-                              alt={property.name}
-                              className="w-full h-48 object-cover rounded-t-lg"
-                            />
-                            <div className="absolute top-3 left-3">
-                              <span className="px-3 py-1 bg-white/90 backdrop-blur text-gray-900 text-xs font-medium rounded">
-                                Contract ID: {property.contractId}
-                              </span>
+                  <div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                      {property.displayedData?.map((propertyItem) => (
+                        <Card key={propertyItem.id}>
+                          <CardContent className="p-0">
+                            {/* Contract ID Badge */}
+                            <div className="relative">
+                              <img
+                                src={propertyItem.image}
+                                alt={propertyItem.name}
+                                className="w-full h-48 object-cover rounded-t-lg"
+                              />
+                              <div className="absolute top-3 left-3">
+                                <span className="px-3 py-1 bg-white/90 backdrop-blur text-gray-900 text-xs font-medium rounded">
+                                  Contract ID: {propertyItem.contractId}
+                                </span>
+                              </div>
                             </div>
-                          </div>
 
-                          <div className="p-4">
-                            {/* Title and Status */}
-                            <div className="flex items-start justify-between mb-3">
-                              <h3 className="text-lg font-semibold text-gray-900">
-                                {property.name}
-                              </h3>
-                              <button
-                                onClick={() =>
-                                  handleComingSoon("Property actions")
-                                }
-                                className="p-1 hover:bg-gray-100 rounded"
+                            <div className="p-4">
+                              {/* Title and Status */}
+                              <div className="flex items-start justify-between mb-3">
+                                <h3 className="text-lg font-semibold text-gray-900">
+                                  {propertyItem.name}
+                                </h3>
+                                <button
+                                  onClick={() =>
+                                    handleComingSoon("Property actions")
+                                  }
+                                  className="p-1 hover:bg-gray-100 rounded"
+                                >
+                                  <MoreHorizontal className="w-5 h-5 text-gray-600" />
+                                </button>
+                              </div>
+                              <span
+                                className={`inline-block px-3 py-1 text-sm rounded font-medium mb-3 ${getStatusColor(
+                                  propertyItem.status
+                                )}`}
                               >
-                                <MoreHorizontal className="w-5 h-5 text-gray-600" />
-                              </button>
-                            </div>
-                            <span
-                              className={`inline-block px-3 py-1 text-sm rounded font-medium mb-3 ${getStatusColor(
-                                property.status
-                              )}`}
-                            >
-                              {property.status}
-                            </span>
+                                {propertyItem.status}
+                              </span>
 
-                            {/* Beneficiary */}
-                            <div className="flex items-center gap-2 mb-2">
-                              <div className="w-8 h-8 rounded-full bg-purple-200 flex items-center justify-center">
-                                <span className="text-xs font-semibold text-purple-700">
-                                  {property.beneficiary.initials}
-                                </span>
+                              {/* Beneficiary */}
+                              <div className="flex items-center gap-2 mb-2">
+                                <div className="w-8 h-8 rounded-full bg-purple-200 flex items-center justify-center">
+                                  <span className="text-xs font-semibold text-purple-700">
+                                    {propertyItem.beneficiary.initials}
+                                  </span>
+                                </div>
+                                <div>
+                                  <p className="text-sm font-medium text-gray-900">
+                                    {propertyItem.beneficiary.name}
+                                  </p>
+                                  <span className="px-2 py-0.5 bg-red-100 text-red-900 text-xs rounded font-medium">
+                                    {propertyItem.beneficiary.badge}
+                                  </span>
+                                </div>
                               </div>
-                              <div>
-                                <p className="text-sm font-medium text-gray-900">
-                                  {property.beneficiary.name}
-                                </p>
-                                <span className="px-2 py-0.5 bg-red-100 text-red-900 text-xs rounded font-medium">
-                                  {property.beneficiary.badge}
-                                </span>
-                              </div>
-                            </div>
 
-                            {/* Location */}
-                            <div className="flex items-center gap-1 text-sm text-gray-600">
-                              <MapPin className="w-4 h-4" />
-                              <span>Location</span>
+                              {/* Location */}
+                              <div className="flex items-center gap-1 text-sm text-gray-600">
+                                <MapPin className="w-4 h-4" />
+                                <span>Location</span>
+                              </div>
                             </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+
+                    {/* Load All Button */}
+                    {!property.showAll &&
+                      property.filteredData.length > 5 && (
+                        <div className="flex justify-center">
+                          <Button
+                            variant="outline"
+                            onClick={property.handleLoadAll}
+                          >
+                            Load all ({property.filteredData.length})
+                          </Button>
+                        </div>
+                      )}
                   </div>
                 )}
               </div>
@@ -2148,11 +1649,11 @@ const Cemetery = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setShowServicesFilters(true)}
+                    onClick={() => services.setShowFilters(true)}
                   >
                     <Filter className="w-4 h-4 mr-2" />
                     Filters
-                    {(servicesFilters.contractId || servicesFilters.status.length > 0) && (
+                    {(services.filters.contractId || services.filters.status.length > 0) && (
                       <span className="ml-2 px-1.5 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full">Active</span>
                     )}
                   </Button>
@@ -2183,13 +1684,13 @@ const Cemetery = () => {
                                   type="checkbox"
                                   className="rounded"
                                   checked={
-                                    paginatedServices?.length > 0 &&
-                                    paginatedServices.every((s) =>
-                                      servicesSelectedRows.has(s.id)
+                                    services.paginatedData?.length > 0 &&
+                                    services.paginatedData.every((s) =>
+                                      services.selectedRows.has(s.id)
                                     )
                                   }
                                   onChange={(e) =>
-                                    handleSelectAllServices(e.target.checked)
+                                    services.handleSelectAll(e.target.checked)
                                   }
                                 />
                               </th>
@@ -2215,58 +1716,58 @@ const Cemetery = () => {
                             </tr>
                           </thead>
                           <tbody>
-                            {paginatedServices?.map((service) => (
+                            {services.paginatedData?.map((serviceItem) => (
                               <tr
-                                key={service.id}
+                                key={serviceItem.id}
                                 className="border-b hover:bg-gray-50"
                               >
                                 <td className="py-3 px-4">
                                   <input
                                     type="checkbox"
                                     className="rounded"
-                                    checked={servicesSelectedRows.has(
-                                      service.id
+                                    checked={services.selectedRows.has(
+                                      serviceItem.id
                                     )}
                                     onChange={() =>
-                                      handleSelectServiceRow(service.id)
+                                      services.handleSelectRow(serviceItem.id)
                                     }
                                   />
                                 </td>
                                 <td className="py-3 px-4 text-sm text-gray-900">
-                                  {service.contractId}
+                                  {serviceItem.contractId}
                                 </td>
                                 <td className="py-3 px-4 text-sm text-gray-900">
-                                  {service.name}
+                                  {serviceItem.name}
                                 </td>
                                 <td className="py-3 px-4">
                                   <div className="flex items-center gap-2">
                                     <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center">
                                       <span className="text-xs font-semibold text-gray-700">
-                                        {service.beneficiary.initials}
+                                        {serviceItem.beneficiary.initials}
                                       </span>
                                     </div>
                                     <span className="text-sm text-gray-900">
-                                      {service.beneficiary.name}
+                                      {serviceItem.beneficiary.name}
                                     </span>
                                     <span className="px-2 py-0.5 bg-blue-100 text-blue-900 text-xs rounded">
-                                      {service.beneficiary.badge}
+                                      {serviceItem.beneficiary.badge}
                                     </span>
                                   </div>
                                 </td>
                                 <td className="py-3 px-4 text-sm text-gray-900">
-                                  {service.dateTime}
+                                  {serviceItem.dateTime}
                                 </td>
                                 <td className="py-3 px-4">
                                   <span
                                     className={`px-3 py-1 text-sm rounded font-medium ${getServiceStatusColor(
-                                      service.status
+                                      serviceItem.status
                                     )}`}
                                   >
-                                    {service.status}
+                                    {serviceItem.status}
                                   </span>
                                 </td>
                                 <td className="py-3 px-4 text-sm text-gray-900">
-                                  {service.serviceId}
+                                  {serviceItem.serviceId}
                                 </td>
                                 <td className="py-3 px-4 text-center">
                                   <button
@@ -2284,68 +1785,15 @@ const Cemetery = () => {
                         </table>
                       </div>
 
-                      {/* Pagination */}
-                      <div className="flex items-center justify-between mt-4 text-sm text-gray-600">
-                        <p>
-                          {servicesSelectedRows.size} of{" "}
-                          {filteredServices.length || 0} row(s) selected.
-                        </p>
-                        <div className="flex items-center gap-4">
-                          <div className="flex items-center gap-2">
-                            <span>Rows per page</span>
-                            <select
-                              value={servicesRowsPerPage}
-                              onChange={(e) =>
-                                handleServicesRowsPerPageChange(e.target.value)
-                              }
-                              className="border border-gray-300 rounded px-2 py-1 text-sm"
-                            >
-                              <option value={5}>5</option>
-                              <option value={10}>10</option>
-                              <option value={20}>20</option>
-                              <option value={50}>50</option>
-                              <option value={100}>100</option>
-                            </select>
-                          </div>
-                          <span>
-                            Page {servicesCurrentPage} of {servicesTotalPages}
-                          </span>
-                          <div className="flex items-center gap-1">
-                            <button
-                              onClick={handleServicesFirstPage}
-                              disabled={servicesCurrentPage === 1}
-                              className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <ChevronsLeft className="w-5 h-5" />
-                            </button>
-                            <button
-                              onClick={handleServicesPrevPage}
-                              disabled={servicesCurrentPage === 1}
-                              className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <ChevronLeft className="w-5 h-5" />
-                            </button>
-                            <button
-                              onClick={handleServicesNextPage}
-                              disabled={
-                                servicesCurrentPage === servicesTotalPages
-                              }
-                              className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <ChevronRight className="w-5 h-5" />
-                            </button>
-                            <button
-                              onClick={handleServicesLastPage}
-                              disabled={
-                                servicesCurrentPage === servicesTotalPages
-                              }
-                              className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <ChevronsRight className="w-5 h-5" />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
+                      <Pagination
+                        selectedCount={services.selectedRows.size}
+                        totalCount={services.filteredData.length}
+                        currentPage={services.currentPage}
+                        totalPages={services.totalPages}
+                        rowsPerPage={services.rowsPerPage}
+                        onPageChange={services.handlePageChange}
+                        onRowsPerPageChange={services.handleRowsPerPageChange}
+                      />
                     </CardContent>
                   </Card>
                 )}
@@ -2354,19 +1802,19 @@ const Cemetery = () => {
                 {viewMode === "cards" && (
                   <div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                      {displayedServices?.map((service) => (
-                        <Card key={service.id}>
+                      {services.displayedData?.map((serviceItem) => (
+                        <Card key={serviceItem.id}>
                           <CardContent className="p-0">
                             {/* Service Image */}
                             <div className="relative">
                               <img
-                                src={service.image}
-                                alt={service.name}
+                                src={serviceItem.image}
+                                alt={serviceItem.name}
                                 className="w-full h-48 object-cover rounded-t-lg"
                               />
                               <div className="absolute top-3 left-3">
                                 <span className="px-3 py-1 bg-white/90 backdrop-blur text-gray-900 text-xs font-medium rounded">
-                                  Contract ID: {service.contractId}
+                                  Contract ID: {serviceItem.contractId}
                                 </span>
                               </div>
                             </div>
@@ -2375,7 +1823,7 @@ const Cemetery = () => {
                               {/* Title and Status */}
                               <div className="flex items-start justify-between mb-3">
                                 <h3 className="text-lg font-semibold text-gray-900 flex-1">
-                                  {service.name}
+                                  {serviceItem.name}
                                 </h3>
                                 <button
                                   onClick={() =>
@@ -2388,25 +1836,25 @@ const Cemetery = () => {
                               </div>
                               <span
                                 className={`inline-block px-3 py-1 text-sm rounded font-medium mb-3 ${getServiceStatusColor(
-                                  service.status
+                                  serviceItem.status
                                 )}`}
                               >
-                                {service.status}
+                                {serviceItem.status}
                               </span>
 
                               {/* Beneficiary */}
                               <div className="flex items-center gap-2 mb-2">
                                 <div className="w-8 h-8 rounded-full bg-purple-200 flex items-center justify-center">
                                   <span className="text-xs font-semibold text-purple-700">
-                                    {service.beneficiary.initials}
+                                    {serviceItem.beneficiary.initials}
                                   </span>
                                 </div>
                                 <div>
                                   <p className="text-sm font-medium text-gray-900">
-                                    {service.beneficiary.name}
+                                    {serviceItem.beneficiary.name}
                                   </p>
                                   <span className="px-2 py-0.5 bg-red-100 text-red-900 text-xs rounded font-medium">
-                                    {service.beneficiary.badge}
+                                    {serviceItem.beneficiary.badge}
                                   </span>
                                 </div>
                               </div>
@@ -2414,7 +1862,7 @@ const Cemetery = () => {
                               {/* Location */}
                               <div className="flex items-center gap-1 text-sm text-gray-600">
                                 <MapPin className="w-4 h-4" />
-                                <span>{service.location}</span>
+                                <span>{serviceItem.location}</span>
                               </div>
                             </div>
                           </CardContent>
@@ -2423,13 +1871,13 @@ const Cemetery = () => {
                     </div>
 
                     {/* Load All Button */}
-                    {!showAllServices && filteredServices.length > 5 && (
+                    {!services.showAll && services.filteredData.length > 5 && (
                       <div className="flex justify-center">
                         <Button
                           variant="outline"
-                          onClick={() => setShowAllServices(true)}
+                          onClick={() => services.handleLoadAll()}
                         >
-                          Load all ({filteredServices.length})
+                          Load all ({services.filteredData.length})
                         </Button>
                       </div>
                     )}
@@ -2509,11 +1957,11 @@ const Cemetery = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setShowMerchandiseFilters(true)}
+                    onClick={() => merchandise.setShowFilters(true)}
                   >
                     <Filter className="w-4 h-4 mr-2" />
                     Filters
-                    {(merchandiseFilters.contractId || merchandiseFilters.status.length > 0) && (
+                    {(merchandise.filters.contractId || merchandise.filters.status.length > 0) && (
                       <span className="ml-2 px-1.5 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full">Active</span>
                     )}
                   </Button>
@@ -2544,13 +1992,13 @@ const Cemetery = () => {
                                   type="checkbox"
                                   className="rounded"
                                   checked={
-                                    paginatedMerchandise?.length > 0 &&
-                                    paginatedMerchandise.every((m) =>
-                                      merchandiseSelectedRows.has(m.id)
+                                    merchandise.paginatedData?.length > 0 &&
+                                    merchandise.paginatedData.every((m) =>
+                                      merchandise.selectedRows.has(m.id)
                                     )
                                   }
                                   onChange={(e) =>
-                                    handleSelectAllMerchandise(e.target.checked)
+                                    merchandise.handleSelectAll(e.target.checked)
                                   }
                                 />
                               </th>
@@ -2576,7 +2024,7 @@ const Cemetery = () => {
                             </tr>
                           </thead>
                           <tbody>
-                            {paginatedMerchandise?.map((item) => (
+                            {merchandise.paginatedData?.map((item) => (
                               <tr
                                 key={item.id}
                                 className="border-b hover:bg-gray-50"
@@ -2585,11 +2033,11 @@ const Cemetery = () => {
                                   <input
                                     type="checkbox"
                                     className="rounded"
-                                    checked={merchandiseSelectedRows.has(
+                                    checked={merchandise.selectedRows.has(
                                       item.id
                                     )}
                                     onChange={() =>
-                                      handleSelectMerchandiseRow(item.id)
+                                      merchandise.handleSelectRow(item.id)
                                     }
                                   />
                                 </td>
@@ -2645,72 +2093,15 @@ const Cemetery = () => {
                         </table>
                       </div>
 
-                      {/* Pagination */}
-                      <div className="flex items-center justify-between mt-4 text-sm text-gray-600">
-                        <p>
-                          {merchandiseSelectedRows.size} of{" "}
-                          {filteredMerchandise.length || 0} row(s)
-                          selected.
-                        </p>
-                        <div className="flex items-center gap-4">
-                          <div className="flex items-center gap-2">
-                            <span>Rows per page</span>
-                            <select
-                              value={merchandiseRowsPerPage}
-                              onChange={(e) =>
-                                handleMerchandiseRowsPerPageChange(
-                                  e.target.value
-                                )
-                              }
-                              className="border border-gray-300 rounded px-2 py-1 text-sm"
-                            >
-                              <option value={5}>5</option>
-                              <option value={10}>10</option>
-                              <option value={20}>20</option>
-                              <option value={50}>50</option>
-                              <option value={100}>100</option>
-                            </select>
-                          </div>
-                          <span>
-                            Page {merchandiseCurrentPage} of{" "}
-                            {merchandiseTotalPages}
-                          </span>
-                          <div className="flex items-center gap-1">
-                            <button
-                              onClick={handleMerchandiseFirstPage}
-                              disabled={merchandiseCurrentPage === 1}
-                              className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <ChevronsLeft className="w-5 h-5" />
-                            </button>
-                            <button
-                              onClick={handleMerchandisePrevPage}
-                              disabled={merchandiseCurrentPage === 1}
-                              className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <ChevronLeft className="w-5 h-5" />
-                            </button>
-                            <button
-                              onClick={handleMerchandiseNextPage}
-                              disabled={
-                                merchandiseCurrentPage === merchandiseTotalPages
-                              }
-                              className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <ChevronRight className="w-5 h-5" />
-                            </button>
-                            <button
-                              onClick={handleMerchandiseLastPage}
-                              disabled={
-                                merchandiseCurrentPage === merchandiseTotalPages
-                              }
-                              className="p-1 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <ChevronsRight className="w-5 h-5" />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
+                      <Pagination
+                        selectedCount={merchandise.selectedRows.size}
+                        totalCount={merchandise.filteredData.length}
+                        currentPage={merchandise.currentPage}
+                        totalPages={merchandise.totalPages}
+                        rowsPerPage={merchandise.rowsPerPage}
+                        onPageChange={merchandise.handlePageChange}
+                        onRowsPerPageChange={merchandise.handleRowsPerPageChange}
+                      />
                     </CardContent>
                   </Card>
                 )}
@@ -2719,7 +2110,7 @@ const Cemetery = () => {
                 {viewMode === "cards" && (
                   <div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                      {displayedMerchandise?.map((item) => (
+                      {merchandise.displayedData?.map((item) => (
                         <Card key={item.id}>
                           <CardContent className="p-0">
                             {/* Merchandise Image */}
@@ -2790,14 +2181,14 @@ const Cemetery = () => {
                     </div>
 
                     {/* Load All Button */}
-                    {!showAllMerchandise &&
-                      filteredMerchandise.length > 5 && (
+                    {!merchandise.showAll &&
+                      merchandise.filteredData.length > 5 && (
                         <div className="flex justify-center">
                           <Button
                             variant="outline"
-                            onClick={() => setShowAllMerchandise(true)}
+                            onClick={() => merchandise.handleLoadAll()}
                           >
-                            Load all ({filteredMerchandise.length})
+                            Load all ({merchandise.filteredData.length})
                           </Button>
                         </div>
                       )}
@@ -2849,469 +2240,43 @@ const Cemetery = () => {
       )}
 
       {/* Property Filters Modal */}
-      {showPropertyFilters && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex justify-end p-4">
-          <div className="bg-white w-full max-w-md h-full flex flex-col rounded-lg">
-            {/* Header */}
-            <div className="p-6 border-b">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-xl font-semibold text-gray-900">
-                  Table filters
-                </h3>
-                <button
-                  onClick={() => setShowPropertyFilters(false)}
-                  className="p-1 hover:bg-gray-100 rounded"
-                >
-                  <X className="w-5 h-5 text-gray-500" />
-                </button>
-              </div>
-              <p className="text-sm text-gray-600">
-                Here you can customise your table view to find needed data.
-              </p>
-            </div>
-
-            {/* Filter Sections */}
-            <div className="flex-1 overflow-y-auto p-6">
-              <div className="space-y-2">
-                {/* Contract ID Filter */}
-                <div className="border rounded-lg">
-                  <button
-                    onClick={() => togglePropertyFilterSection("contractId")}
-                    className="w-full flex items-center justify-between p-4 hover:bg-gray-50"
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-gray-900">Contract ID</span>
-                      {tempPropertyFilters.contractId && (
-                        <span className="text-sm text-gray-500">1</span>
-                      )}
-                    </div>
-                    <ChevronDown
-                      className={`w-5 h-5 text-gray-500 transition-transform ${
-                        expandedPropertyFilters.contractId ? "rotate-180" : ""
-                      }`}
-                    />
-                  </button>
-                  {expandedPropertyFilters.contractId && (
-                    <div className="px-4 pb-4">
-                      <Input
-                        type="text"
-                        placeholder="Search by contract ID..."
-                        value={tempPropertyFilters.contractId}
-                        onChange={(e) =>
-                          setTempPropertyFilters((prev) => ({
-                            ...prev,
-                            contractId: e.target.value,
-                          }))
-                        }
-                        className="w-full"
-                      />
-                    </div>
-                  )}
-                </div>
-
-                {/* Status Filter */}
-                <div className="border rounded-lg">
-                  <button
-                    onClick={() => togglePropertyFilterSection("status")}
-                    className="w-full flex items-center justify-between p-4 hover:bg-gray-50"
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-gray-900">Status</span>
-                      {tempPropertyFilters.status.length > 0 && (
-                        <span className="text-sm text-gray-500">
-                          {tempPropertyFilters.status.length}
-                        </span>
-                      )}
-                    </div>
-                    <ChevronDown
-                      className={`w-5 h-5 text-gray-500 transition-transform ${
-                        expandedPropertyFilters.status ? "rotate-180" : ""
-                      }`}
-                    />
-                  </button>
-                  {expandedPropertyFilters.status && (
-                    <div className="px-4 pb-4 space-y-2">
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          className="rounded accent-black"
-                          checked={tempPropertyFilters.status.includes("In Trust")}
-                          onChange={() =>
-                            handlePropertyFilterToggle("status", "In Trust")
-                          }
-                        />
-                        <span className="text-sm text-gray-700">In Trust</span>
-                      </label>
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          className="rounded accent-black"
-                          checked={tempPropertyFilters.status.includes("Not Purchased")}
-                          onChange={() =>
-                            handlePropertyFilterToggle("status", "Not Purchased")
-                          }
-                        />
-                        <span className="text-sm text-gray-700">Not Purchased</span>
-                      </label>
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          className="rounded accent-black"
-                          checked={tempPropertyFilters.status.includes("Used")}
-                          onChange={() =>
-                            handlePropertyFilterToggle("status", "Used")
-                          }
-                        />
-                        <span className="text-sm text-gray-700">Used</span>
-                      </label>
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          className="rounded accent-black"
-                          checked={tempPropertyFilters.status.includes("Paid")}
-                          onChange={() =>
-                            handlePropertyFilterToggle("status", "Paid")
-                          }
-                        />
-                        <span className="text-sm text-gray-700">Paid</span>
-                      </label>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Footer */}
-            <div className="p-6 border-t bg-gray-50 rounded-b-lg">
-              <div className="flex gap-3">
-                <Button
-                  variant="outline"
-                  className="flex-1"
-                  onClick={cancelPropertyFilters}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  className="flex-1 bg-black text-white hover:bg-gray-800"
-                  onClick={applyPropertyFilters}
-                >
-                  Save
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <FilterModal
+        isOpen={property.showFilters}
+        onClose={() => property.setShowFilters(false)}
+        tempFilters={property.tempFilters}
+        setTempFilters={property.setTempFilters}
+        expandedSections={property.expandedFilters}
+        onToggleSection={property.toggleFilterSection}
+        onApply={property.handleApplyFilters}
+        onCancel={property.handleCancelFilters}
+        statusOptions={propertyStatusOptions}
+      />
 
       {/* Services Filters Modal */}
-      {showServicesFilters && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex justify-end p-4">
-          <div className="bg-white w-full max-w-md h-full flex flex-col rounded-lg">
-            {/* Header */}
-            <div className="p-6 border-b">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-xl font-semibold text-gray-900">
-                  Table filters
-                </h3>
-                <button
-                  onClick={() => setShowServicesFilters(false)}
-                  className="p-1 hover:bg-gray-100 rounded"
-                >
-                  <X className="w-5 h-5 text-gray-500" />
-                </button>
-              </div>
-              <p className="text-sm text-gray-600">
-                Here you can customise your table view to find needed data.
-              </p>
-            </div>
-
-            {/* Filter Sections */}
-            <div className="flex-1 overflow-y-auto p-6">
-              <div className="space-y-2">
-                {/* Contract ID Filter */}
-                <div className="border rounded-lg">
-                  <button
-                    onClick={() => toggleServicesFilterSection("contractId")}
-                    className="w-full flex items-center justify-between p-4 hover:bg-gray-50"
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-gray-900">Contract ID</span>
-                      {tempServicesFilters.contractId && (
-                        <span className="text-sm text-gray-500">1</span>
-                      )}
-                    </div>
-                    <ChevronDown
-                      className={`w-5 h-5 text-gray-500 transition-transform ${
-                        expandedServicesFilters.contractId ? "rotate-180" : ""
-                      }`}
-                    />
-                  </button>
-                  {expandedServicesFilters.contractId && (
-                    <div className="px-4 pb-4">
-                      <Input
-                        type="text"
-                        placeholder="Search by contract ID..."
-                        value={tempServicesFilters.contractId}
-                        onChange={(e) =>
-                          setTempServicesFilters((prev) => ({
-                            ...prev,
-                            contractId: e.target.value,
-                          }))
-                        }
-                        className="w-full"
-                      />
-                    </div>
-                  )}
-                </div>
-
-                {/* Status Filter */}
-                <div className="border rounded-lg">
-                  <button
-                    onClick={() => toggleServicesFilterSection("status")}
-                    className="w-full flex items-center justify-between p-4 hover:bg-gray-50"
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-gray-900">Status</span>
-                      {tempServicesFilters.status.length > 0 && (
-                        <span className="text-sm text-gray-500">
-                          {tempServicesFilters.status.length}
-                        </span>
-                      )}
-                    </div>
-                    <ChevronDown
-                      className={`w-5 h-5 text-gray-500 transition-transform ${
-                        expandedServicesFilters.status ? "rotate-180" : ""
-                      }`}
-                    />
-                  </button>
-                  {expandedServicesFilters.status && (
-                    <div className="px-4 pb-4 space-y-2">
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          className="rounded accent-black"
-                          checked={tempServicesFilters.status.includes("Paid")}
-                          onChange={() =>
-                            handleServicesFilterToggle("status", "Paid")
-                          }
-                        />
-                        <span className="text-sm text-gray-700">Paid</span>
-                      </label>
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          className="rounded accent-black"
-                          checked={tempServicesFilters.status.includes("In Trust")}
-                          onChange={() =>
-                            handleServicesFilterToggle("status", "In Trust")
-                          }
-                        />
-                        <span className="text-sm text-gray-700">In Trust</span>
-                      </label>
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          className="rounded accent-black"
-                          checked={tempServicesFilters.status.includes("Not Purchased")}
-                          onChange={() =>
-                            handleServicesFilterToggle("status", "Not Purchased")
-                          }
-                        />
-                        <span className="text-sm text-gray-700">Not Purchased</span>
-                      </label>
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          className="rounded accent-black"
-                          checked={tempServicesFilters.status.includes("Used")}
-                          onChange={() =>
-                            handleServicesFilterToggle("status", "Used")
-                          }
-                        />
-                        <span className="text-sm text-gray-700">Used</span>
-                      </label>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Footer */}
-            <div className="p-6 border-t bg-gray-50 rounded-b-lg">
-              <div className="flex gap-3">
-                <Button
-                  variant="outline"
-                  className="flex-1"
-                  onClick={cancelServicesFilters}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  className="flex-1 bg-black text-white hover:bg-gray-800"
-                  onClick={applyServicesFilters}
-                >
-                  Save
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <FilterModal
+        isOpen={services.showFilters}
+        onClose={() => services.setShowFilters(false)}
+        tempFilters={services.tempFilters}
+        setTempFilters={services.setTempFilters}
+        expandedSections={services.expandedFilters}
+        onToggleSection={services.toggleFilterSection}
+        onApply={services.handleApplyFilters}
+        onCancel={services.handleCancelFilters}
+        statusOptions={servicesStatusOptions}
+      />
 
       {/* Merchandise Filters Modal */}
-      {showMerchandiseFilters && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex justify-end p-4">
-          <div className="bg-white w-full max-w-md h-full flex flex-col rounded-lg">
-            {/* Header */}
-            <div className="p-6 border-b">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-xl font-semibold text-gray-900">
-                  Table filters
-                </h3>
-                <button
-                  onClick={() => setShowMerchandiseFilters(false)}
-                  className="p-1 hover:bg-gray-100 rounded"
-                >
-                  <X className="w-5 h-5 text-gray-500" />
-                </button>
-              </div>
-              <p className="text-sm text-gray-600">
-                Here you can customise your table view to find needed data.
-              </p>
-            </div>
-
-            {/* Filter Sections */}
-            <div className="flex-1 overflow-y-auto p-6">
-              <div className="space-y-2">
-                {/* Contract ID Filter */}
-                <div className="border rounded-lg">
-                  <button
-                    onClick={() => toggleMerchandiseFilterSection("contractId")}
-                    className="w-full flex items-center justify-between p-4 hover:bg-gray-50"
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-gray-900">Contract ID</span>
-                      {tempMerchandiseFilters.contractId && (
-                        <span className="text-sm text-gray-500">1</span>
-                      )}
-                    </div>
-                    <ChevronDown
-                      className={`w-5 h-5 text-gray-500 transition-transform ${
-                        expandedMerchandiseFilters.contractId ? "rotate-180" : ""
-                      }`}
-                    />
-                  </button>
-                  {expandedMerchandiseFilters.contractId && (
-                    <div className="px-4 pb-4">
-                      <Input
-                        type="text"
-                        placeholder="Search by contract ID..."
-                        value={tempMerchandiseFilters.contractId}
-                        onChange={(e) =>
-                          setTempMerchandiseFilters((prev) => ({
-                            ...prev,
-                            contractId: e.target.value,
-                          }))
-                        }
-                        className="w-full"
-                      />
-                    </div>
-                  )}
-                </div>
-
-                {/* Status Filter */}
-                <div className="border rounded-lg">
-                  <button
-                    onClick={() => toggleMerchandiseFilterSection("status")}
-                    className="w-full flex items-center justify-between p-4 hover:bg-gray-50"
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-gray-900">Status</span>
-                      {tempMerchandiseFilters.status.length > 0 && (
-                        <span className="text-sm text-gray-500">
-                          {tempMerchandiseFilters.status.length}
-                        </span>
-                      )}
-                    </div>
-                    <ChevronDown
-                      className={`w-5 h-5 text-gray-500 transition-transform ${
-                        expandedMerchandiseFilters.status ? "rotate-180" : ""
-                      }`}
-                    />
-                  </button>
-                  {expandedMerchandiseFilters.status && (
-                    <div className="px-4 pb-4 space-y-2">
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          className="rounded accent-black"
-                          checked={tempMerchandiseFilters.status.includes("Paid")}
-                          onChange={() =>
-                            handleMerchandiseFilterToggle("status", "Paid")
-                          }
-                        />
-                        <span className="text-sm text-gray-700">Paid</span>
-                      </label>
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          className="rounded accent-black"
-                          checked={tempMerchandiseFilters.status.includes("In Trust")}
-                          onChange={() =>
-                            handleMerchandiseFilterToggle("status", "In Trust")
-                          }
-                        />
-                        <span className="text-sm text-gray-700">In Trust</span>
-                      </label>
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          className="rounded accent-black"
-                          checked={tempMerchandiseFilters.status.includes("Not Purchased")}
-                          onChange={() =>
-                            handleMerchandiseFilterToggle("status", "Not Purchased")
-                          }
-                        />
-                        <span className="text-sm text-gray-700">Not Purchased</span>
-                      </label>
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          className="rounded accent-black"
-                          checked={tempMerchandiseFilters.status.includes("Used")}
-                          onChange={() =>
-                            handleMerchandiseFilterToggle("status", "Used")
-                          }
-                        />
-                        <span className="text-sm text-gray-700">Used</span>
-                      </label>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Footer */}
-            <div className="p-6 border-t bg-gray-50 rounded-b-lg">
-              <div className="flex gap-3">
-                <Button
-                  variant="outline"
-                  className="flex-1"
-                  onClick={cancelMerchandiseFilters}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  className="flex-1 bg-black text-white hover:bg-gray-800"
-                  onClick={applyMerchandiseFilters}
-                >
-                  Save
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <FilterModal
+        isOpen={merchandise.showFilters}
+        onClose={() => merchandise.setShowFilters(false)}
+        tempFilters={merchandise.tempFilters}
+        setTempFilters={merchandise.setTempFilters}
+        expandedSections={merchandise.expandedFilters}
+        onToggleSection={merchandise.toggleFilterSection}
+        onApply={merchandise.handleApplyFilters}
+        onCancel={merchandise.handleCancelFilters}
+        statusOptions={merchandiseStatusOptions}
+      />
     </div>
   );
 };
