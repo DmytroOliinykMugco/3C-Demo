@@ -19,16 +19,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/toast";
+import DocumentViewer from "@/components/DocumentViewer";
 
 const Cemetery = () => {
   const { addToast } = useToast();
   const [activeTab, setActiveTab] = useState("all");
-  const [viewMode, setViewMode] = useState("cards"); // 'cards' or 'table' - for dedicated tabs
+  const [viewMode, setViewMode] = useState("table"); // 'cards' or 'table' - for dedicated tabs
 
   // View mode states for All tab sections
-  const [propertyViewMode, setPropertyViewMode] = useState("cards");
-  const [servicesViewMode, setServicesViewMode] = useState("cards");
-  const [merchandiseViewMode, setMerchandiseViewMode] = useState("cards");
+  const [propertyViewMode, setPropertyViewMode] = useState("table");
+  const [servicesViewMode, setServicesViewMode] = useState("table");
+  const [merchandiseViewMode, setMerchandiseViewMode] = useState("table");
   const [designationTab, setDesignationTab] = useState("signed");
 
   // Property pagination state
@@ -50,6 +51,9 @@ const Cemetery = () => {
   );
   const [showAllMerchandise, setShowAllMerchandise] = useState(false);
 
+  // Document viewer state
+  const [viewerDocument, setViewerDocument] = useState(null);
+
   const {
     data: cemeteryResponse,
     isLoading,
@@ -63,6 +67,38 @@ const Cemetery = () => {
 
   const handleComingSoon = (feature) => {
     addToast(`${feature} will be developed soon`, "success");
+  };
+
+  // Document handlers
+  const handlePreviewDocument = (doc) => {
+    setViewerDocument({
+      url: `http://localhost:3000/example-pdfs/${doc.fileName}`,
+      name: doc.name,
+      fileName: doc.fileName
+    });
+  };
+
+  const handleDownloadDocument = (doc) => {
+    const url = `http://localhost:3000/example-pdfs/${doc.fileName}`;
+    fetch(url)
+      .then(response => response.blob())
+      .then(blob => {
+        const link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.download = doc.fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(link.href);
+      })
+      .catch(error => {
+        console.error('Download failed:', error);
+        addToast('Failed to download document', 'error');
+      });
+  };
+
+  const closeDocumentViewer = () => {
+    setViewerDocument(null);
   };
 
   // Pagination helpers
@@ -647,16 +683,12 @@ const Cemetery = () => {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() =>
-                                handleComingSoon("Preview document")
-                              }
+                              onClick={() => handlePreviewDocument(cert)}
                             >
                               Preview
                             </Button>
                             <button
-                              onClick={() =>
-                                handleComingSoon("Download document")
-                              }
+                              onClick={() => handleDownloadDocument(cert)}
                               className="p-2 hover:bg-gray-100 rounded"
                             >
                               <Download className="w-4 h-4 text-gray-600" />
@@ -1938,16 +1970,12 @@ const Cemetery = () => {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() =>
-                                handleComingSoon("Preview document")
-                              }
+                              onClick={() => handlePreviewDocument(doc)}
                             >
                               Preview
                             </Button>
                             <button
-                              onClick={() =>
-                                handleComingSoon("Download document")
-                              }
+                              onClick={() => handleDownloadDocument(doc)}
                               className="p-2 hover:bg-gray-100 rounded"
                             >
                               <Download className="w-4 h-4 text-gray-600" />
@@ -2685,6 +2713,19 @@ const Cemetery = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Document Viewer */}
+      {viewerDocument && (
+        <DocumentViewer
+          documentUrl={viewerDocument.url}
+          documentName={viewerDocument.name}
+          onClose={closeDocumentViewer}
+          onDownload={() => handleDownloadDocument({
+            name: viewerDocument.name,
+            fileName: viewerDocument.fileName
+          })}
+        />
+      )}
     </div>
   );
 };

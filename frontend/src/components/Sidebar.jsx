@@ -34,7 +34,7 @@ const Sidebar = () => {
       ],
     },
     {
-      title: "My Services",
+      title: "My Account",
       icon: CreditCard,
       items: [
         { name: "Balance", path: "/balance", icon: CreditCard },
