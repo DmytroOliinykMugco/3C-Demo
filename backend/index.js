@@ -26,25 +26,25 @@ app.use(express.json());
 app.use("/example-pdfs", express.static("pdf"));
 app.use("/img", express.static("img"));
 
-// Mocked Data - Star Wars Theme
+// Mocked Data
 const profileData = {
-  userId: "JEDI-2187",
-  status: "Mister",
-  firstName: "Luke",
-  lastName: "Skywalker",
-  middleName: "Force",
-  prefix: "Jedi Master",
+  userId: "USR-2187",
+  status: "Mr.",
+  firstName: "James",
+  lastName: "Anderson",
+  middleName: "Robert",
+  prefix: "Dr.",
   suffix: "Jr.",
-  phoneNumber: "+1 555 JEDI 001",
-  email: "luke.skywalker@jediorder.org",
-  secondNumber: "+1 555 REBEL 123",
+  phoneNumber: "+1 (555) 123-4567",
+  email: "james.anderson@email.com",
+  secondNumber: "+1 (555) 987-6543",
   country: "USA",
-  addressLine1: "1138 Desert View Lane, Tatooine District, AZ 85001",
-  addressLine2: "Moisture Farm #42",
+  addressLine1: "1425 Oak Street, Phoenix, AZ 85001",
+  addressLine2: "Apt 4B",
   state: "AZ",
-  city: "Mos Eisley",
-  zipCode: "77777",
-  initials: "LS",
+  city: "Phoenix",
+  zipCode: "85001",
+  initials: "JA",
   photoUrl: null, // Will store base64 encoded image
 };
 
@@ -600,10 +600,10 @@ const balanceData = {
 const familyMembers = [
   {
     id: 2,
-    name: "Leia Organa",
+    name: "Jennifer Anderson",
     relationship: "Sister",
-    phone: "+1 555 REBEL 777",
-    email: "leia.organa@rebellion.org",
+    phone: "+1 (555) 234-5678",
+    email: "jennifer.anderson@email.com",
     accesses: [
       { id: "FU8434434", type: "viewer", label: "ID: FU8434434" },
       { id: "FU8434435", type: "viewer", label: "ID: FU8434435" },
@@ -611,28 +611,28 @@ const familyMembers = [
     ],
     isStarred: true,
     isNextOfKin: false,
-    initials: "LO",
+    initials: "JA",
   },
   {
     id: 3,
-    name: "Han Solo",
+    name: "Michael Thompson",
     relationship: "Brother-in-law",
-    phone: "+1 555 FCON 420",
-    email: "han.solo@millenniumfalcon.com",
+    phone: "+1 (555) 345-6789",
+    email: "michael.thompson@email.com",
     accesses: [
       { id: "FU8434434", type: "viewer", label: "ID: FU8434434" },
       { type: "viewer", label: "My Wishes" },
     ],
     isStarred: true,
     isNextOfKin: false,
-    initials: "HS",
+    initials: "MT",
   },
   {
     id: 4,
-    name: "Chewbacca",
-    relationship: "Co-pilot & Friend",
-    phone: "+1 555 WOOKIE 190",
-    email: "chewie@millenniumfalcon.com",
+    name: "David Miller",
+    relationship: "Brother",
+    phone: "+1 (555) 456-7890",
+    email: "david.miller@email.com",
     accesses: [
       { id: "FU8434436", type: "viewer", label: "ID: FU8434436" },
       { id: "FU8434437", type: "viewer", label: "ID: FU8434437" },
@@ -640,21 +640,21 @@ const familyMembers = [
     ],
     isStarred: false,
     isNextOfKin: false,
-    initials: "CB",
+    initials: "DM",
   },
   {
     id: 5,
-    name: "R2-D2",
-    relationship: "Droid Companion",
-    phone: "+1 555 BEEP BOOP",
-    email: "r2d2@astromech.droid",
+    name: "Rebecca Wilson",
+    relationship: "Cousin",
+    phone: "+1 (555) 567-8901",
+    email: "rebecca.wilson@email.com",
     accesses: [
       { id: "FU8434438", type: "viewer", label: "ID: FU8434438" },
       { type: "viewer", label: "My Wishes" },
     ],
     isStarred: false,
     isNextOfKin: false,
-    initials: "R2",
+    initials: "RW",
   },
 ];
 
