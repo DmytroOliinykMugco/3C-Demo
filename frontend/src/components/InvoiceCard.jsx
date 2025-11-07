@@ -70,19 +70,19 @@ const InvoiceCard = ({ invoice, onPay, onPreview, onDownload }) => {
             <>
               <Button
                 onClick={() => onPay(invoice)}
-                className="flex-1"
+                className="flex-1 h-10"
               >
                 Pay
               </Button>
               <button
                 onClick={() => onPreview(invoice)}
-                className="p-3 border rounded-lg hover:bg-gray-50 transition-colors"
+                className="h-10 w-10 border rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center"
               >
                 <Eye className="w-5 h-5 text-gray-600" />
               </button>
               <button
                 onClick={() => onDownload(invoice)}
-                className="p-3 border rounded-lg hover:bg-gray-50 transition-colors"
+                className="h-10 w-10 border rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center"
               >
                 <Download className="w-5 h-5 text-gray-600" />
               </button>
@@ -91,13 +91,13 @@ const InvoiceCard = ({ invoice, onPay, onPreview, onDownload }) => {
             <>
               <button
                 onClick={() => onPreview(invoice)}
-                className="flex-1 p-3 border rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center"
+                className="flex-1 h-10 border rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center"
               >
                 <Eye className="w-5 h-5 text-gray-600" />
               </button>
               <button
                 onClick={() => onDownload(invoice)}
-                className="flex-1 p-3 border rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center"
+                className="flex-1 h-10 border rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center"
               >
                 <Download className="w-5 h-5 text-gray-600" />
               </button>

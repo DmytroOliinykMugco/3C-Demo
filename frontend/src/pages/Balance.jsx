@@ -112,16 +112,16 @@ const Balance = () => {
     const handleClickOutside = (event) => {
       if (propertyMenuOpen !== null) {
         // Check if click is outside the menu
-        const isOutside = !event.target.closest('.property-menu-container');
+        const isOutside = !event.target.closest(".property-menu-container");
         if (isOutside) {
           setPropertyMenuOpen(null);
         }
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [propertyMenuOpen]);
 
@@ -130,7 +130,7 @@ const Balance = () => {
     setPayingContracts({ ...payingContracts, [contractId]: true });
 
     // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    await new Promise((resolve) => setTimeout(resolve, 1500));
 
     setPayingContracts({ ...payingContracts, [contractId]: false });
     addToast("Payment processed successfully!", "success");
@@ -149,7 +149,7 @@ const Balance = () => {
       const blobUrl = window.URL.createObjectURL(blob);
 
       // Trigger download
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = blobUrl;
       link.download = `statement-${statementId}.pdf`;
       document.body.appendChild(link);
@@ -159,10 +159,16 @@ const Balance = () => {
       // Clean up the blob URL
       window.URL.revokeObjectURL(blobUrl);
 
-      setDownloadingStatements({ ...downloadingStatements, [statementId]: false });
+      setDownloadingStatements({
+        ...downloadingStatements,
+        [statementId]: false,
+      });
       addToast("Statement downloaded successfully!", "success");
     } catch (error) {
-      setDownloadingStatements({ ...downloadingStatements, [statementId]: false });
+      setDownloadingStatements({
+        ...downloadingStatements,
+        [statementId]: false,
+      });
       addToast("Failed to download statement", "error");
     }
   };
@@ -172,7 +178,7 @@ const Balance = () => {
     setViewerDocument({
       id: statement.id || statement.title,
       name: statement.title,
-      url: url
+      url: url,
     });
   };
 
@@ -184,13 +190,13 @@ const Balance = () => {
   // Phone contact handler
   const handlePhoneContact = (phone) => {
     // Remove any spaces or formatting from phone
-    const cleanPhone = phone.replace(/\s+/g, '');
+    const cleanPhone = phone.replace(/\s+/g, "");
     window.location.href = `tel:${cleanPhone}`;
   };
 
   // Open contract details
   const handleOpenContract = (contractId) => {
-    const contract = balanceData?.contracts.find(c => c.id === contractId);
+    const contract = balanceData?.contracts.find((c) => c.id === contractId);
     if (contract) {
       addToast(`Opening ${contract.type} contract...`, "success");
       // In real app: navigate(`/contracts/${contractId}`);
@@ -233,13 +239,18 @@ const Balance = () => {
       addToast("Please select at least one contract", "error");
       return;
     }
-    const shareLink = `${window.location.origin}/contracts/${shareContractIds.join(",")}`;
-    navigator.clipboard.writeText(shareLink).then(() => {
-      setLinkCopied(true);
-      setTimeout(() => setLinkCopied(false), 2000);
-    }).catch(() => {
-      addToast("Failed to copy link", "error");
-    });
+    const shareLink = `${
+      window.location.origin
+    }/contracts/${shareContractIds.join(",")}`;
+    navigator.clipboard
+      .writeText(shareLink)
+      .then(() => {
+        setLinkCopied(true);
+        setTimeout(() => setLinkCopied(false), 2000);
+      })
+      .catch(() => {
+        addToast("Failed to copy link", "error");
+      });
   };
 
   // Send invite
@@ -261,13 +272,19 @@ const Balance = () => {
   // Toggle invoice view mode
   const toggleInvoiceView = () => {
     setInvoiceViewMode((prev) => (prev === "grid" ? "list" : "grid"));
-    addToast(`Switched to ${invoiceViewMode === "grid" ? "list" : "grid"} view`, "success");
+    addToast(
+      `Switched to ${invoiceViewMode === "grid" ? "list" : "grid"} view`,
+      "success"
+    );
   };
 
   // Toggle history view mode
   const toggleHistoryView = () => {
     setHistoryViewMode((prev) => (prev === "table" ? "cards" : "table"));
-    addToast(`Switched to ${historyViewMode === "table" ? "cards" : "table"} view`, "success");
+    addToast(
+      `Switched to ${historyViewMode === "table" ? "cards" : "table"} view`,
+      "success"
+    );
   };
 
   // Handle invoice filter changes
@@ -325,7 +342,7 @@ const Balance = () => {
   const handleShareProperty = (property) => {
     // Find contract associated with this property
     const contract = balanceData?.contracts.find(
-      c => c.contractNumber === property.contractId
+      (c) => c.contractNumber === property.contractId
     );
 
     if (contract) {
@@ -351,35 +368,49 @@ const Balance = () => {
     setExportingHistory(true);
 
     // Simulate export
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
     // Create CSV content
-    const selectedPayments = balanceData?.paymentHistory.filter(p =>
+    const selectedPayments = balanceData?.paymentHistory.filter((p) =>
       selectedRows.includes(p.id)
     );
 
     const csvContent = [
-      ["Contract ID", "Date & Time", "Beneficiary", "Payment Method", "Amount", "Balance"],
-      ...selectedPayments.map(p => [
+      [
+        "Contract ID",
+        "Date & Time",
+        "Beneficiary",
+        "Payment Method",
+        "Amount",
+        "Balance",
+      ],
+      ...selectedPayments.map((p) => [
         p.contractId,
         p.dateTime,
         p.beneficiary.name,
         p.paymentMethod,
         p.amount,
-        p.balance
-      ])
-    ].map(row => row.join(",")).join("\n");
+        p.balance,
+      ]),
+    ]
+      .map((row) => row.join(","))
+      .join("\n");
 
     // Download CSV
     const blob = new Blob([csvContent], { type: "text/csv" });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `payment-history-${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = `payment-history-${
+      new Date().toISOString().split("T")[0]
+    }.csv`;
     a.click();
 
     setExportingHistory(false);
-    addToast(`Exported ${selectedRows.length} payment(s) successfully!`, "success");
+    addToast(
+      `Exported ${selectedRows.length} payment(s) successfully!`,
+      "success"
+    );
   };
 
   // Preview document in viewer
@@ -471,81 +502,102 @@ const Balance = () => {
   };
 
   // Filter invoices
-  const filteredInvoices = balanceData?.additionalInvoices.filter((invoice) => {
-    // Status filter
-    if (invoiceFilters.status !== "all" && invoice.status !== invoiceFilters.status) {
-      return false;
-    }
-    // Date range filter (mock implementation)
-    if (invoiceFilters.dateRange !== "all") {
-      // In real app, would filter by actual dates
-    }
-    return true;
-  }) || [];
-
-  // Payment history pagination and selection handlers with filtering
-  const filteredPayments = balanceData?.paymentHistory.filter((payment) => {
-    // Search filter
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      const matchesSearch = (
-        payment.contractId.toLowerCase().includes(query) ||
-        payment.beneficiary.name.toLowerCase().includes(query) ||
-        payment.paymentMethod.toLowerCase().includes(query)
-      );
-      if (!matchesSearch) return false;
-    }
-
-    // Contract type filter (checkbox based) - Check for FU (funeral) or CE (cemetery)
-    if (historyFilters.contractType.length > 0 && historyFilters.contractType.length < 2) {
-      const contractType = payment.contractId.toUpperCase().startsWith("FU") ? "funeral" : "cemetery";
-      if (!historyFilters.contractType.includes(contractType)) return false;
-    }
-
-    // Contract number filter (text input)
-    if (historyFilters.contractNumber) {
-      if (!payment.contractId.toLowerCase().includes(historyFilters.contractNumber.toLowerCase())) {
+  const filteredInvoices =
+    balanceData?.additionalInvoices.filter((invoice) => {
+      // Status filter
+      if (
+        invoiceFilters.status !== "all" &&
+        invoice.status !== invoiceFilters.status
+      ) {
         return false;
       }
-    }
+      // Date range filter (mock implementation)
+      if (invoiceFilters.dateRange !== "all") {
+        // In real app, would filter by actual dates
+      }
+      return true;
+    }) || [];
 
-    // Payment method filter (checkbox based)
-    if (historyFilters.paymentMethod.length > 0) {
-      const method = payment.paymentMethod.toLowerCase();
-      let matches = false;
+  // Payment history pagination and selection handlers with filtering
+  const filteredPayments =
+    balanceData?.paymentHistory.filter((payment) => {
+      // Search filter
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        const matchesSearch =
+          payment.contractId.toLowerCase().includes(query) ||
+          payment.beneficiary.name.toLowerCase().includes(query) ||
+          payment.paymentMethod.toLowerCase().includes(query);
+        if (!matchesSearch) return false;
+      }
 
-      for (const selectedMethod of historyFilters.paymentMethod) {
-        if (selectedMethod === "card") {
-          // Card payments have ** followed by numbers
-          if (method.includes("**")) {
-            matches = true;
-            break;
-          }
-        } else if (selectedMethod === "cash") {
-          // Cash payments contain "cash"
-          if (method.includes("cash")) {
-            matches = true;
-            break;
-          }
-        } else if (selectedMethod === "bank") {
-          // Bank transfers
-          if (method.includes("bank") || method.includes("transfer") || method.includes("ach") || method.includes("wire")) {
-            matches = true;
-            break;
-          }
+      // Contract type filter (checkbox based) - Check for FU (funeral) or CE (cemetery)
+      if (
+        historyFilters.contractType.length > 0 &&
+        historyFilters.contractType.length < 2
+      ) {
+        const contractType = payment.contractId.toUpperCase().startsWith("FU")
+          ? "funeral"
+          : "cemetery";
+        if (!historyFilters.contractType.includes(contractType)) return false;
+      }
+
+      // Contract number filter (text input)
+      if (historyFilters.contractNumber) {
+        if (
+          !payment.contractId
+            .toLowerCase()
+            .includes(historyFilters.contractNumber.toLowerCase())
+        ) {
+          return false;
         }
       }
 
-      if (!matches) return false;
-    }
+      // Payment method filter (checkbox based)
+      if (historyFilters.paymentMethod.length > 0) {
+        const method = payment.paymentMethod.toLowerCase();
+        let matches = false;
 
-    // Amount filter (range)
-    if (payment.amount < historyFilters.amountMin || payment.amount > historyFilters.amountMax) {
-      return false;
-    }
+        for (const selectedMethod of historyFilters.paymentMethod) {
+          if (selectedMethod === "card") {
+            // Card payments have ** followed by numbers
+            if (method.includes("**")) {
+              matches = true;
+              break;
+            }
+          } else if (selectedMethod === "cash") {
+            // Cash payments contain "cash"
+            if (method.includes("cash")) {
+              matches = true;
+              break;
+            }
+          } else if (selectedMethod === "bank") {
+            // Bank transfers
+            if (
+              method.includes("bank") ||
+              method.includes("transfer") ||
+              method.includes("ach") ||
+              method.includes("wire")
+            ) {
+              matches = true;
+              break;
+            }
+          }
+        }
 
-    return true;
-  }) || [];
+        if (!matches) return false;
+      }
+
+      // Amount filter (range)
+      if (
+        payment.amount < historyFilters.amountMin ||
+        payment.amount > historyFilters.amountMax
+      ) {
+        return false;
+      }
+
+      return true;
+    }) || [];
 
   const totalPayments = filteredPayments.length;
   const totalPages = Math.ceil(totalPayments / rowsPerPage);
@@ -554,16 +606,17 @@ const Balance = () => {
   const currentPayments = filteredPayments.slice(startIndex, endIndex);
 
   // Filter contracts
-  const filteredContracts = balanceData?.contracts.filter((contract) => {
-    if (!contractSearchQuery) return true;
-    const query = contractSearchQuery.toLowerCase();
-    return (
-      contract.contractNumber.toLowerCase().includes(query) ||
-      contract.type.toLowerCase().includes(query) ||
-      contract.role.toLowerCase().includes(query) ||
-      (contract.status && contract.status.toLowerCase().includes(query))
-    );
-  }) || [];
+  const filteredContracts =
+    balanceData?.contracts.filter((contract) => {
+      if (!contractSearchQuery) return true;
+      const query = contractSearchQuery.toLowerCase();
+      return (
+        contract.contractNumber.toLowerCase().includes(query) ||
+        contract.type.toLowerCase().includes(query) ||
+        contract.role.toLowerCase().includes(query) ||
+        (contract.status && contract.status.toLowerCase().includes(query))
+      );
+    }) || [];
 
   const handleSelectAll = (checked) => {
     if (checked) {
@@ -677,8 +730,8 @@ const Balance = () => {
                 </p>
 
                 {/* Filters and View Toggle */}
-                <div className="flex gap-3 mb-6 flex-wrap">
-                  <div className="flex gap-2">
+                {/* <div className="flex gap-3 mb-6 flex-wrap"> */}
+                {/* <div className="flex gap-2">
                     <select
                       className="border rounded px-3 py-1.5 text-sm"
                       value={invoiceFilters.status}
@@ -712,7 +765,7 @@ const Balance = () => {
                     <Layout className="w-4 h-4 mr-2" />
                     {invoiceViewMode === "grid" ? "List" : "Grid"} View
                   </Button>
-                </div>
+                </div> */}
 
                 {/* Invoice cards */}
                 <div
@@ -727,12 +780,19 @@ const Balance = () => {
                       key={invoice.id}
                       invoice={invoice}
                       onPay={() => handlePay(invoice.id)}
-                      onPreview={() => handlePreviewDocument({
-                        id: invoice.id,
-                        name: `Invoice ${invoice.id}`,
-                        url: `/example-pdfs/information_pdf_example_1.pdf`
-                      })}
-                      onDownload={() => handleDownloadStatement(invoice.id, `/example-pdfs/information_pdf_example_1.pdf`)}
+                      onPreview={() =>
+                        handlePreviewDocument({
+                          id: invoice.id,
+                          name: `Invoice ${invoice.id}`,
+                          url: `/example-pdfs/information_pdf_example_1.pdf`,
+                        })
+                      }
+                      onDownload={() =>
+                        handleDownloadStatement(
+                          invoice.id,
+                          `/example-pdfs/information_pdf_example_1.pdf`
+                        )
+                      }
                       isLoading={downloadingStatements[invoice.id]}
                     />
                   ))}
@@ -793,12 +853,20 @@ const Balance = () => {
                             key={index}
                             statement={statement}
                             onPreview={() =>
-                              handlePreviewStatement(statement, `/example-pdfs/my_services_balance_account_statements_funeral_contract.pdf`)
+                              handlePreviewStatement(
+                                statement,
+                                `/example-pdfs/my_services_balance_account_statements_funeral_contract.pdf`
+                              )
                             }
                             onDownload={() =>
-                              handleDownloadStatement(`funeral-${index}`, `/example-pdfs/my_services_balance_account_statements_funeral_contract.pdf`)
+                              handleDownloadStatement(
+                                `funeral-${index}`,
+                                `/example-pdfs/my_services_balance_account_statements_funeral_contract.pdf`
+                              )
                             }
-                            isLoading={downloadingStatements[`funeral-${index}`]}
+                            isLoading={
+                              downloadingStatements[`funeral-${index}`]
+                            }
                           />
                         )
                       )}
@@ -821,12 +889,20 @@ const Balance = () => {
                             <StatementCard
                               statement={statement}
                               onPreview={() =>
-                                handlePreviewStatement(statement, `/example-pdfs/my_services_balance_account_statements_funeral_contract.pdf`)
+                                handlePreviewStatement(
+                                  statement,
+                                  `/example-pdfs/my_services_balance_account_statements_funeral_contract.pdf`
+                                )
                               }
                               onDownload={() =>
-                                handleDownloadStatement(`funeral-${index}`, `/example-pdfs/my_services_balance_account_statements_funeral_contract.pdf`)
+                                handleDownloadStatement(
+                                  `funeral-${index}`,
+                                  `/example-pdfs/my_services_balance_account_statements_funeral_contract.pdf`
+                                )
                               }
-                              isLoading={downloadingStatements[`funeral-${index}`]}
+                              isLoading={
+                                downloadingStatements[`funeral-${index}`]
+                              }
                             />
                           </div>
                         )
@@ -876,12 +952,20 @@ const Balance = () => {
                             key={index}
                             statement={statement}
                             onPreview={() =>
-                              handlePreviewStatement(statement, `/example-pdfs/my_services_balance_account_statements_cemetery_contract.pdf`)
+                              handlePreviewStatement(
+                                statement,
+                                `/example-pdfs/my_services_balance_account_statements_cemetery_contract.pdf`
+                              )
                             }
                             onDownload={() =>
-                              handleDownloadStatement(`cemetery-${index}`, `/example-pdfs/my_services_balance_account_statements_cemetery_contract.pdf`)
+                              handleDownloadStatement(
+                                `cemetery-${index}`,
+                                `/example-pdfs/my_services_balance_account_statements_cemetery_contract.pdf`
+                              )
                             }
-                            isLoading={downloadingStatements[`cemetery-${index}`]}
+                            isLoading={
+                              downloadingStatements[`cemetery-${index}`]
+                            }
                           />
                         )
                       )}
@@ -904,12 +988,20 @@ const Balance = () => {
                             <StatementCard
                               statement={statement}
                               onPreview={() =>
-                                handlePreviewStatement(statement, `/example-pdfs/my_services_balance_account_statements_cemetery_contract.pdf`)
+                                handlePreviewStatement(
+                                  statement,
+                                  `/example-pdfs/my_services_balance_account_statements_cemetery_contract.pdf`
+                                )
                               }
                               onDownload={() =>
-                                handleDownloadStatement(`cemetery-${index}`, `/example-pdfs/my_services_balance_account_statements_cemetery_contract.pdf`)
+                                handleDownloadStatement(
+                                  `cemetery-${index}`,
+                                  `/example-pdfs/my_services_balance_account_statements_cemetery_contract.pdf`
+                                )
                               }
-                              isLoading={downloadingStatements[`cemetery-${index}`]}
+                              isLoading={
+                                downloadingStatements[`cemetery-${index}`]
+                              }
                             />
                           </div>
                         )
@@ -979,199 +1071,205 @@ const Balance = () => {
                       <>
                         {/* Table or Cards View */}
                         {historyViewMode === "table" ? (
-                      <div className="overflow-x-auto">
-                        <table className="w-full">
-                          <thead>
-                            <tr className="border-b">
-                              <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">
-                                <input
-                                  type="checkbox"
-                                  className="rounded"
-                                  checked={allCurrentPageSelected}
-                                  onChange={(e) =>
-                                    handleSelectAll(e.target.checked)
-                                  }
-                                />
-                              </th>
-                              <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">
-                                Contract
-                              </th>
-                              <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">
-                                Beneficiaries
-                              </th>
-                              <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">
-                                Date & Time
-                              </th>
-                              <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">
-                                Payment method
-                              </th>
-                              <th className="text-right py-3 px-4 text-sm font-medium text-gray-700">
-                                Amount
-                              </th>
-                              <th className="text-right py-3 px-4 text-sm font-medium text-gray-700">
-                                Balance
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody>
+                          <div className="overflow-x-auto">
+                            <table className="w-full">
+                              <thead>
+                                <tr className="border-b">
+                                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">
+                                    <input
+                                      type="checkbox"
+                                      className="rounded"
+                                      checked={allCurrentPageSelected}
+                                      onChange={(e) =>
+                                        handleSelectAll(e.target.checked)
+                                      }
+                                    />
+                                  </th>
+                                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">
+                                    Contract
+                                  </th>
+                                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">
+                                    Beneficiaries
+                                  </th>
+                                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">
+                                    Date & Time
+                                  </th>
+                                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">
+                                    Payment method
+                                  </th>
+                                  <th className="text-right py-3 px-4 text-sm font-medium text-gray-700">
+                                    Amount
+                                  </th>
+                                  <th className="text-right py-3 px-4 text-sm font-medium text-gray-700">
+                                    Balance
+                                  </th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {currentPayments.map((payment) => (
+                                  <tr
+                                    key={payment.id}
+                                    className="border-b hover:bg-gray-50"
+                                  >
+                                    <td className="py-3 px-4">
+                                      <input
+                                        type="checkbox"
+                                        className="rounded"
+                                        checked={selectedRows.includes(
+                                          payment.id
+                                        )}
+                                        onChange={(e) =>
+                                          handleSelectRow(
+                                            payment.id,
+                                            e.target.checked
+                                          )
+                                        }
+                                      />
+                                    </td>
+                                    <td className="py-3 px-4 text-sm text-gray-900">
+                                      ID: {payment.contractId}
+                                    </td>
+                                    <td className="py-3 px-4">
+                                      <div className="flex items-center gap-2">
+                                        <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center">
+                                          <span className="text-xs font-semibold text-gray-700">
+                                            {payment.beneficiary.initials}
+                                          </span>
+                                        </div>
+                                        <span className="text-sm text-gray-900">
+                                          {payment.beneficiary.name}
+                                        </span>
+                                        <span className="px-2 py-0.5 bg-red-100 text-red-900 text-xs rounded">
+                                          {payment.beneficiary.badge}
+                                        </span>
+                                      </div>
+                                    </td>
+                                    <td className="py-3 px-4 text-sm text-gray-900">
+                                      {payment.dateTime}
+                                    </td>
+                                    <td className="py-3 px-4 text-sm text-gray-900">
+                                      {payment.paymentMethod}
+                                    </td>
+                                    <td className="py-3 px-4 text-sm text-gray-900 text-right">
+                                      {formatCurrency(payment.amount)}
+                                    </td>
+                                    <td className="py-3 px-4 text-sm text-gray-900 text-right">
+                                      {formatCurrency(payment.balance)}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        ) : (
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {currentPayments.map((payment) => (
-                              <tr
-                                key={payment.id}
-                                className="border-b hover:bg-gray-50"
-                              >
-                                <td className="py-3 px-4">
-                                  <input
-                                    type="checkbox"
-                                    className="rounded"
-                                    checked={selectedRows.includes(payment.id)}
-                                    onChange={(e) =>
-                                      handleSelectRow(
-                                        payment.id,
-                                        e.target.checked
-                                      )
-                                    }
-                                  />
-                                </td>
-                                <td className="py-3 px-4 text-sm text-gray-900">
-                                  ID: {payment.contractId}
-                                </td>
-                                <td className="py-3 px-4">
-                                  <div className="flex items-center gap-2">
-                                    <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center">
-                                      <span className="text-xs font-semibold text-gray-700">
+                              <Card key={payment.id}>
+                                <CardContent className="p-4">
+                                  <div className="flex items-start gap-2 mb-3">
+                                    <input
+                                      type="checkbox"
+                                      className="rounded mt-1"
+                                      checked={selectedRows.includes(
+                                        payment.id
+                                      )}
+                                      onChange={(e) =>
+                                        handleSelectRow(
+                                          payment.id,
+                                          e.target.checked
+                                        )
+                                      }
+                                    />
+                                    <div>
+                                      <p className="text-sm font-medium text-gray-900">
+                                        {payment.contractId}
+                                      </p>
+                                      <p className="text-xs text-gray-500">
+                                        {payment.dateTime}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-2 mb-3">
+                                    <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                                      <span className="text-sm font-semibold text-gray-700">
                                         {payment.beneficiary.initials}
                                       </span>
                                     </div>
-                                    <span className="text-sm text-gray-900">
-                                      {payment.beneficiary.name}
-                                    </span>
-                                    <span className="px-2 py-0.5 bg-red-100 text-red-900 text-xs rounded">
-                                      {payment.beneficiary.badge}
-                                    </span>
+                                    <div>
+                                      <p className="text-sm text-gray-900">
+                                        {payment.beneficiary.name}
+                                      </p>
+                                      <span className="px-2 py-0.5 bg-red-100 text-red-900 text-xs rounded">
+                                        {payment.beneficiary.badge}
+                                      </span>
+                                    </div>
                                   </div>
-                                </td>
-                                <td className="py-3 px-4 text-sm text-gray-900">
-                                  {payment.dateTime}
-                                </td>
-                                <td className="py-3 px-4 text-sm text-gray-900">
-                                  {payment.paymentMethod}
-                                </td>
-                                <td className="py-3 px-4 text-sm text-gray-900 text-right">
-                                  {formatCurrency(payment.amount)}
-                                </td>
-                                <td className="py-3 px-4 text-sm text-gray-900 text-right">
-                                  {formatCurrency(payment.balance)}
-                                </td>
-                              </tr>
+                                  <div className="flex justify-between items-center pt-3 border-t">
+                                    <div>
+                                      <p className="text-xs text-gray-500">
+                                        {payment.paymentMethod}
+                                      </p>
+                                      <p className="text-sm font-medium text-gray-900">
+                                        {formatCurrency(payment.amount)}
+                                      </p>
+                                    </div>
+                                    <div className="text-right">
+                                      <p className="text-xs text-gray-500">
+                                        Balance
+                                      </p>
+                                      <p className="text-sm font-medium text-gray-900">
+                                        {formatCurrency(payment.balance)}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </CardContent>
+                              </Card>
                             ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {currentPayments.map((payment) => (
-                          <Card key={payment.id}>
-                            <CardContent className="p-4">
-                              <div className="flex items-start gap-2 mb-3">
-                                <input
-                                  type="checkbox"
-                                  className="rounded mt-1"
-                                  checked={selectedRows.includes(payment.id)}
-                                  onChange={(e) =>
-                                    handleSelectRow(
-                                      payment.id,
-                                      e.target.checked
-                                    )
-                                  }
-                                />
-                                <div>
-                                  <p className="text-sm font-medium text-gray-900">
-                                    {payment.contractId}
-                                  </p>
-                                  <p className="text-xs text-gray-500">
-                                    {payment.dateTime}
-                                  </p>
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-2 mb-3">
-                                <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
-                                  <span className="text-sm font-semibold text-gray-700">
-                                    {payment.beneficiary.initials}
-                                  </span>
-                                </div>
-                                <div>
-                                  <p className="text-sm text-gray-900">
-                                    {payment.beneficiary.name}
-                                  </p>
-                                  <span className="px-2 py-0.5 bg-red-100 text-red-900 text-xs rounded">
-                                    {payment.beneficiary.badge}
-                                  </span>
-                                </div>
-                              </div>
-                              <div className="flex justify-between items-center pt-3 border-t">
-                                <div>
-                                  <p className="text-xs text-gray-500">
-                                    {payment.paymentMethod}
-                                  </p>
-                                  <p className="text-sm font-medium text-gray-900">
-                                    {formatCurrency(payment.amount)}
-                                  </p>
-                                </div>
-                                <div className="text-right">
-                                  <p className="text-xs text-gray-500">Balance</p>
-                                  <p className="text-sm font-medium text-gray-900">
-                                    {formatCurrency(payment.balance)}
-                                  </p>
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        ))}
-                      </div>
-                    )}
+                          </div>
+                        )}
 
                         {/* Pagination */}
                         <div className="flex items-center justify-between mt-4 text-sm text-gray-600">
-                      <p>
-                        {selectedRows.length} of {totalPayments} row(s)
-                        selected.
-                      </p>
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-2">
-                          <span>Rows per page</span>
-                          <select
-                            className="border rounded px-2 py-1"
-                            value={rowsPerPage}
-                            onChange={(e) =>
-                              handleRowsPerPageChange(e.target.value)
-                            }
-                          >
-                            <option value={5}>5</option>
-                            <option value={10}>10</option>
-                            <option value={20}>20</option>
-                            <option value={50}>50</option>
-                          </select>
-                        </div>
-                        <span>
-                          Page {currentPage} of {totalPages}
-                        </span>
-                        <div className="flex items-center gap-1">
-                          <button
-                            onClick={handlePreviousPage}
-                            disabled={currentPage === 1}
-                            className="p-1 hover:bg-gray-100 rounded disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            <ChevronLeft className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={handleNextPage}
-                            disabled={currentPage === totalPages}
-                            className="p-1 hover:bg-gray-100 rounded disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            <ChevronRight className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
+                          <p>
+                            {selectedRows.length} of {totalPayments} row(s)
+                            selected.
+                          </p>
+                          <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-2">
+                              <span>Rows per page</span>
+                              <select
+                                className="border rounded px-2 py-1"
+                                value={rowsPerPage}
+                                onChange={(e) =>
+                                  handleRowsPerPageChange(e.target.value)
+                                }
+                              >
+                                <option value={5}>5</option>
+                                <option value={10}>10</option>
+                                <option value={20}>20</option>
+                                <option value={50}>50</option>
+                              </select>
+                            </div>
+                            <span>
+                              Page {currentPage} of {totalPages}
+                            </span>
+                            <div className="flex items-center gap-1">
+                              <button
+                                onClick={handlePreviousPage}
+                                disabled={currentPage === 1}
+                                className="p-1 hover:bg-gray-100 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                <ChevronLeft className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={handleNextPage}
+                                disabled={currentPage === totalPages}
+                                className="p-1 hover:bg-gray-100 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                <ChevronRight className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
                         </div>
                       </>
                     )}
@@ -1187,7 +1285,9 @@ const Balance = () => {
                   Active Contracts
                 </h2>
                 <p className="text-gray-600 mb-4">
-                  All ongoing contracts associated with your account, where you are an owner or beneficiary. You can see more on Contracts page.
+                  All ongoing contracts associated with your account, where you
+                  are an owner or beneficiary. You can see more on Contracts
+                  page.
                 </p>
 
                 {/* Search input above contracts */}
@@ -1206,7 +1306,27 @@ const Balance = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {contractSearchQuery ? (
                     filteredContracts.length > 0 ? (
-                      filteredContracts.slice(0, 2).map((contract) => (
+                      filteredContracts
+                        .slice(0, 2)
+                        .map((contract) => (
+                          <ContractCard
+                            key={contract.id}
+                            contract={contract}
+                            onShare={() => handleShareContract(contract.id)}
+                            onOpenContract={() =>
+                              handleOpenContract(contract.id)
+                            }
+                          />
+                        ))
+                    ) : (
+                      <div className="text-center py-12 text-gray-500 col-span-2">
+                        No contracts found matching your search.
+                      </div>
+                    )
+                  ) : (
+                    balanceData?.contracts
+                      ?.slice(0, 2)
+                      .map((contract) => (
                         <ContractCard
                           key={contract.id}
                           contract={contract}
@@ -1214,20 +1334,6 @@ const Balance = () => {
                           onOpenContract={() => handleOpenContract(contract.id)}
                         />
                       ))
-                    ) : (
-                      <div className="text-center py-12 text-gray-500 col-span-2">
-                        No contracts found matching your search.
-                      </div>
-                    )
-                  ) : (
-                    balanceData?.contracts?.slice(0, 2).map((contract) => (
-                      <ContractCard
-                        key={contract.id}
-                        contract={contract}
-                        onShare={() => handleShareContract(contract.id)}
-                        onOpenContract={() => handleOpenContract(contract.id)}
-                      />
-                    ))
                   )}
                 </div>
               </section>
@@ -1240,7 +1346,9 @@ const Balance = () => {
                   Active Contracts
                 </h2>
                 <p className="text-gray-600 mb-4">
-                  All ongoing contracts associated with your account, where you are an owner or beneficiary. You can see more on Contracts page.
+                  All ongoing contracts associated with your account, where you
+                  are an owner or beneficiary. You can see more on Contracts
+                  page.
                 </p>
 
                 {/* Search and See All on same line */}
@@ -1276,14 +1384,18 @@ const Balance = () => {
                           onOpenContract={() => handleOpenContract(contract.id)}
                         />
                       ))
-                    : filteredContracts.slice(0, 2).map((contract) => (
-                        <ContractCard
-                          key={contract.id}
-                          contract={contract}
-                          onShare={() => handleShareContract(contract.id)}
-                          onOpenContract={() => handleOpenContract(contract.id)}
-                        />
-                      ))}
+                    : filteredContracts
+                        .slice(0, 2)
+                        .map((contract) => (
+                          <ContractCard
+                            key={contract.id}
+                            contract={contract}
+                            onShare={() => handleShareContract(contract.id)}
+                            onOpenContract={() =>
+                              handleOpenContract(contract.id)
+                            }
+                          />
+                        ))}
                 </div>
                 {filteredContracts.length === 0 && (
                   <div className="text-center py-12 text-gray-500">
@@ -1403,7 +1515,9 @@ const Balance = () => {
                     className="w-full flex items-center justify-between p-4 hover:bg-gray-50"
                   >
                     <div className="flex items-center gap-2">
-                      <span className="font-medium text-gray-900">Contract type</span>
+                      <span className="font-medium text-gray-900">
+                        Contract type
+                      </span>
                       {tempFilters.contractType.length > 0 && (
                         <span className="text-sm text-gray-500">
                           {tempFilters.contractType.length}
@@ -1433,7 +1547,9 @@ const Balance = () => {
                         <input
                           type="checkbox"
                           className="rounded accent-black"
-                          checked={tempFilters.contractType.includes("cemetery")}
+                          checked={tempFilters.contractType.includes(
+                            "cemetery"
+                          )}
                           onChange={() =>
                             handleTempFilterToggle("contractType", "cemetery")
                           }
@@ -1451,7 +1567,9 @@ const Balance = () => {
                     className="w-full flex items-center justify-between p-4 hover:bg-gray-50"
                   >
                     <div className="flex items-center gap-2">
-                      <span className="font-medium text-gray-900">Contract number</span>
+                      <span className="font-medium text-gray-900">
+                        Contract number
+                      </span>
                       {tempFilters.contractNumber && (
                         <span className="text-sm text-gray-500">1</span>
                       )}
@@ -1487,7 +1605,9 @@ const Balance = () => {
                     className="w-full flex items-center justify-between p-4 hover:bg-gray-50"
                   >
                     <div className="flex items-center gap-2">
-                      <span className="font-medium text-gray-900">Payment method</span>
+                      <span className="font-medium text-gray-900">
+                        Payment method
+                      </span>
                       {tempFilters.paymentMethod.length > 0 && (
                         <span className="text-sm text-gray-500">
                           {tempFilters.paymentMethod.length}
@@ -1522,7 +1642,9 @@ const Balance = () => {
                             handleTempFilterToggle("paymentMethod", "bank")
                           }
                         />
-                        <span className="text-sm text-gray-700">Bank Transfer</span>
+                        <span className="text-sm text-gray-700">
+                          Bank Transfer
+                        </span>
                       </label>
                       <label className="flex items-center gap-2 cursor-pointer">
                         <input
@@ -1547,7 +1669,8 @@ const Balance = () => {
                   >
                     <div className="flex items-center gap-2">
                       <span className="font-medium text-gray-900">Amount</span>
-                      {(tempFilters.amountMin > 0 || tempFilters.amountMax < 30000) && (
+                      {(tempFilters.amountMin > 0 ||
+                        tempFilters.amountMax < 30000) && (
                         <span className="text-sm text-gray-500">1</span>
                       )}
                     </div>
@@ -1561,7 +1684,8 @@ const Balance = () => {
                     <div className="px-4 pb-4">
                       <div className="space-y-4">
                         <div className="text-sm text-gray-600 text-center mb-2">
-                          Set your budget range (${tempFilters.amountMin.toLocaleString()} - $
+                          Set your budget range ($
+                          {tempFilters.amountMin.toLocaleString()} - $
                           {tempFilters.amountMax.toLocaleString()}).
                         </div>
                         <div className="relative pt-2">
@@ -1572,8 +1696,12 @@ const Balance = () => {
                             <div
                               className="absolute h-2 bg-gray-300 rounded-full"
                               style={{
-                                left: `${(tempFilters.amountMin / 30000) * 100}%`,
-                                right: `${100 - (tempFilters.amountMax / 30000) * 100}%`,
+                                left: `${
+                                  (tempFilters.amountMin / 30000) * 100
+                                }%`,
+                                right: `${
+                                  100 - (tempFilters.amountMax / 30000) * 100
+                                }%`,
                               }}
                             ></div>
                             {/* Min range input */}
@@ -1593,7 +1721,9 @@ const Balance = () => {
                                 }))
                               }
                               className="absolute w-full h-2 appearance-none bg-transparent pointer-events-none [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-black [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-black [&::-moz-range-thumb]:cursor-pointer"
-                              style={{ zIndex: tempFilters.amountMin > 29000 ? 5 : 3 }}
+                              style={{
+                                zIndex: tempFilters.amountMin > 29000 ? 5 : 3,
+                              }}
                             />
                             {/* Max range input */}
                             <input
@@ -1675,7 +1805,8 @@ const Balance = () => {
                 </button>
               </div>
               <p className="text-sm text-gray-600">
-                Enter the email addresses of the people you want to share the contract with.
+                Enter the email addresses of the people you want to share the
+                contract with.
               </p>
             </div>
 
@@ -1689,42 +1820,51 @@ const Balance = () => {
                 <div className="space-y-3">
                   {/* Selected contracts as chips */}
                   <div className="flex flex-wrap gap-2 min-h-[40px] p-2 border border-gray-200 rounded-md">
-                    {shareContractIds.length > 0 ? (
-                      shareContractIds.map((contractId) => {
-                        const contract = balanceData?.contracts.find(c => c.id === contractId);
-                        return (
-                          <div
-                            key={contractId}
-                            className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 rounded-md text-sm"
-                          >
-                            <span>ID: {contract?.contractNumber}</span>
-                            <button
-                              onClick={() => removeContractFromSelection(contractId)}
-                              className="hover:bg-gray-200 rounded p-0.5"
+                    {shareContractIds.length > 0
+                      ? shareContractIds.map((contractId) => {
+                          const contract = balanceData?.contracts.find(
+                            (c) => c.id === contractId
+                          );
+                          return (
+                            <div
+                              key={contractId}
+                              className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 rounded-md text-sm"
                             >
-                              <X className="w-3 h-3" />
-                            </button>
-                          </div>
-                        );
-                      })
-                    ) : null}
+                              <span>ID: {contract?.contractNumber}</span>
+                              <button
+                                onClick={() =>
+                                  removeContractFromSelection(contractId)
+                                }
+                                className="hover:bg-gray-200 rounded p-0.5"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            </div>
+                          );
+                        })
+                      : null}
                   </div>
 
                   {/* Add contract dropdown */}
                   <select
                     onChange={(e) => {
                       const contractId = parseInt(e.target.value);
-                      if (contractId && !shareContractIds.includes(contractId)) {
+                      if (
+                        contractId &&
+                        !shareContractIds.includes(contractId)
+                      ) {
                         setShareContractIds([...shareContractIds, contractId]);
                       }
-                      e.target.value = '';
+                      e.target.value = "";
                     }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-black"
                     defaultValue=""
                   >
                     <option value="">Select contract to add</option>
                     {balanceData?.contracts
-                      .filter(contract => !shareContractIds.includes(contract.id))
+                      .filter(
+                        (contract) => !shareContractIds.includes(contract.id)
+                      )
                       .map((contract) => (
                         <option key={contract.id} value={contract.id}>
                           ID: {contract.contractNumber}

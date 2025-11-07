@@ -298,7 +298,7 @@ const balanceData = {
       "Wire transfer",
     ];
 
-    const badges = ["AN", "PN", "BN", "OK"];
+    const badges = ["AN", "PN"];
 
     // Generate 200 unique payments (one per contract)
     for (let i = 0; i < 200; i++) {
@@ -488,7 +488,7 @@ const balanceData = {
     ];
 
     const statuses = ["Paid", "Active", "Reserved"];
-    const badges = ["AN", "PN", "BN", "OK"];
+    const badges = ["AN", "PN"];
 
     const image = "/img/owned_property_picture.png";
 
@@ -673,7 +673,7 @@ const cemeteryData = {
       "Jennifer Martinez",
       "William Garcia",
     ];
-    const badges = ["PN", "FN", "CN"];
+    const badges = ["AN", "PN"];
     const statuses = ["In Trust", "Not Purchased", "Used"];
     const sections = [
       "Section A",
@@ -755,7 +755,7 @@ const cemeteryData = {
       "Emily Davis",
       "Ken Parker",
     ];
-    const badges = ["PN", "FN", "CN", "AN"];
+    const badges = ["AN", "PN"];
     const statuses = ["Paid", "Pending", "In Trust"];
     const serviceTypes = [
       "Installation of gravestone",
@@ -837,7 +837,7 @@ const cemeteryData = {
       "Emily Davis",
       "Ken Parker",
     ];
-    const badges = ["PN", "FN", "CN", "AN"];
+    const badges = ["AN", "PN"];
     const statuses = ["Paid", "Not Purchased", "Used"];
     const merchandiseTypes = [
       "Gravestone",
@@ -1366,7 +1366,7 @@ const funeralData = {
       "Robert Williams",
       "Emily Davis",
     ];
-    const badges = ["AN", "PN", "CN"];
+    const badges = ["AN", "PN"];
     const statuses = ["In Trust", "Not Purchased", "Used", "Paid"];
     const serviceTypes = [
       "Transportation of the deceased",
@@ -1433,7 +1433,7 @@ const funeralData = {
       "Robert Williams",
       "Emily Davis",
     ];
-    const badges = ["AN", "PN", "CN"];
+    const badges = ["AN", "PN"];
     const statuses = ["In Trust", "Not Purchased", "Used", "Paid"];
     const merchandiseTypes = [
       "Coffins",
